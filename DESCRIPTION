@@ -1,0 +1,13 @@
+Package: kdensity
+Type: Package
+Title: Kernel Density Estimation with a Parametric Start
+Version: 0.0.9
+Author: Jonas Moss
+Maintainer: Jonas Moss <jonas.gjertsen@gmail.com>
+Description: Deals with non-parametric density estimation with a parametric start 
+    in a simple and flexible way. 
+License: MIT
+Encoding: UTF-8
+LazyData: true
+Suggests: statmod
+RoxygenNote: 6.0.1
