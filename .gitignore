@@ -47,3 +47,9 @@ Temporary Items
 .apdisk
 .Rproj.user
 /testing
+.RData
+.Rproj.user
+.Rhistory
+.Rbuildignore
+inst/doc
+vignettes/*.R
