@@ -4,7 +4,7 @@
 \alias{get_support}
 \title{Helper function that generates automatic support.}
 \usage{
-get_support(start, kernel)
+get_support(start_str, kernel_str)
 }
 \arguments{
 \item{start}{the type of parametric start.}

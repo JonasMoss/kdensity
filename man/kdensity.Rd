@@ -4,15 +4,19 @@
 \alias{kdensity}
 \title{Kernel density estimator with parametric start}
 \usage{
-kdensity(x, adjust = 1, support = NULL, na.rm = TRUE, normalized = TRUE,
-  bw = c("nrd0", "nrd", "bcv", "ucv", "SJ"), kernel = c("gaussian",
-  "epanechnikov", "rectangular", "triangular", "biweight", "cosine",
-  "optcosine", "tricube", "triweight", "laplace"), start = c("uniform",
-  "normal", "gamma", "exponential", "inverse_gaussian", "lognormal", "beta",
-  "laplace"))
+kdensity(x, kernel = NULL, start = NULL, bw = NULL, adjust = 1,
+  support = NULL, na.rm = FALSE, normalized = TRUE)
 }
 \arguments{
 \item{x}{the supplied data.}
+
+\item{kernel}{the kernel function, chosen from a list of alternatives}
+
+\item{start}{choice of parametric start. Can either be chosen from a vector
+of strings, or be supplied via a list containing a \code{density} function
+and an \code{estimator} function.}
+
+\item{bw}{a bandwidth function or a double.}
 
 \item{adjust}{an adjustment constant, so that h = adjust*bw*m, where m
 varies acccording to the chosen kernel.}
@@ -23,14 +27,6 @@ varies acccording to the chosen kernel.}
 \item{na.rm}{should \code{NA} values be removed?}
 
 \item{normalized}{should the density be normalized?}
-
-\item{bw}{a bandwidth function (NOT IMPLEMENTED) or a double}
-
-\item{kernel}{the kernel function, chosen from a list of alternatives}
-
-\item{start}{choice of parametric start. Can either be chosen from a vector
-of strings, or be supplied via a list containing a \code{density} function
-and an \code{estimator} function.}
 }
 \value{
 A function of class kdensity.
@@ -39,5 +35,19 @@ A function of class kdensity.
 Kernel density estimator with parametric start
 }
 \details{
-fill in
+Bandwidth functions: The available bandwidth functions are "nrd0", "nrd",
+"bcv","ucv", and "SJ" from the stats package. They intended for use with a
+'uniform' start and the 'gaussian' kernel, but work well for the other
+symmetric kernels as well.
+
+The function "JH" is designed for use with the 'gcopula' kernel.
+
+The standard bandwidth function is 'nrd0' when the start is uniform and
+the kernel is symmetric, following stats::densitt.
+
+When the kernel "gcopula" is chosen, the standard bandwidth function is
+"JH".
+
+(NOT IMPLEMENTED) When a symmetric kernel is chosen and start != uniform,
+the alternatives are:
 }

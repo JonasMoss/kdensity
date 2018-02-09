@@ -4,7 +4,7 @@
 \alias{get_kernel}
 \title{Helper function that gets a kernel function for kdensity.}
 \usage{
-get_kernel(kernel_str, support)
+get_kernel(kernel_str)
 }
 \arguments{
 \item{kernel_str}{a string specifying which kernel to use.}

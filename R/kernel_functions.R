@@ -18,6 +18,7 @@
 #' to 1.
 
 get_kernel = function(kernel_str) {
+
   switch(kernel_str,
          gaussian     = kernel_gaussian,
          laplace      = kernel_laplace,
@@ -30,8 +31,11 @@ get_kernel = function(kernel_str) {
          cosine       = kernel_cosine,
          optcosine    = kernel_optcosine,
          uniform      = kernel_rectangular,
-         gcopula      = kernel_gcopula
-  )
+         gcopula      = kernel_gcopula,
+         gamma        = kernel_gamma,
+         gamma_biased = kernel_gamma_biased,
+         kernel_gaussian
+         )
 }
 
 ## This is the list of pre-defined kernels.
@@ -54,12 +58,12 @@ kernel_epanechnikov = list(kernel  = function(y, x, h) {
                                       3/4*(1-u^2)*(abs(u) <= 1)
                                       },
                            sd      = sqrt(5),
-                           support = c(0, 1))
+                           support = c(-Inf, Inf))
 
 
 kernel_rectangular  = list(kernel  = function(y, x, h) dunif((x - y)/h, min = -1, max = 1),
                            sd      = sqrt(3),
-                           support = c(0, 1))
+                           support = c(-Inf, Inf))
 
 
 kernel_triangular   = list(kernel  = function(y, x, h) {
@@ -67,7 +71,7 @@ kernel_triangular   = list(kernel  = function(y, x, h) {
                                       (1-abs(u))*(abs(u) <= 1)
                                      },
                            sd      = sqrt(6),
-                           support = c(0, 1))
+                           support = c(-Inf, Inf))
 
 
 kernel_biweight     = list(kernel  = function(y, x, h) {
@@ -75,7 +79,7 @@ kernel_biweight     = list(kernel  = function(y, x, h) {
                                       15/16*(1-u^2)^2*(abs(u) <= 1)
                                      },
                            sd      = sqrt(7),
-                           support = c(0, 1))
+                           support = c(-Inf, Inf))
 
 
 kernel_triweight    = list(kernel  = function(y, x, h) {
@@ -83,7 +87,7 @@ kernel_triweight    = list(kernel  = function(y, x, h) {
                                       35/32*(1-u^2)^3*(abs(u) <= 1)
                                      },
                            sd      = 3,
-                           support = c(0, 1))
+                           support = c(-Inf, Inf))
 
 
 kernel_tricube      = list(kernel = function(y, x, h) {
@@ -93,21 +97,21 @@ kernel_tricube      = list(kernel = function(y, x, h) {
 
                            sd      = 3^(5/2)/sqrt(35),
 
-                           support = c(0, 1))
+                           support = c(-Inf, Inf))
 
 kernel_cosine       = list(kernel  = function(y, x, h) {
                                       u = (x - y)/h
                                       (1+cos(pi*u))/2*(abs(u) <= 1)
                                      },
                            sd      = 1/sqrt(1/3 - 2/pi^2),
-                           support = c(0, 1))
+                           support = c(-Inf, Inf))
 
 kernel_optcosine    = list(kernel  = function(y, x, h) {
                                       u = (x - y)/h
                                       pi/4*cos(pi/2*u)*(abs(u) <= 1)
                                      },
                            sd      = 1/sqrt(1-8/pi^2),
-                           support = c(0, 1)
+                           support = c(-Inf, Inf)
                            )
 
 kernel_gcopula      = list(kernel  = function(y, x, h) {

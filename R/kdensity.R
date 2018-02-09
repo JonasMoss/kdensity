@@ -17,14 +17,14 @@
 #' @details
 #'
 #' Bandwidth functions: The available bandwidth functions are "nrd0", "nrd",
-#' "bcv","ucv", and "SJ" from the stats package. They intended for use with a
+#' "bcv", "ucv", and "SJ" from the stats package. They intended for use with a
 #' 'uniform' start and the 'gaussian' kernel, but work well for the other
 #' symmetric kernels as well.
 #'
 #' The function "JH" is designed for use with the 'gcopula' kernel.
 #'
 #' The standard bandwidth function is 'nrd0' when the start is uniform and
-#' the kernel is symmetric, following stats::densitt.
+#' the kernel is symmetric, following stats::density.
 #'
 #' When the kernel "gcopula" is chosen, the standard bandwidth function is
 #' "JH".
@@ -33,70 +33,23 @@
 #' the alternatives are:
 #'
 #'
-kdensity = function(x, adjust = 1, support = NULL, na.rm = FALSE, normalized = TRUE,
-                    bw = NULL,
-                    kernel = c("gaussian",
-                               "epanechnikov",
-                               "rectangular",
-                               "triangular",
-                               "biweight",
-                               "cosine",
-                               "optcosine",
-                               "tricube",
-                               "triweight",
-                               "laplace",
-                               "gcopula",
-                               "gamma",
-                               "gamma_biased"),
-                    start =  c("uniform",
-                               "normal",
-                               "gamma",
-                               "exponential",
-                               "inverse_gaussian",
-                               "lognormal",
-                               "beta",
-                               "laplace")) {
+kdensity = function(x, kernel = NULL, start = NULL, bw = NULL, adjust = 1,
+                    support = NULL, na.rm = FALSE, normalized = TRUE)
+ {
 
-  ## We handle the kernel functions. This works by matching the strings and
-  ## obtaining the kernel function from outside the 'kdensity' function itself.
-  if(!is.list(kernel)) {
-    kernel = match.arg(kernel)
-    kernel_str = kernel
-    kernel = get_kernel(kernel)
-  } else {
-    kernel_str = deparse(substitute(kernel))
-  }
+  ## Now we massage and handle the combinations of kernel, start and support.
+  kss_list = get_kernel_start_support(kernel, start, support)
 
-  ## Now we handle the parametric start itself. If the parametric start is a
-  ## string, we will match the string with pre-supplied functions.
-
-  if(!is.list(start)) {
-    start = match.arg(start)
-    start_str = start
-    start = get_start(start)
-  } else {
-    start_str = deparse(substitute(start))
-  }
-
-  ## The support is automatically handled if unspecified.
-
-  if(is.null(support)) {
-    support = get_support(start_str, kernel_str)
-  }
+  kernel = kss_list$kernel
+  kernel_str = kss_list$kernel_str
+  start = kss_list$start
+  start_str = kss_list$start_str
+  support = kss_list$support
 
   ## We continue by checking if the supplied values make sense.
   if(!all(x <= support[2] & x >= support[1])) {
     stop("The supplied data x is not contained in the support: (",
          support[1], ", ", support[2], ").")
-  }
-
-
-  ## Here comes checks of the supplied start, kernel, and support. Will
-  ## make a function for this.
-
-  if(!is.element("estimator", names(start)) | !is.element("density", names(start))) {
-    stop("The argument 'start' should be either 1.) a string specifying an implemented
-          start density or, 2.) a list containing two functions 'density' and 'estimator")
   }
 
   parameters = start$estimator(x)
@@ -118,7 +71,7 @@ kdensity = function(x, adjust = 1, support = NULL, na.rm = FALSE, normalized = T
   if(!is.numeric(bw)) {
     if(is.character(bw)) {
       bw_str = bw
-      bw     = get_bw(bw)(data, kernel_str, start_str, support)
+      bw     = get_bw(bw)(x, kernel_str, start_str, support)
     } else {
       bw_str = deparse(substitute(bw))
       bw     = bw(data, kernel_str, start_str, support)
@@ -130,7 +83,6 @@ kdensity = function(x, adjust = 1, support = NULL, na.rm = FALSE, normalized = T
   ## The parameter h is computed. The basic bandwidth is h = bw*adjust for the
   ## normal kernel, and is adjusted for all the other kernels so that the sd
   ## of the kernel equals h.
-
   h = bw*adjust*kernel$sd
 
   ## The denominator can be computed once and for all.
@@ -154,8 +106,7 @@ kdensity = function(x, adjust = 1, support = NULL, na.rm = FALSE, normalized = T
 
     normalization = tryCatch(integrate(pre_function, lower = support[1], upper = support[2])$value,
                           error = function(e) {
-                            stop("Normalization error! The function won't integrate. Try different
-                               support?")
+                            stop("Normalization error: The function will not integrate. Two common causes are: 1.) The kernel is non-smooth, try a smooth kernel if possible. 2.) The supplied support is incorrect.")
                           })
 
   }
@@ -190,6 +141,7 @@ kdensity = function(x, adjust = 1, support = NULL, na.rm = FALSE, normalized = T
   attr(return_function, "has.na")    = any(is.na(x))
   attr(return_function, "call")      = match.call()
   attr(return_function, "range")     = c(min(x), max(x))
+  attr(return_function, "estimates") = parameters
 
   return_function
 }

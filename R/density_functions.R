@@ -35,13 +35,16 @@ get_start = function(start) {
          inverse_gaussian = start_inverse_gaussian,
          lognormal        = start_lognormal,
          beta             = start_beta,
-         laplace          = start_laplace)
+         laplace          = start_laplace,
+         start_uniform
+         )
 }
 
 
 start_uniform = list(
-  density = function(x) 1,
-  estimator = function(data) {}
+  density   = function(x) 1,
+  estimator = function(data) {},
+  support   = c(-Inf, Inf)
 )
 
 start_normal = list(
@@ -49,14 +52,16 @@ start_normal = list(
   estimator = function(data) {
     c(mean = mean(data),
       sd   = sd(data))
-  }
+  },
+  support   = c(0, Inf)
 )
 
 start_exponential = list(
   density = dexp,
   estimator = function(data) {
     c(rate = 1/mean(data))
-  }
+  },
+  support   = c(0, Inf)
 )
 
 start_lognormal = list(
@@ -64,7 +69,8 @@ start_lognormal = list(
   estimator = function(data) {
     c(meanlog = mean(log(data)),
       sdlog   = sd(log(data)))
-  }
+  },
+  support   = c(0, Inf)
 )
 
 start_inverse_gaussian = list(
@@ -72,7 +78,8 @@ start_inverse_gaussian = list(
   estimator = function(data) {
     c(mean       = mean(data),
       dispersion = mean(1/data - 1/mean(data)))
-  }
+  },
+  support   = c(0, Inf)
 )
 
 start_laplace = list(
@@ -83,7 +90,9 @@ start_laplace = list(
   estimator = function(data) {
     c(mu = median(data),
       b  = mean(abs(data - mu)))
-  }
+  },
+
+  support   = c(-Inf, Inf)
 )
 
 start_beta = list(
@@ -94,7 +103,8 @@ start_beta = list(
     }, p = c(1,1))$estimate
     names(shapes) = c("shape1", "shape2")
     shapes
-  }
+  },
+  support   = c(0, 1)
 )
 
 start_gamma = list(
@@ -105,5 +115,6 @@ start_gamma = list(
     }, p = c(1,1))$estimate
     names(shapes) = c("shape", "rate")
     shapes
-  }
+  },
+  support   = c(0, Inf)
 )
