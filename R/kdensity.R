@@ -46,6 +46,9 @@ kdensity = function(x, kernel = NULL, start = NULL, bw = NULL, adjust = 1,
   start_str = kss_list$start_str
   support = kss_list$support
 
+  ## Tests for incompabibilities in the supplied values.
+  support_compatible(kernel, start, support)
+
   ## We continue by checking if the supplied values make sense.
   if(!all(x <= support[2] & x >= support[1])) {
     stop("The supplied data x is not contained in the support: (",
