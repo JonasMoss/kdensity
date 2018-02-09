@@ -12,8 +12,11 @@
 #' @param kernel the type of kernel.
 #' @return a support proposal. Currently kernel does nothing.
 
-get_support = function(start, kernel) {
-  switch(start,
+get_support = function(start_str, kernel_str) {
+
+  if(kernel_str == "gcopula") return(c(0, 1))
+
+  switch(start_str,
          uniform          = c(-Inf, Inf),
          normal           = c(-Inf, Inf),
          gamma            = c(0, Inf),

@@ -71,8 +71,12 @@ listmerge = function(x, y, type = c("merge", "template")) {
   ## Keep and not-keep are quite different.
   if(type == "merge") {
     matches = match(names(y), names(x))
-    elements_to_discard = matches[!is.na(match(names(y), names(x)))]
-    combined = c(y, x[-elements_to_discard])
+    elements_to_discard = matches[!is.na(matches)]
+    if(length(elements_to_discard) == 0)  {
+      combined = c(y, x)
+    } else{
+      combined = c(y, x[-elements_to_discard])
+    }
     return(combined)
   }
 

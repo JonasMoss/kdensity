@@ -91,7 +91,7 @@ summary.kdensity <- function(obj, digits = NULL, ...)
 {
   cat("\nCall: \n", deparse(attr(obj, "call")), "\n\n",
       "Data:       ", attr(obj, "data.name"), " (",attr(obj, "n"), " obs.)\n",
-      "Bandwidth:  ", formatC(attr(obj, "bw"), digits = digits), "\n",
+      "Bandwidth:  ", formatC(attr(obj, "bw"), digits = digits), " ('", attr(obj, "bw_str"), "')\n",
       "Support:    (", attr(obj, "support")[1], ", ", attr(obj, "support")[2],   ")\n",
       "Kernel:     ", attr(obj, "kernel"), "\n",
       "Start:      ", attr(obj, "start"), "\n",
