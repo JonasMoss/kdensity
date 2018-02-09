@@ -19,7 +19,7 @@ get_bw = function(bw) {
          "nrd"  = function(data, kernel, start, support) stats::bw.nrd(data),
          "ucv"  = function(data, kernel, start, support) stats::bw.ucv(data),
          "bcv"  = function(data, kernel, start, support) stats::bw.bcv(data),
-         "SJ"   = function(data, kernel, start, support) stats::bw.SJ(data)
+         "SJ"   = function(data, kernel, start, support) stats::bw.SJ(data),
          "JH"   = function(data, kernel, start, support) bw.JH
 
   )

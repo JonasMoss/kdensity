@@ -36,38 +36,83 @@ get_kernel = function(kernel_str, support) {
 
 ## This is the list of pre-defined kernels.
 
-kernel_gaussian     = list(kernel = dnorm,
-                           sd     = 1)
+kernel_gaussian     = list(kernel  = function(y, x, h) dnorm(y, x, h),
+                           sd      = 1,
+                           support = c(-Inf, Inf))
 
-kernel_laplace      = list(kernel = function(u) 1/2*exp(-abs(u)),
-                           sd     = 1/sqrt(2))
 
-kernel_epanechnikov = list(kernel = function(u) 3/4*(1-u^2)*(abs(u) <= 1),
-                           sd     = sqrt(5))
+kernel_laplace      = list(kernel  = function(y, x, h) {
+                                      u = (x - y)/h
+                                      1/2*exp(-abs(u))
+                                      },
+                           sd      = 1/sqrt(2),
+                           support = c(-Inf, Inf))
 
-kernel_rectangular  = list(kernel = function(u) dunif(u, min = -1, max = 1),
-                           sd     = sqrt(3))
 
-kernel_triangular   = list(kernel = function(u) (1-abs(u))*(abs(u) <= 1),
-                           sd     = sqrt(6))
+kernel_epanechnikov = list(kernel  = function(y, x, h) {
+                                      u = (x - y)/h
+                                      3/4*(1-u^2)*(abs(u) <= 1)
+                                      },
+                           sd      = sqrt(5),
+                           support = c(0, 1))
 
-kernel_biweight     = list(kernel = function(u) 15/16*(1-u^2)^2*(abs(u) <= 1),
-                           sd     = sqrt(7))
 
-kernel_triweight    = list(kernel = function(u) 35/32*(1-u^2)^3*(abs(u) <= 1),
-                           sd     = 3)
+kernel_rectangular  = list(kernel  = function(y, x, h) dunif((x - y)/h, min = -1, max = 1),
+                           sd      = sqrt(3),
+                           support = c(0, 1))
 
-kernel_tricube      = list(kernel = function(u) 70/81*(1-abs(u)^3)^3*(abs(u) <= 1),
-                           sd     = 3^(5/2)/sqrt(35))
 
-kernel_cosine       = list(kernel = function(u) (1+cos(pi*u))/2*(abs(u) <= 1),
-                           sd     = 1/sqrt(1/3 - 2/pi^2))
+kernel_triangular   = list(kernel  = function(y, x, h) {
+                                      u = (x - y)/h
+                                      (1-abs(u))*(abs(u) <= 1)
+                                     },
+                           sd      = sqrt(6),
+                           support = c(0, 1))
 
-kernel_optcosine    = list(kernel = function(u) pi/4*cos(pi/2*u)*(abs(u) <= 1),
-                           sd     = 1/sqrt(1-8/pi^2))
 
-kernel_gcopula      = list(kernel = function(u) {
-                        inside = rho^2*(qnorm(x)^2+qnorm(X)^2)-2*rho*qnorm(x)*qnorm(X)
-                        1/sqrt(1-rho^2)*exp(-inside/(2*(1-rho^2)))
-                        },
-                           sd     = 1)
+kernel_biweight     = list(kernel  = function(y, x, h) {
+                                      u = (x - y)/h
+                                      15/16*(1-u^2)^2*(abs(u) <= 1)
+                                     },
+                           sd      = sqrt(7),
+                           support = c(0, 1))
+
+
+kernel_triweight    = list(kernel  = function(y, x, h) {
+                                      u = (x - y)/h
+                                      35/32*(1-u^2)^3*(abs(u) <= 1)
+                                     },
+                           sd      = 3,
+                           support = c(0, 1))
+
+
+kernel_tricube      = list(kernel = function(y, x, h) {
+                                     u = (x - y)/h
+                                     70/81*(1-abs(u)^3)^3*(abs(u) <= 1)
+                                     },
+
+                           sd      = 3^(5/2)/sqrt(35),
+
+                           support = c(0, 1))
+
+kernel_cosine       = list(kernel  = function(y, x, h) {
+                                      u = (x - y)/h
+                                      (1+cos(pi*u))/2*(abs(u) <= 1)
+                                     },
+                           sd      = 1/sqrt(1/3 - 2/pi^2),
+                           support = c(0, 1))
+
+kernel_optcosine    = list(kernel  = function(y, x, h) {
+                                    u = (x - y)/h
+                                    pi/4*cos(pi/2*u)*(abs(u) <= 1)
+                                    },
+                           sd      = 1/sqrt(1-8/pi^2),
+                           support = c(0, 1)
+                           )
+
+kernel_gcopula      = list(kernel  = function(y, x, h) {
+                                      inside = rho^2*(qnorm(x)^2+qnorm(X)^2)-2*rho*qnorm(x)*qnorm(X)
+                                      1/sqrt(1-rho^2)*exp(-inside/(2*(1-rho^2)))
+                                     },
+                           sd      = 1,
+                           support = c(0, 1))

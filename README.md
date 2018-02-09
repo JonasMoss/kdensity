@@ -1,12 +1,12 @@
 kdensity: Kernel density estimation with a parametric start
 ================
 Jonas Moss
-7 February 2018
+8 February 2018
 
 ## Introduction
 
 Kernel density estimation with a parametric start was introduced by Nils
-Lid Hjort and Ingrid Glad in their 1996 paper [Nonparametric Density
+Lid Hjort and Ingrid Glad in their 1995 paper [Nonparametric Density
 Estimation with a Parametric
 Start](https://projecteuclid.org/euclid.aos/1176324627). The idea is to
 start out with a parametric density before you do your kernel density
@@ -54,9 +54,10 @@ lines(y, dexp(y, 1/mean(sunspot.month)), lty = 2)
 lines(density(sunspot.month, kernel = "gauss", adjust = 2), lty = 3)
 ```
 
-<img src="README_files/figure-gfm/full plot-1.png" width="750px" /> Here
-`density` is easily seen to be far more affected by boundary bias than
-`kdensity`, and it capturs more of features of the data than the
+<img src="README_files/figure-gfm/full plot-1.png" width="750px" />
+
+Here `density` is easily seen to be far more affected by boundary bias
+than `kdensity`, and it capturs more of features of the data than the
 exponential distribution does.
 
 ## How to use
@@ -97,9 +98,10 @@ follows:
 plot(kdensity::kdensity(sunspot.month + 1, start = start_inverse_gaussian, support = c(0, Inf), bw = 16), lwd = 2)
 ```
 
-<img src="README_files/figure-gfm/lnormplot-1.png" width="750px" /> Here
-`sunspot.month + 1` is used inside `kdensity` in order to make the data
-strictly positive.
+<img src="README_files/figure-gfm/lnormplot-1.png" width="750px" />
+
+Here `sunspot.month + 1` is used inside `kdensity` in order to make the
+data strictly positive.
 
 The `plot` function works just as in the case of `stats::density`.
 Moreover, `lines` and `points` does as well. Since the return value of

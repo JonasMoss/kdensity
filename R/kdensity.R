@@ -125,9 +125,9 @@ kdensity = function(x, adjust = 1, support = NULL, na.rm = TRUE, normalized = TR
 
     pre_function = function(y) {
       if(length(y) == 1) {
-        mean(1/h*kernel$kernel((y-x)/h)*parametric_start_vector(y)/parametric_start_data)
+        mean(1/h*kernel$kernel(y, x, h)*parametric_start_vector(y)/parametric_start_data)
       } else {
-        sapply(y, function(y) mean(1/h*kernel$kernel((y-x)/h)*parametric_start_vector(y)/parametric_start_data))
+        sapply(y, function(y) mean(1/h*kernel$kernel(y, x, h)*parametric_start_vector(y)/parametric_start_data))
       }
     }
 
@@ -144,11 +144,11 @@ kdensity = function(x, adjust = 1, support = NULL, na.rm = TRUE, normalized = TR
 
   return_function = function(y) {
     if(length(y) == 1) {
-      mean(1/h*kernel$kernel((y-x)/h)*parametric_start_vector(y)/parametric_start_data)/normalization
+      mean(1/h*kernel$kernel(y, x, h)*parametric_start_vector(y)/parametric_start_data)/normalization
     } else {
       sapply(y, function(y) {
         parametric_start_vector_y = parametric_start_vector(y)
-        1/h*mean(kernel$kernel((y-x)/h)*parametric_start_vector_y/parametric_start_data)/normalization
+        1/h*mean(kernel$kernel(y, x, h)*parametric_start_vector_y/parametric_start_data)/normalization
       })
     }
 
