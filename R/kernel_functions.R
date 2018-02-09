@@ -30,7 +30,9 @@ get_kernel = function(kernel_str) {
          cosine       = kernel_cosine,
          optcosine    = kernel_optcosine,
          uniform      = kernel_rectangular,
-         gcopula      = kernel_gcopula
+         gcopula      = kernel_gcopula,
+         gamma        = kernel_gamma,
+         gamma_biased = kernel_gamma_biased
   )
 }
 
@@ -117,3 +119,18 @@ kernel_gcopula      = list(kernel  = function(y, x, h) {
                                      },
                            sd      = 1,
                            support = c(0, 1))
+
+kernel_gamma        = list(kernel  = function(y, x, h) {
+                                      indices = (y >= 2*h)
+                                      y_new = y/h*indices + (1/4*(y/h)^2 + 1)*(!indices)
+                                      h*dgamma(x, y_new + 1, scale = h)
+                                    },
+                           sd      = 1,
+                           support = c(0, Inf))
+
+kernel_gamma_biased = list(kernel  = function(y, x, h) {
+                                      h*dgamma(x, y/h + 1, scale = h)
+                                    },
+                           sd      = 1,
+                           support = c(0, Inf))
+
