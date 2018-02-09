@@ -1,20 +1,20 @@
-kdensity: Kernel density estimation with a parametric start
+kdensity: Kernel density estimation with parametric starts and
+asymmetric kernels
 ================
-Jonas Moss
-8 February 2018
 
 ## Introduction
 
-Kernel density estimation with a parametric start was introduced by Nils
-Lid Hjort and Ingrid Glad in their 1995 paper [Nonparametric Density
-Estimation with a Parametric
+Kernel density estimation with a *parametric start* was introduced by
+Nils Lid Hjort and Ingrid Glad in their 1995 paper [Nonparametric
+Density Estimation with a Parametric
 Start](https://projecteuclid.org/euclid.aos/1176324627). The idea is to
 start out with a parametric density before you do your kernel density
 estimation, so that your actual kernel density estimation will be a
 correction to the original parametric estimate. Why is this a good idea?
-Because the resulting estimator will be better than a naïve kernel
-density estimator whenever the true density is close to your suggestion,
-and probably not worse if not. Read the paper for more information.
+Because the resulting estimator will be better than an ordinary kernel
+density estimator whenever the true density is close to your suggestion.
+And the estimator can be superior to the ordinary kernal density
+estimator even when the suggestion is pretty far off.
 
 The goal of this `R` package is to make kernel density estimation with a
 parametric start both routine and flexible. In order to achieve this, we
@@ -28,15 +28,15 @@ sharp boundaries, such as data supported on the positive half-line or
 the unit interval. Currently we support the following asymmetric
 kernels:
 
-  - MC Jones and Daniel Henderson’s Gaussian copula KDE, from
+  - MC Jones and Daniel Henderson’s *Gaussian copula KDE*, from
     [Kernel-Type Density Estimation on the Unit Interval
     (2007)](https://academic.oup.com/biomet/article-abstract/94/4/977/246269).
     This is used for data on the unit interval. The bandwidth selection
     mechanism described in that paper is implemented as well. This
     kernel is called `gcopula`.
 
-  - Song Xi Chen’s two gammakernels from [Probability Density Function
-    Estimation Using Gamma Kernels
+  - Song Xi Chen’s two *gamma kernels* from [Probability Density
+    Function Estimation Using Gamma Kernels
     (2000)](https://link.springer.com/article/10.1023/A:1004165218295).
     This is used for data supported on the positive half-line. These
     kernels are called `gamma` and `gamma_biased`.
@@ -67,15 +67,18 @@ x = seq(0, 300, by = 0.5)
 hist(data, freq = FALSE, breaks = 40,
      main = "Monthly Sunspot Numbers, 1749 – 1983",
      xlab = "Monthly mean relative sunspot numbers")
-lines(kdensity(data, start = "exponential", kernel = "gaussian", adjust = 1),
+lines(kdensity(data, start = "exponential", kernel = "gaussian", adjust = 2),
       lwd = 2, lty = 2, col = "red")
+lines(density(data, adjust = 2), lwd = 2, lty = 1)
 lines(x, dexp(x, 1/mean(data)), lwd = 2, lty = 3, col = "blue")
 ```
 
 <img src="README_files/figure-gfm/gaussiankernelexp plot-1.png" width="750px" />
 
-As seen from the histogram, the fit is quite bad, so let us try out the
-`gamma` kernel. Notice the argument `start = "uniform"`, which states
+As seen from the histogram, the `kdensity` estimator with an exponential
+start (red) fits better than `density` (black). But boundary bias is
+still visible, even in the red line, so let us try out the `gamma`
+kernel instrad. Notice the argument `start = "uniform"`, which states
 that the parametric start is *constant*. Using this argument reduces the
 density estimates to a classical kernel density estimate.
 
