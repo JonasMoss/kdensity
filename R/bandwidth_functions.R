@@ -15,20 +15,36 @@
 #' @return a bandwidth function.
 get_bw = function(bw) {
   switch(bw,
-         "nrd0" = function(data, kernel, start, support) stats::bw.nrd0(data),
-         "nrd"  = function(data, kernel, start, support) stats::bw.nrd(data),
-         "ucv"  = function(data, kernel, start, support) stats::bw.ucv(data),
-         "bcv"  = function(data, kernel, start, support) stats::bw.bcv(data),
-         "SJ"   = function(data, kernel, start, support) stats::bw.SJ(data),
-         "JH"   = function(data, kernel, start, support) bw.JH
+         "nrd0" = function(data, kernel_str, start_str, support) stats::bw.nrd0(data),
+         "nrd"  = function(data, kernel_str, start_str, support) stats::bw.nrd(data),
+         "ucv"  = function(data, kernel_str, start_str, support) stats::bw.ucv(data),
+         "bcv"  = function(data, kernel_str, start_str, support) stats::bw.bcv(data),
+         "SJ"   = function(data, kernel_str, start_str, support) stats::bw.SJ(data),
+         "JH"   = bw.JH
 
   )
+}
+
+
+#' Get a bandwidth string when 'bw' is unspecified.
+#'
+#' @param kernel_str supplied kernel,
+#' @param start_str supplied parametric start
+#' @param support supplied support
+#' @return a bandwidth string.
+
+get_standard_bw = function (kernel_str, start_str, support) {
+  if(kernel_str == "gcopula") {
+    bw = "JH"
+  } else {
+    bw ="nrd0"
+  }
 }
 
 ## Custom kernels.
 
 bw.JH = function(data, kernel_str, start_str, support) {
-  if(kernel != "gcopula") {
+  if(kernel_str != "gcopula") {
     warning("The bandwidth selection method JH is made for the asymmetric kernel 'gcopula'.")
   }
 

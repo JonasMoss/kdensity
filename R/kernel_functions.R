@@ -17,7 +17,7 @@
 #' @return a kernel function of the format k(u) with integral normalized
 #' to 1.
 
-get_kernel = function(kernel_str, support) {
+get_kernel = function(kernel_str) {
   switch(kernel_str,
          gaussian     = kernel_gaussian,
          laplace      = kernel_laplace,
@@ -36,7 +36,7 @@ get_kernel = function(kernel_str, support) {
 
 ## This is the list of pre-defined kernels.
 
-kernel_gaussian     = list(kernel  = function(y, x, h) dnorm(y, x, h),
+kernel_gaussian     = list(kernel  = function(y, x, h) dnorm((y-x)/h),
                            sd      = 1,
                            support = c(-Inf, Inf))
 
@@ -103,16 +103,17 @@ kernel_cosine       = list(kernel  = function(y, x, h) {
                            support = c(0, 1))
 
 kernel_optcosine    = list(kernel  = function(y, x, h) {
-                                    u = (x - y)/h
-                                    pi/4*cos(pi/2*u)*(abs(u) <= 1)
-                                    },
+                                      u = (x - y)/h
+                                      pi/4*cos(pi/2*u)*(abs(u) <= 1)
+                                     },
                            sd      = 1/sqrt(1-8/pi^2),
                            support = c(0, 1)
                            )
 
 kernel_gcopula      = list(kernel  = function(y, x, h) {
-                                      inside = rho^2*(qnorm(x)^2+qnorm(X)^2)-2*rho*qnorm(x)*qnorm(X)
-                                      1/sqrt(1-rho^2)*exp(-inside/(2*(1-rho^2)))
+                                      rho = 1 - h^2
+                                      inside = rho^2*(qnorm(y)^2 + qnorm(x)^2)-2*rho*qnorm(y)*qnorm(x)
+                                      exp(-inside/(2*(1-rho^2)))
                                      },
                            sd      = 1,
                            support = c(0, 1))
