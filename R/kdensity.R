@@ -16,7 +16,12 @@
 #' @return A function of class kdensity.
 #' @details fill in
 
-kdensity = function(x, bw = 0.1, adjust = 1, support = NULL, na.rm = TRUE, normalized = TRUE,
+kdensity = function(x, adjust = 1, support = NULL, na.rm = TRUE, normalized = TRUE,
+                    bw     = c("nrd0",
+                               "nrd",
+                               "bcv",
+                               "ucv",
+                               "SJ"),
                     kernel = c("gaussian",
                                "epanechnikov",
                                "rectangular",
@@ -38,9 +43,14 @@ kdensity = function(x, bw = 0.1, adjust = 1, support = NULL, na.rm = TRUE, norma
 
   ## We handle the kernel functions. This works by matching the strings and
   ## obtaining the kernel function from outside the 'kdensity' function itself.
-  kernel = match.arg(kernel)
-  kernel_str = kernel
-  kernel = get_kernel(kernel)
+  if(!is.list(kernel)) {
+    kernel = match.arg(kernel)
+    kernel_str = kernel
+    kernel = get_kernel(kernel, support)
+  } else {
+    kernel_str = deparse(substitute(kernel))
+  }
+
 
   ## Now we handle the parametric start itself. If the parametric start is a
   ## string, we will match the string with pre-supplied functions.
@@ -48,9 +58,9 @@ kdensity = function(x, bw = 0.1, adjust = 1, support = NULL, na.rm = TRUE, norma
   if(!is.list(start)) {
     start = match.arg(start)
     start_str = start
-    start = kdensity_start_functions(start, support)
+    start = get_start(start, support)
   } else {
-    start_str = "user supplied"
+    start_str = deparse(substitute(start))
   }
 
   ## The support is automatically handled if unspecified.
@@ -81,11 +91,26 @@ kdensity = function(x, bw = 0.1, adjust = 1, support = NULL, na.rm = TRUE, norma
       })
   }
 
+  ## Takes care of the bandwidth. Can be either a double, a string, or a
+  ## function taking the arguments data, kernel, start support.
+
+  if(!is.numeric(bw)) {
+    if(is.character("bw")) {
+      bw_str = bw
+      bw     = get_bw(bw)(data, kernel, start, support)
+    } else {
+      bw_str = deparse(substitute(bw))
+      bw     = bw(data, kernel, start, support)
+    }
+  } else {
+    bw_str = bw
+  }
+
   ## The parameter h is computed. The basic bandwidth is h = bw*adjust for the
   ## normal kernel, and is adjusted for all the other kernels so that the sd
   ## of the kernel equals h.
 
-  h = bw*adjust*get_kernel_sd(kernel_str)
+  h = bw*adjust*kernel$sd
 
   ## The denominator can be computed once and for all.
   parametric_start_data = parametric_start_vector(x)
@@ -100,9 +125,9 @@ kdensity = function(x, bw = 0.1, adjust = 1, support = NULL, na.rm = TRUE, norma
 
     pre_function = function(y) {
       if(length(y) == 1) {
-        mean(1/h*kernel((y-x)/h)*parametric_start_vector(y)/parametric_start_data)
+        mean(1/h*kernel$kernel((y-x)/h)*parametric_start_vector(y)/parametric_start_data)
       } else {
-        sapply(y, function(y) mean(1/h*kernel((y-x)/h)*parametric_start_vector(y)/parametric_start_data))
+        sapply(y, function(y) mean(1/h*kernel$kernel((y-x)/h)*parametric_start_vector(y)/parametric_start_data))
       }
     }
 
@@ -119,11 +144,11 @@ kdensity = function(x, bw = 0.1, adjust = 1, support = NULL, na.rm = TRUE, norma
 
   return_function = function(y) {
     if(length(y) == 1) {
-      mean(1/h*kernel((y-x)/h)*parametric_start_vector(y)/parametric_start_data)/normalization
+      mean(1/h*kernel$kernel((y-x)/h)*parametric_start_vector(y)/parametric_start_data)/normalization
     } else {
       sapply(y, function(y) {
         parametric_start_vector_y = parametric_start_vector(y)
-        1/h*mean(kernel((y-x)/h)*parametric_start_vector_y/parametric_start_data)/normalization
+        1/h*mean(kernel$kernel((y-x)/h)*parametric_start_vector_y/parametric_start_data)/normalization
       })
     }
 
@@ -132,6 +157,7 @@ kdensity = function(x, bw = 0.1, adjust = 1, support = NULL, na.rm = TRUE, norma
 
   ## Finally, we assign the return_function its class and required attributes.
   class(return_function) = "kdensity"
+  attr(return_function, "bw_str")    = bw_str
   attr(return_function, "bw")        = bw
   attr(return_function, "kernel")    = kernel_str
   attr(return_function, "start")     = start_str

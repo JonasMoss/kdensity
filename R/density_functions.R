@@ -13,7 +13,7 @@
 #' @param support a tuple containg the support. Used for error handling.
 #' @return a list of two functions.
 
-kdensity_start_functions = function(start, support) {
+get_start = function(start, support) {
   if(start == "start_inverse_gaussian") {
     if(!("statmod" %in% rownames(installed.packages()))) {
       stop("The option 'inverse_gaussian' requires the package 'statmod' to work.")

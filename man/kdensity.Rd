@@ -4,16 +4,15 @@
 \alias{kdensity}
 \title{Kernel density estimator with parametric start}
 \usage{
-kdensity(x, bw = 0.1, adjust = 1, support = NULL, na.rm = TRUE,
-  normalized = TRUE, kernel = c("gaussian", "epanechnikov", "rectangular",
-  "triangular", "biweight", "cosine", "optcosine", "tricube", "triweight",
-  "laplace"), start = c("uniform", "normal", "gamma", "exponential",
-  "inverse_gaussian", "lognormal", "beta", "laplace"))
+kdensity(x, adjust = 1, support = NULL, na.rm = TRUE, normalized = TRUE,
+  bw = c("nrd0", "nrd", "bcv", "ucv", "SJ"), kernel = c("gaussian",
+  "epanechnikov", "rectangular", "triangular", "biweight", "cosine",
+  "optcosine", "tricube", "triweight", "laplace"), start = c("uniform",
+  "normal", "gamma", "exponential", "inverse_gaussian", "lognormal", "beta",
+  "laplace"))
 }
 \arguments{
 \item{x}{the supplied data.}
-
-\item{bw}{a bandwidth function (NOT IMPLEMENTED) or a double}
 
 \item{adjust}{an adjustment constant, so that h = adjust*bw*m, where m
 varies acccording to the chosen kernel.}
@@ -24,6 +23,8 @@ varies acccording to the chosen kernel.}
 \item{na.rm}{should \code{NA} values be removed?}
 
 \item{normalized}{should the density be normalized?}
+
+\item{bw}{a bandwidth function (NOT IMPLEMENTED) or a double}
 
 \item{kernel}{the kernel function, chosen from a list of alternatives}
 

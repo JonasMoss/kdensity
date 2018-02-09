@@ -22,6 +22,6 @@ get_support = function(start, kernel) {
          lognormal        = c(0, Inf),
          beta             = c(0, 1),
          laplace          = c(-Inf, Inf),
-         "user supplied"  = c(-Inf, Inf)
+         c(-Inf, Inf)
   )
 }

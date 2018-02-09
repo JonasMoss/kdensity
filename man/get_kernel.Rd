@@ -4,10 +4,10 @@
 \alias{get_kernel}
 \title{Helper function that gets a kernel function for kdensity.}
 \usage{
-get_kernel(kernel)
+get_kernel(kernel_str, support)
 }
 \arguments{
-\item{kernel}{a string specifying which kernel to use.}
+\item{kernel_str}{a string specifying which kernel to use.}
 }
 \value{
 a kernel function of the format k(u) with integral normalized

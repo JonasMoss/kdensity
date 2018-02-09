@@ -1,7 +1,7 @@
 ---
 title: 'kdensity: Kernel density estimation with a parametric start'
 author: "Jonas Moss"
-date: "7 February 2018"
+date: "8 February 2018"
 output: github_document
 ---
 
@@ -12,7 +12,7 @@ knitr::opts_chunk$set(out.width='750px', dpi=200)
 
 ## Introduction
 
-Kernel density estimation with a parametric start was introduced by Nils Lid Hjort and Ingrid Glad in their 1996 paper [Nonparametric Density Estimation with a Parametric Start](https://projecteuclid.org/euclid.aos/1176324627). The idea is to start out with a parametric density before you do your kernel density estimation, so that your actual kernel density estimation will be a correction to the original parametric estimate. Why is this a good idea? Because the resulting estimator will be better than a naïve kernel density estimator whenever the true density is close to your suggestion, and probably not worse if not. Read the paper for more information.
+Kernel density estimation with a parametric start was introduced by Nils Lid Hjort and Ingrid Glad in their 1995 paper [Nonparametric Density Estimation with a Parametric Start](https://projecteuclid.org/euclid.aos/1176324627). The idea is to start out with a parametric density before you do your kernel density estimation, so that your actual kernel density estimation will be a correction to the original parametric estimate. Why is this a good idea? Because the resulting estimator will be better than a naïve kernel density estimator whenever the true density is close to your suggestion, and probably not worse if not. Read the paper for more information.
 
 The goal of this `R` package is to make kernel density estimation with a parametric start both routine and flexible. In order to achieve this, we have decided on emulating the behaviour of the function `density` in the `stats` package (which is included in your `R` installation) to the highest extent possible.
 
@@ -27,6 +27,7 @@ plot(kdensity::kdensity(sunspot.month, start = "exponential", bw = 16), lwd = 2)
 ```
 
 Lets compare this to the behaviour of `density` and `dexp`:
+
 ```{r full plot, echo = TRUE}
 y = seq(0, max(sunspot.month) + 10, by = 0.5)
 plot(kdensity::kdensity(sunspot.month, start = "exponential", bw = 16), lwd = 2)
@@ -34,6 +35,7 @@ lines(y, dexp(y, 1/mean(sunspot.month)), lty = 2)
 lines(density(sunspot.month, kernel = "gauss", adjust = 2), lty = 3)
 
 ```
+
 Here `density` is easily seen to be far more  affected by boundary bias than `kdensity`, and it capturs more of features of the data than the exponential distribution does.
 
 ## How to use
@@ -52,10 +54,13 @@ start_inverse_gaussian = list(
   }
 )
 ```
+
 Using this definition we can run a new `kdensity` function as follows:
+
 ```{r lnormplot, echo = TRUE}
 plot(kdensity::kdensity(sunspot.month + 1, start = start_inverse_gaussian, support = c(0, Inf), bw = 16), lwd = 2)
 ```
+
 Here `sunspot.month + 1` is used inside `kdensity` in order to make the data strictly positive.
 
 The `plot` function works just as in the case of `stats::density`. Moreover, `lines` and `points` does as well. Since the return value of `kdensity` is a function, it is callable, as in:

@@ -5,52 +5,69 @@
 ### categories. Standard symmetric kernel functions and non-standard assymetric
 ### kernel functions, such as the gamma kernel, beta kernel, and Gaussian
 ### copula kernel. Currently only symmetric kernel functions are supported.
+###
+### A user supplied kernel is a list containing a kernel function kernel that
+### integrates to 1, and a float sd that equals the standard deviation of the
+### kernel.
 ### ===========================================================================
 
 #' Helper function that gets a kernel function for kdensity.
 #'
-#' @param kernel a string specifying which kernel to use.
+#' @param kernel_str a string specifying which kernel to use.
 #' @return a kernel function of the format k(u) with integral normalized
 #' to 1.
 
-get_kernel = function(kernel) {
-  switch(kernel,
-         gaussian     = dnorm,
-         laplace      = function(u) 1/2*exp(-abs(u)),
-         epanechnikov = function(u) 3/4*(1-u^2)*(abs(u) <= 1),
-         rectangular  = function(u) dunif(u, min = -1, max = 1),
-         triangular   = function(u) (1-abs(u))*(abs(u) <= 1),
-         biweight     = function(u) 15/16*(1-u^2)^2*(abs(u) <= 1),
-         triweight    = function(u) 35/32*(1-u^2)^3*(abs(u) <= 1),
-         tricube      = function(u) 70/81*(1-abs(u)^3)^3*(abs(u) <= 1),
-         cosine       = function(u) (1+cos(pi*u))/2*(abs(u) <= 1),
-         optcosine    = function(u) pi/4*cos(pi/2*u)*(abs(u) <= 1),
-         uniform      = function(u) dunif(u, min = -1, max = 1)
+get_kernel = function(kernel_str, support) {
+  switch(kernel_str,
+         gaussian     = kernel_gaussian,
+         laplace      = kernel_laplace,
+         epanechnikov = kernel_epanechnikov,
+         rectangular  = kernel_rectangular,
+         triangular   = kernel_triangular,
+         biweight     = kernel_biweight,
+         triweight    = kernel_triweight,
+         tricube      = kernel_tricube,
+         cosine       = kernel_cosine,
+         optcosine    = kernel_optcosine,
+         uniform      = kernel_rectangular,
+         gcopula      = kernel_gcopula
   )
 }
 
-#' Helper function that gets a the kernel standard deviation.
-#'
-#' @param kernel a string specifying which kernel to use.
-#' @return a kernel function of the format k(u) with standard deviation
-#' normalized to 1.
-#' @details stats::density use this concept in order to make different
-#' kernels directly comparable. Most of the bandwidth selectors are based
-#' one the Gaussian kernel, and translation requires the kernels to be
-#' comparable.
+## This is the list of pre-defined kernels.
 
-get_kernel_sd = function(kernel) {
-  switch(kernel,
-         gaussian     = 1,
-         laplace      = 1/sqrt(2),
-         epanechnikov = sqrt(5),
-         rectangular  = sqrt(3),
-         triangular   = sqrt(6),
-         biweight     = sqrt(7),
-         triweight    = 3,
-         tricube      = 3^(5/2)/sqrt(35),
-         cosine       = 1/sqrt(1/3 - 2/pi^2),
-         optcosine    = 1/sqrt(1-8/pi^2),
-         uniform      = sqrt(3)
-  )
-}
+kernel_gaussian     = list(kernel = dnorm,
+                           sd     = 1)
+
+kernel_laplace      = list(kernel = function(u) 1/2*exp(-abs(u)),
+                           sd     = 1/sqrt(2))
+
+kernel_epanechnikov = list(kernel = function(u) 3/4*(1-u^2)*(abs(u) <= 1),
+                           sd     = sqrt(5))
+
+kernel_rectangular  = list(kernel = function(u) dunif(u, min = -1, max = 1),
+                           sd     = sqrt(3))
+
+kernel_triangular   = list(kernel = function(u) (1-abs(u))*(abs(u) <= 1),
+                           sd     = sqrt(6))
+
+kernel_biweight     = list(kernel = function(u) 15/16*(1-u^2)^2*(abs(u) <= 1),
+                           sd     = sqrt(7))
+
+kernel_triweight    = list(kernel = function(u) 35/32*(1-u^2)^3*(abs(u) <= 1),
+                           sd     = 3)
+
+kernel_tricube      = list(kernel = function(u) 70/81*(1-abs(u)^3)^3*(abs(u) <= 1),
+                           sd     = 3^(5/2)/sqrt(35))
+
+kernel_cosine       = list(kernel = function(u) (1+cos(pi*u))/2*(abs(u) <= 1),
+                           sd     = 1/sqrt(1/3 - 2/pi^2))
+
+kernel_optcosine    = list(kernel = function(u) pi/4*cos(pi/2*u)*(abs(u) <= 1),
+                           sd     = 1/sqrt(1-8/pi^2))
+
+kernel_gcopula      = list(kernel = function(u) {
+                        inside = rho^2*(qnorm(x)^2+qnorm(X)^2)-2*rho*qnorm(x)*qnorm(X)
+                        1/sqrt(1-rho^2)*exp(-inside/(2*(1-rho^2)))
+                        },
+                           sd     = 1)
