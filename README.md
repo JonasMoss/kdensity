@@ -22,10 +22,7 @@ have decided on emulating the behaviour of the function `density` in the
 `stats` package (which is included in your `R` installation) to the
 highest extent possible.
 
-**NB:** This package is mint out of box\! At least one core feature, the
-choice of bandwidth, has not been implemented, and the documentation is
-not fully spelled out. Come back later for more\! The package only
-supports estimates in one dimension at the moment.
+The package only contains one function, `kdensity`.
 
 ## Example
 
@@ -36,11 +33,11 @@ estimation with a parametric start, as it is supported on positive
 half-line. In such a case, traditional density estimators are prone to
 serious *boundary bias*. However, parametric starts allows us to
 circumvent this by using a pre-specified parametric density supported on
-the half-line, for instance the
-exponential.
+the half-line, for instance the exponential.
 
 ``` r
-plot(kdensity::kdensity(sunspot.month, start = "exponential", bw = 16), lwd = 2)
+library("kdensity")
+plot(kdensity(sunspot.month, start = "exponential", adjust = 2), lwd = 2)
 ```
 
 <img src="README_files/figure-gfm/small plot-1.png" width="750px" />
@@ -49,7 +46,7 @@ Lets compare this to the behaviour of `density` and `dexp`:
 
 ``` r
 y = seq(0, max(sunspot.month) + 10, by = 0.5)
-plot(kdensity::kdensity(sunspot.month, start = "exponential", bw = 16), lwd = 2)
+plot(kdensity(sunspot.month, start = "exponential", adjust = 2), lwd = 2)
 lines(y, dexp(y, 1/mean(sunspot.month)), lty = 2)
 lines(density(sunspot.month, kernel = "gauss", adjust = 2), lty = 3)
 ```
@@ -87,7 +84,8 @@ start_inverse_gaussian = list(
   estimator = function(data) {
     c(mean       = mean(data),
       dispersion = mean(1/data - 1/mean(data)))
-  }
+  },
+  support = c(0, Inf)
 )
 ```
 
@@ -95,7 +93,8 @@ Using this definition we can run a new `kdensity` function as
 follows:
 
 ``` r
-plot(kdensity::kdensity(sunspot.month + 1, start = start_inverse_gaussian, support = c(0, Inf), bw = 16), lwd = 2)
+plot(kdensity(sunspot.month + 1, start = start_inverse_gaussian, adjust = 2), lwd = 2,
+     main = "Inverse Gaussian plot")
 ```
 
 <img src="README_files/figure-gfm/lnormplot-1.png" width="750px" />
@@ -105,11 +104,10 @@ data strictly positive.
 
 The `plot` function works just as in the case of `stats::density`.
 Moreover, `lines` and `points` does as well. Since the return value of
-`kdensity` is a function, it is callable, as
-in:
+`kdensity` is a function, it is callable, as in:
 
 ``` r
-new_density = kdensity::kdensity(sunspot.month + 1, start = "lognormal", bw = 16)
+new_density = kdensity(sunspot.month + 1, start = "lognormal", bw = 16)
 new_density(56.7)
 ```
 

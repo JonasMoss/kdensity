@@ -4,7 +4,7 @@
 \alias{get_start}
 \title{Get densities and estimators from strings.}
 \usage{
-get_start(start, support)
+get_start(start)
 }
 \arguments{
 \item{start}{a string specifying the density of interest.}
