@@ -21,6 +21,7 @@ get_kernel = function(kernel_str) {
 
   switch(kernel_str,
          gaussian     = kernel_gaussian,
+         normal       = kernel_gaussian,
          laplace      = kernel_laplace,
          epanechnikov = kernel_epanechnikov,
          rectangular  = kernel_rectangular,
@@ -34,7 +35,7 @@ get_kernel = function(kernel_str) {
          gcopula      = kernel_gcopula,
          gamma        = kernel_gamma,
          gamma_biased = kernel_gamma_biased,
-         kernel_gaussian
+         stop(paste0("The supplied kernel (",kernel_str,") is not implemented."))
          )
 }
 

@@ -48,17 +48,17 @@ get_range = function(obj) {
 
 
 plot.kdensity = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ...) {
-  plot_helper(x, range, plot_start, zero_line, type = "plot", ...)
+  plot_helper(x, range, plot_start, zero_line, ptype = "plot", ...)
 }
 
 #' @export
 lines.kdensity = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ...) {
-  plot_helper(x, range, plot_start, zero_line, type = "lines", ...)
+  plot_helper(x, range, plot_start, zero_line, ptype = "lines", type = "l", ...)
 }
 
 #' @export
 points.kdensity = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ...) {
-  plot_helper(x, range, plot_start, zero_line, type = "points", ...)
+  plot_helper(x, range, plot_start, zero_line, ptype = "points", type = "p", ...)
 }
 
 #' Helper function for the plot methods
@@ -67,9 +67,9 @@ points.kdensity = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE
 #' @param type the kind of plot to make
 #' @return None.
 
-plot_helper = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, type = c("plot", "lines", "points"), ...) {
+plot_helper = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ptype = c("plot", "lines", "points"), ...) {
 
-  type = match.arg(type)
+  ptype = match.arg(ptype)
 
   if(is.null(range)) range = get_range(x)
 
@@ -108,7 +108,7 @@ plot_helper = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ty
     args$y = x(range)
   }
 
-  switch(type,
+  switch(ptype,
          plot   = do.call(plot, args),
          lines  = do.call(lines, args),
          points = do.call(points, args))
