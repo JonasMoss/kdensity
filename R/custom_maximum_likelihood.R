@@ -8,15 +8,12 @@
 #' is good.
 
 
-mlbeta = function(x = NULL, start = NULL, type = c("none", "gradient", "full")) {
+mlbeta = function(x, start = NULL, type = c("none", "gradient", "full")) {
   type = match.arg(type, c("none","gradient","full"))
 
-  if(!is.null(x)) {
-    val1 = mean(log(x))
-    val2 = mean(log(1-x))
-  } else if (is.null(val1) & is.null(val2)) {
-    stop("Either x or (val1 and val2) must be supplied.")
-  }
+  val1 = mean(log(x))
+  val2 = mean(log(1-x))
+
 
   if(is.null(start)) {
     G1 = exp(val1)
@@ -47,5 +44,39 @@ mlbeta = function(x = NULL, start = NULL, type = c("none", "gradient", "full")) 
   parameters = nlm(beta_objective, p = start, typsize = start)$estimate
   names(parameters) = c("shape1", "shape2")
   parameters
+
+}
+
+#' Fast maximum likelihood for the gamma distribution.
+#'
+#' @param x The data, contained in c(0, Inf)
+#' @param rel_eps Relative epsilon comparison criterion.
+#' @param max_iter Maximal number of Newton-Raphson iteratons.
+#' @return a vector of two parameters, \code{shape} and \code{rate}.
+#' @details Implemented following wikipedia.
+
+
+mlgamma = function(x, rel_eps = 10^-10, max_iter = 100) {
+
+  mean_hat = mean(x)
+  s = log(mean_hat) - mean(log(x))
+
+  ## This start estimator is very close to the ML estimator already.
+  shape = 1/(12*s)*(3 - s + sqrt((s-3)^2 + 24*s))
+
+  ## The Newton-Raphson steps.
+  for(i in 1:max_iter) {
+    shape_next = shape - (1/(1/shape - trigamma(shape))*(log(shape) - digamma(shape) - s))
+    if(abs((shape - shape_next)/shape) < rel_eps) break
+    shape = shape_next
+  }
+
+  # gamma_objective = function(shape) {
+  #   -((shape-1)*geom_hat - shape - shape*log_mean_hat + shape*log(shape) - lgamma(shape))
+  # }
+  #
+  # optimize(gamma_objective, interval = c(0, 100))
+
+  c(shape = shape, rate = shape/mean_hat)
 
 }

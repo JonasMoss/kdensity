@@ -103,12 +103,6 @@ start_beta = list(
 
 start_gamma = list(
   density   = dgamma,
-  estimator = function(data) {
-    shapes = nlm(function(par) {
-      -mean(dgamma(data, par[1], par[2], log = TRUE))
-    }, p = c(1,1))$estimate
-    names(shapes) = c("shape", "rate")
-    shapes
-  },
+  estimator = mlgamma,
   support   = c(0, Inf)
 )
