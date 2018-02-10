@@ -36,6 +36,45 @@
 kdensity = function(x, kernel = NULL, start = NULL, bw = NULL, adjust = 1,
                     support = NULL, na.rm = FALSE, normalized = TRUE)
  {
+  ## The case of bw == Inf is special! In this case, we return the parametric
+  ## start itself.
+
+  if(!is.null(bw)) {
+    if(bw == Inf) {
+      msg = "bw = Inf does not work with a uniform start."
+      assertthat::assert_that(!is.null(start), start != "uniform", msg = msg)
+      kss_list = get_kernel_start_support(NULL, start, NULL)
+      start = kss_list$start
+      start_str = kss_list$start_str
+
+      parameters = start$estimator(x)
+      parametric_start = start$density
+
+      return_function = function(y) {
+        sapply(y, function(y) {
+          do.call(parametric_start, as.list(c("x" = y, parameters)))
+        })
+      }
+
+      class(return_function) = "kdensity"
+      attr(return_function, "bw_str")    = Inf
+      attr(return_function, "bw")        = Inf
+      attr(return_function, "kernel")    = "none"
+      attr(return_function, "start")     = start_str
+      attr(return_function, "support")   = start$support
+      attr(return_function, "adjust")    = 1
+      attr(return_function, "n")         = length(x)
+      attr(return_function, "h")         = Inf
+      attr(return_function, "data.name") = deparse(substitute(x))
+      attr(return_function, "has.na")    = any(is.na(x))
+      attr(return_function, "call")      = match.call()
+      attr(return_function, "range")     = c(min(x), max(x))
+      attr(return_function, "estimates") = parameters
+      return(return_function)
+    }
+  }
+
+
 
   ## Now we massage and handle the combinations of kernel, start and support.
   kss_list = get_kernel_start_support(kernel, start, support)

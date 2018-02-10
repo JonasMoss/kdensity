@@ -89,14 +89,18 @@ print.kdensity <- function(obj, digits = NULL, ...)
 #' @export
 summary.kdensity <- function(obj, digits = NULL, ...)
 {
+  parameters = attr(obj, "estimates")
   cat("\nCall: \n", deparse(attr(obj, "call")), "\n\n",
-      "Data:       ", attr(obj, "data.name"), " (",attr(obj, "n"), " obs.)\n",
-      "Bandwidth:  ", formatC(attr(obj, "bw"), digits = digits), " ('", attr(obj, "bw_str"), "')\n",
-      "Support:    (", attr(obj, "support")[1], ", ", attr(obj, "support")[2],   ")\n",
-      "Kernel:     ", attr(obj, "kernel"), "\n",
-      "Start:      ", attr(obj, "start"), "\n",
-      "Range:      (", attr(obj, "range")[1], ", ", attr(obj, "range")[2],   ")\n",
-      "NAs:        ", attr(obj, "has.na"), "\n",
-      "Adjustment: ", attr(obj, "adjust"), "\n\n",
+      "Data:        ", attr(obj, "data.name"), " (",attr(obj, "n"), " obs.)\n",
+      "Bandwidth:   ", formatC(attr(obj, "bw"), digits = digits), " ('", attr(obj, "bw_str"), "')\n",
+      "Support:     (", attr(obj, "support")[1], ", ", attr(obj, "support")[2],   ")\n",
+      "Kernel:      ", attr(obj, "kernel"), "\n",
+      "Start:       ", attr(obj, "start"), "\n",
+      "Range:       (", formatC(attr(obj, "range")[1], digits), ", ", formatC(attr(obj, "range")[2], digits),   ")\n",
+      "NAs in data: ", attr(obj, "has.na"), "\n",
+      "Adjustment:  ", attr(obj, "adjust"), "\n\n",
+      "Parameter estimates:", "\n",
+      sapply(1:length(parameters), function(i) paste0(names(parameters)[i], ": ", formatC(parameters[i], digits), "\n")),
+      "\n",
       sep = "")
 }
