@@ -23,55 +23,98 @@ get_range = function(obj) {
   seq(xmin, xmax, length.out = 1000)
 }
 
-#' Plotting generic for kdensity objects.
+#' Plot Method for Kernel Density Estimation
+#'
+#' The \code{plot} method for \code{kdensity} objects.
+#'
 #' @export
-#' @param obj a kdensity object
-#' @param range the x-values the density is applied over (optional)
-#' @param ... passed to plot.default.
+#' @param x a \code{kdensity} object.
+#' @param range range of x values.
+#' @param plot_start logical; if \code{TRUE}, plots the parametric start instead of the kernel density estimate.
+#' @param zero_lines logical; if \code{TRUE}, add a base line at \code{y = 0}.
+#' @param ... further plotting parameters.
+#' @return None.
+#' @seealso \code{\link{kdensity}}
+#' @examples
+#' ## Using the data set "precip" to eye-ball the similarity between:
+#' ## A kernel fit, a parametric fit, and a kernel with parametric start fit.
+#' kde_gamma = kdensity(precip, kernel = "gaussian", start = "gamma")
+#' kde = kdensity(precip, kernel = "gaussian", start = "uniform")
+#'
+#' plot(kde_gamma, main = "Annual Precipitation in US Cities")
+#' lines(kde_gamma, plot_start = TRUE, lty = 2)
+#' lines(kde, lty = 3)
+#' rug(precip)
 
-plot.kdensity = function(obj, range = NULL, ...) {
 
-  if(is.null(range)) range = get_range(obj)
+plot.kdensity = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ...) {
+  plot_helper(x, range, plot_start, zero_line, type = "plot", ...)
+}
+
+#' @export
+lines.kdensity = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ...) {
+  plot_helper(x, range, plot_start, zero_line, type = "lines", ...)
+}
+
+#' @export
+points.kdensity = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ...) {
+  plot_helper(x, range, plot_start, zero_line, type = "points", ...)
+}
+
+#' Helper function for the plot methods
+#'
+#' @inheritParams plot.kdensity
+#' @param type the kind of plot to make
+#' @return None.
+
+plot_helper = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, type = c("plot", "lines", "points"), ...) {
+
+  type = match.arg(type)
+
+  if(is.null(range)) range = get_range(x)
 
   ## Potential arguments in ellipses are handled here. They are modelled
   ## after the structure of the 'density' function.
   supplied = list(...)
   defaults = list(type = "l",
-                  main = deparse(attr(obj, "call")),
+                  main = deparse(attr(x, "call")),
                   ylab = "Density",
-                  xlab = paste("N =", attr(obj, "n"), "  Bandwidth =", formatC(attr(obj, "bw"))),
+                  xlab = paste("N =", attr(x, "n"), "  Bandwidth =", formatC(attr(x, "bw"))),
                   lwd  = 1)
 
   args = listmerge(x = defaults,
                    y = supplied)
   args$x = range
-  args$y = obj(range)
 
-  do.call(plot, args)
+  if(plot_start) {
+    kernel = attr(x, "kernel")
+    start = attr(x, "start")
+    support = attr(x, "support")
 
-}
+    msg = "To use 'plot_start = TRUE', supply a parametric start that is a proper density."
+    assertthat::assert_that(!is.null(start), start != "uniform", msg = msg)
 
-#' @export
-lines.kdensity = function(obj, range = NULL, ...) {
+    kss_list = get_kernel_start_support(kernel, start, support)
+    start = kss_list$start
+    start_str = kss_list$start_str
 
-  if(is.null(range)) range = get_range(obj)
+    parameters = attr(x, "estimates")
+    parametric_start = start$density
 
-  ## Potential arguments in ellipses are handled here. All go into the plot.
-  supplied = list(...)
-  defaults = list(type = "l",
-                  lwd  = 1)
+    args$y = sapply(range, function(y) {
+      do.call(parametric_start, as.list(c("x" = y, parameters)))})
 
-  args = listmerge(x = defaults,
-                   y = supplied)
-  args$x = range
-  args$y = obj(range)
+  } else {
+    args$y = x(range)
+  }
 
-  do.call(lines, args)
-}
+  switch(type,
+         plot   = do.call(plot, args),
+         lines  = do.call(lines, args),
+         points = do.call(points, args))
 
-#' @export
-points.kdensity = function(obj, ...) {
-  lines.kdensity(obj, type = "p", ...)
+  if(zero_line) abline(h = 0, lwd = 0.1, col = "gray")
+
 }
 
 #' @export

@@ -2,17 +2,39 @@
 % Please edit documentation in R/generics.R
 \name{plot.kdensity}
 \alias{plot.kdensity}
-\title{Plotting generic for kdensity objects.}
+\title{Plot Method for Kernel Density Estimation}
 \usage{
-\method{plot}{kdensity}(obj, range = NULL, ...)
+\method{plot}{kdensity}(x, range = NULL, plot_start = FALSE,
+  zero_line = TRUE, ...)
 }
 \arguments{
-\item{obj}{a kdensity object}
+\item{x}{a \code{kdensity} object.}
 
-\item{range}{the x-values the density is applied over (optional)}
+\item{range}{range of x values.}
 
-\item{...}{passed to plot.default.}
+\item{plot_start}{logical; if \code{TRUE}, plots the parametric start instead of the kernel density estimate.}
+
+\item{...}{further plotting parameters.}
+
+\item{zero_lines}{logical; if \code{TRUE}, add a base line at \code{y = 0}.}
+}
+\value{
+None.
 }
 \description{
-Plotting generic for kdensity objects.
+The \code{plot} method for \code{kdensity} objects.
+}
+\examples{
+## Using the data set "precip" to eye-ball the similarity between:
+## A kernel fit, a parametric fit, and a kernel with parametric start fit.
+kde_gamma = kdensity(precip, kernel = "gaussian", start = "gamma")
+kde = kdensity(precip, kernel = "gaussian", start = "uniform")
+
+plot(kde_gamma, main = "Annual Precipitation in US Cities")
+lines(kde_gamma, plot_start = TRUE, lty = 2)
+lines(kde, lty = 3)
+rug(precip)
+}
+\seealso{
+\code{\link{kdensity}}
 }

@@ -36,14 +36,14 @@ Kernel density estimator with parametric start
 }
 \details{
 Bandwidth functions: The available bandwidth functions are "nrd0", "nrd",
-"bcv","ucv", and "SJ" from the stats package. They intended for use with a
+"bcv", "ucv", and "SJ" from the stats package. They intended for use with a
 'uniform' start and the 'gaussian' kernel, but work well for the other
 symmetric kernels as well.
 
 The function "JH" is designed for use with the 'gcopula' kernel.
 
 The standard bandwidth function is 'nrd0' when the start is uniform and
-the kernel is symmetric, following stats::densitt.
+the kernel is symmetric, following stats::density.
 
 When the kernel "gcopula" is chosen, the standard bandwidth function is
 "JH".
