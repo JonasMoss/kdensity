@@ -97,13 +97,7 @@ start_laplace = list(
 
 start_beta = list(
   density   = dbeta,
-  estimator = function(data) {
-    shapes = nlm(function(par) {
-      -mean(dbeta(data, par[1], par[2], log = TRUE))
-    }, p = c(1,1))$estimate
-    names(shapes) = c("shape1", "shape2")
-    shapes
-  },
+  estimator = mlbeta,
   support   = c(0, 1)
 )
 
