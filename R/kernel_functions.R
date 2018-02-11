@@ -19,7 +19,7 @@
 
 get_kernel = function(kernel_str) {
 
-  switch(kernel_str,
+  kernel = switch(kernel_str,
          gaussian     = kernel_gaussian,
          normal       = kernel_gaussian,
          laplace      = kernel_laplace,
@@ -34,9 +34,17 @@ get_kernel = function(kernel_str) {
          uniform      = kernel_rectangular,
          gcopula      = kernel_gcopula,
          gamma        = kernel_gamma,
-         gamma_biased = kernel_gamma_biased,
-         stop(paste0("The supplied kernel (",kernel_str,") is not implemented."))
+         gamma_biased = kernel_gamma_biased
          )
+  if(is.null(kernel_str)) {
+    if(exists(kernel_str)) {
+      kernel = get(kernel_str)
+    } else {
+      stop(paste0("The supplied kernel (",kernel_str,") is not implemented."))
+    }
+  }
+
+  kernel
 }
 
 ## This is the list of pre-defined kernels.
