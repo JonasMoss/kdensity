@@ -1,51 +1,93 @@
 #' Kernel density estimator with parametric start
 #'
+#' \code{kdensity} computes a kernel density for univariate data. It supports
+#' asymmetric kernels and parametric starts through the \code{kernel} and
+#' \code{start} arguments.
+#'
 #' @export
 #' @param x the supplied data.
-#' @param bw a bandwidth function or a double.
-#' @param adjust an adjustment constant, so that h = adjust*bw*m, where m
+#' @param bw a bandwidth function. Can be either a string, a custom made
+#' function, or a double.
+#' @param adjust an adjustment constant, so that \code{h = adjust*bw*sd}, where \code{sd}
 #' varies acccording to the chosen kernel.
-#' @param kernel the kernel function, chosen from a list of alternatives
-#' @param start choice of parametric start. Can either be chosen from a vector
-#' of strings, or be supplied via a list containing a \code{density} function
-#' and an \code{estimator} function.
+#' @param kernel the kernel function. Can be a string or a custom made list
+#' containg a function \code{kernel}, the standard deviation of the kernel,
+#' \code{sd}, and domain of definition for the kernel, \code{support}.
+#' @param start choice of parametric start. Can be a string or be supplied via a l
+#' ist containing a \code{density} function, an \code{estimator} function,
+#' and a \code{support} tuple.
 #' @param support the support of the data. Must be compatible with the supplied
-#' \code{x} and the supplied \code{start} and \code{kernel}
-#' @param normalized should the density be normalized?
-#' @param na.rm should \code{NA} values be removed?
-#' @return A function of class kdensity.
+#' \code{x} and the supplied \code{start} and \code{kernel}. Is used to find the
+#' normalization constant, see \code{normalized}.
+#' @param normalized logical; if \code{TRUE}, the density is normalized.
+#' @param na.rm logical; if \code{TRUE}, \code{NA}s will be removed from \code{x}.
+#' @return \code{kdensity} returns a function object of \code{\link[base]{class}} "kdensity".
 #' @details
 #'
-#' Bandwidth functions: The available bandwidth functions are "nrd0", "nrd",
-#' "bcv", "ucv", and "SJ" from the stats package. They intended for use with a
-#' 'uniform' start and the 'gaussian' kernel, but work well for the other
-#' symmetric kernels as well.
+#' If \code{normalized} is \code{FALSE} and \code{start != "uniform"}, the resulting
+#' density will not integrate to 1 in general.
 #'
-#' The function "JH" is designed for use with the 'gcopula' kernel.
+#' \strong{Bandwidth functions}: Bandwidth functions can either be specified by a string,
+#' be user made, or be a fixed double. If the argument is a string, it must fully match
+#' one of the implemented bandwidt functions. From the package \code{stats}, the bandwidth
+#' functions are \code{nrd0}, \code{nrd}, \code{bcv}, \code{ucv}, and \code{SJ} are avaiable,
+#' see \code{\link[stats]{bandwidth}}. They intended for use with a 'uniform' start and the 'gaussian' kernel, but
+#' work well for the other symmetric kernels as well. Implemented bandwidth functions for asymmetric
+#' kernels are: \code{JH} for the Gaussian copula estimator. For parametric starts, \code{RHE} is an
+#' Hermite expansion reference rule. Bandwidth functions for asymmetric kernels and parametric
+#' starts are documented in \code{\link{bandwidth_functions}}.
 #'
-#' The standard bandwidth function is 'nrd0' when the start is uniform and
-#' the kernel is symmetric, following stats::density.
+#' \strong{Kernel functions}: Kernel functions can either be specified by a string or
+#' be user made. If the argument is a string, it must fully match one of the implemented
+#' kernels. Available symmetric kernels are \code{gaussian} (or \code{normal}), \code{epanechnikov},
+#' \code{rectangular} (or \code{uniform}), \code{triangular}, \code{biweight}, \code{triweight},
+#' \code{tricube}, \code{cosine}, \code{optcosine}, and \code{laplace}. See \code{\link[stats]{density}}.
 #'
-#' When the kernel "gcopula" is chosen, the standard bandwidth function is
-#' "JH".
+#' The implemented asymmetric kernels are:
+#' \itemize{
+#'   \item \code{gcopula}. The Gaussian copula KDE, used for data on the unit
+#'    interval. Described in Jones & Henderswon.
+#'   \item \code{gamma} and \code{gamma_biased}. Gamma kernels for data on the
+#'   positive half-line, \code{c(0, Inf)}. They are described in Chen.
+#' }
 #'
-#' (NOT IMPLEMENTED) When a symmetric kernel is chosen and start != uniform,
-#' the alternatives are:
-#'
-#'
-kdensity = function(x, kernel = NULL, start = NULL, bw = NULL, adjust = 1,
+#' \strong{Parametric starts}: The following parametric starts are supported:
+#' \code{uniform} (or \code{constant}), \code{normal}, \code{gamma},
+#' \code{exponential}, \code{inverse_gaussian}, \code{lognormal}, \code{beta},
+#' and \code{laplace}. Their parameters are estimated by maximum likelihood.
+#' The default value is \code{uniform}, which corresponds to ordinary kernel
+#' density estimation.
+#' @seealso The \code{stats} package function \code{\link[stats]{density}}. For
+#' bandwidth selection documentation, see \code{\link{bandwidth_seletor}}.
+#' @example
+#' ##
+
+kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
                     support = NULL, na.rm = FALSE, normalized = TRUE)
  {
+
+  data.name = deparse(substitute(x))
+  has.na = any(is.na(x))
+
+  if(has.na) {
+    if(!na.rm) stop("x contains NAs and na.rm = FALSE.")
+    x = x[!is.na(x)]
+  }
+
   ## The case of bw == Inf is special! In this case, we return the parametric
   ## start itself.
 
   if(!is.null(bw)) {
     if(bw == Inf) {
-      msg = "bw = Inf does not work with a uniform start."
-      assertthat::assert_that(!is.null(start), start != "uniform", msg = msg)
+
+      if(!is.list(start)) {
+        msg = "bw = Inf does not work with a uniform start."
+        assertthat::assert_that(!is.null(start), start != "uniform", msg = msg)
+      }
+
       kss_list = get_kernel_start_support(NULL, start, NULL)
+      start_str = ifelse(!is.list(start), kss_list$start_str, deparse(substitute(start)))
       start = kss_list$start
-      start_str = kss_list$start_str
 
       parameters = start$estimator(x)
       parametric_start = start$density
@@ -75,14 +117,14 @@ kdensity = function(x, kernel = NULL, start = NULL, bw = NULL, adjust = 1,
   }
 
 
-
   ## Now we massage and handle the combinations of kernel, start and support.
   kss_list = get_kernel_start_support(kernel, start, support)
 
+  start_str = ifelse(!is.list(start), kss_list$start_str, deparse(substitute(start)))
+  kernel_str = ifelse(!is.list(kernel), kss_list$kernel_str, deparse(substitute(kernel)))
+
   kernel = kss_list$kernel
-  kernel_str = kss_list$kernel_str
   start = kss_list$start
-  start_str = kss_list$start_str
   support = kss_list$support
 
   ## Tests for incompabibilities in the supplied values.
@@ -137,12 +179,11 @@ kdensity = function(x, kernel = NULL, start = NULL, bw = NULL, adjust = 1,
   normalization = 1
 
   if(normalized & !(start_str == "uniform" & all(support == c(-Inf, Inf)))) {
-
     pre_function = function(y) {
       if(length(y) == 1) {
         mean(1/h*kernel$kernel(y, x, h)*parametric_start_vector(y)/parametric_start_data)
       } else {
-        sapply(y, function(y) mean(1/h*kernel$kernel(y, x, h)*parametric_start_vector(y)/parametric_start_data))
+        sapply(y, function(y) mean(1/h*kernel$kernel(y, x, h)/parametric_start_data)*parametric_start_vector(y))
       }
     }
 
@@ -179,8 +220,8 @@ kdensity = function(x, kernel = NULL, start = NULL, bw = NULL, adjust = 1,
   attr(return_function, "adjust")    = adjust
   attr(return_function, "n")         = length(x)
   attr(return_function, "h")         = h
-  attr(return_function, "data.name") = deparse(substitute(x))
-  attr(return_function, "has.na")    = any(is.na(x))
+  attr(return_function, "data.name") = data.name
+  attr(return_function, "has.na")    = has.na
   attr(return_function, "call")      = match.call()
   attr(return_function, "range")     = c(min(x), max(x))
   attr(return_function, "estimates") = parameters

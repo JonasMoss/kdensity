@@ -7,11 +7,11 @@
 get_standard_bw(kernel_str, start_str, support)
 }
 \arguments{
-\item{kernel_str}{supplied kernel,}
+\item{kernel_str}{a kernel string}
 
-\item{start_str}{supplied parametric start}
+\item{start_str}{a parametric start string.}
 
-\item{support}{supplied support}
+\item{support}{the support.}
 }
 \value{
 a bandwidth string.

@@ -4,12 +4,10 @@
 \alias{get_start}
 \title{Get densities and estimators from strings.}
 \usage{
-get_start(start)
+get_start(start_str)
 }
 \arguments{
-\item{start}{a string specifying the density of interest.}
-
-\item{support}{a tuple containg the support. Used for error handling.}
+\item{start_str}{a string specifying the density of interest.}
 }
 \value{
 a list of two functions.

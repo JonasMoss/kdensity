@@ -1,53 +1,32 @@
-### ===========================================================================
-### BANDWIDTH FUNCTIONS
-###
-### This file handles bandwidths. First we handle the conversion from strings
-### to functions. The functions will take care of error handling. For instance,
-### we will generate error if the kernel-start-support tupple is not
-### compatible with the chosen bandwidth function. If it looks suspect, a
-### warning is issued.
-### ===========================================================================
-
-
-#' Get bandwidth functions from string.
+#' Bandwidth Selectors for Kernel Density Estimation
 #'
-#' @param bw a string specifying the density of interest.
-#' @return a bandwidth function.
-get_bw = function(bw) {
-  switch(bw,
-         "nrd0" = function(data, kernel_str, start_str, support) stats::bw.nrd0(data),
-         "nrd"  = function(data, kernel_str, start_str, support) stats::bw.nrd(data),
-         "ucv"  = function(data, kernel_str, start_str, support) stats::bw.ucv(data),
-         "bcv"  = function(data, kernel_str, start_str, support) stats::bw.bcv(data),
-         "SJ"   = function(data, kernel_str, start_str, support) stats::bw.SJ(data),
-         "JH"   = bw.JH,
-         "RHE"  = bw.RHE,
-         stop("The supplied 'bw' is no among the supported alternatives.")
-         )
-}
-
-
-#' Get a bandwidth string when 'bw' is unspecified.
+#' Bandwidth selectors for \code{kdensity}.
 #'
-#' @param kernel_str supplied kernel,
-#' @param start_str supplied parametric start
-#' @param support supplied support
-#' @return a bandwidth string.
+#' Bandwidth functions for parametric starts and asymmetric kernels currently include:
+#'
+#' \itemize{
+#'   \item \strong{bw.JH:} Selector for the Gaussian copula kernel, based on
+#'   normal reference rule. Described in Jones & Henderson. The default method when
+#'   the \code{gcopula} kernel is used in \code{kdensity}.
+#'   \item \strong{bw.RHE:} Selector for parametric starts with a symmetric kernel.
+#'   Described in Hjort & Glad. The default method in \code{kdensity} when a parametric
+#'   start is supplied and the kernel is symmetric.
+#' }
+#'
+#' In addition to these,\code{kdensity} supports the bandwidth functions described in
+#' \code{\link[stats]{bandwidth}}.
+#'
+#' @param x numeric vector containing the data.
+#' @param kernel (optional) a \code{kernel} in list format.
+#' @param start (optional) a \code{start} in list format.
+#' @param support (optional) the support of the data.
+#'
+#' @seealso \code{\link{kdensity}}, \code{\link[stats]{bandwidth}} for the
+#' bandwidth selectors for \code{\link[stats]{density}}.
+#' @name bandwidth_selectors
 
-get_standard_bw = function (kernel_str, start_str, support) {
-  if(kernel_str == "gcopula") {
-    bw = "JH"
-  } else if (start_str != "uniform") {
-    bw = "RHE"
-  } else {
-    bw ="nrd0"
-  }
-  bw
-}
-
-## Custom kernels.
-
-bw.JH = function(data, kernel_str, start_str, support) {
+#' @rdname bandwidth_selectors
+bw.JH = function(x, kernel = NULL, start = NULL, support = NULL) {
   if(kernel_str != "gcopula") {
     warning("The bandwidth selection method JH is made for the asymmetric kernel 'gcopula'.")
   }
@@ -57,23 +36,23 @@ bw.JH = function(data, kernel_str, start_str, support) {
   }
 
   ## The data is transfomed through qnorm, with singularities removed.
-  transformed_data = qnorm(data)
-  transformed_data = transformed_data[transformed_data != Inf & transformed_data != -Inf]
-  sigma = sd(transformed_data)
-  mu = mean(transformed_data)
-  n = length(transformed_data)
+  transformed_x = qnorm(x)
+  transformed_x = transformed_x[transformed_x != Inf & transformed_x != -Inf]
+  sigma = sd(transformed_x)
+  mu = mean(transformed_x)
+  n = length(transformed_x)
   min(sigma * (2 * mu^2 * sigma^2 + 3*(1 - sigma^2)^2)^(-1/5)*n^(-1/5), 0.5)
 }
 
-
-bw.RHE = function(data, kernel_str, start_str, support) {
+#' @rdname bandwidth_selectors
+bw.RHE = function(x, kernel = NULL, start = NULL, support = NULL) {
   assertthat::assert_that("EQL" %in% rownames(installed.packages()), msg =
-    "The bandwidth function 'bw.RHE' requires the package 'EQL' to work.")
+                            "The bandwidth function 'bw.RHE' requires the package 'EQL' to work.")
   max_degree = 5  # The maximum degree of the Hermite polynomials.
-  n <- length(data)
-  mu = mean(data)
-  sigma = sd(data)
-  z = (data - mu) / sigma
+  n <- length(x)
+  mu = mean(x)
+  sigma = sd(x)
+  z = (x - mu) / sigma
 
   ## Calculating the estimates of the robust Hermite polynomial coefficients.
   delta <- rep(0, max_degree)
@@ -88,3 +67,51 @@ bw.RHE = function(data, kernel_str, start_str, support) {
   return(bw)
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+#' Get bandwidth functions from string.
+#'
+#' @param bw a string specifying the density of interest.
+#' @return a bandwidth function.
+get_bw = function(bw) {
+  switch(bw,
+         "nrd0" = function(data, kernel, start, support) stats::bw.nrd0(data),
+         "nrd"  = function(data, kernel, start, support) stats::bw.nrd(data),
+         "ucv"  = function(data, kernel, start, support) stats::bw.ucv(data),
+         "bcv"  = function(data, kernel, start, support) stats::bw.bcv(data),
+         "SJ"   = function(data, kernel, start, support) stats::bw.SJ(data),
+         "JH"   = bw.JH,
+         "RHE"  = bw.RHE,
+         stop("The supplied 'bw' is no among the supported alternatives.")
+         )
+}
+
+
+#' Get a bandwidth string when 'bw' is unspecified.
+#'
+#' @param kernel_str a kernel string
+#' @param start_str a parametric start string.
+#' @param support the support.
+#' @return a bandwidth string.
+
+get_standard_bw = function (kernel_str, start_str, support) {
+  if(kernel_str == "gcopula") {
+    bw = "JH"
+  } else if (start_str != "uniform") {
+    bw = "RHE"
+  } else {
+    bw ="nrd0"
+  }
+  bw
+}

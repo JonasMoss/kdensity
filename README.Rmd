@@ -25,7 +25,7 @@ So the package has two main features: parametric starts and asymmetric kernels. 
 ## Example
 The data set `sunspot.month` is described at `R` site [here](https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/sunspot.month.html). This is a good example to showcase the usefulness of kernel density estimation with a parametric start, as it is supported on positive half-line. In such a case, traditional density estimators are prone to serious *boundary bias*. However, parametric starts allows us to circumvent this by using a pre-specified parametric density supported on the half-line, for instance the exponential, which clearly fits the data well.
 
-```{r gaussiankernelexp plot, echo = TRUE}
+```{r gaussiankernelexpplot, echo = TRUE}
 library("kdensity")
 data = sunspot.month[sunspot.month != 0]
 x = seq(0, 300, by = 0.5)
@@ -40,7 +40,7 @@ lines(x, dexp(x, 1/mean(data)), lwd = 2, lty = 3, col = "blue")
 
 As seen from the histogram, the `kdensity` estimator with an exponential start (red) fits better than `density` (black). But boundary bias is still visible, even in the red line, so let us try out the `gamma` kernel instrad. Notice the argument `start = "uniform"`, which states that the parametric start is *constant*. Using this argument reduces the density estimates to a classical kernel density estimate.
 
-```{r gammakernel plot, echo = TRUE}
+```{r gammakernelplot, echo = TRUE}
 library("kdensity")
 data = sunspot.month[sunspot.month != 0]
 x = seq(0, 300, by = 0.5)
@@ -54,7 +54,7 @@ lines(x, dexp(x, 1/mean(data)), lwd = 2, lty = 3, col = "blue")
 
 While this helped, the fit could certainly be better, as the density estimate is artificially pushed downwards at the boundary. So let us try a `gamma` kernel with an `exponential` start:
 
-```{r gammakernelexp plot, echo = TRUE}
+```{r gammakernelexpplot, echo = TRUE}
 library("kdensity")
 data = sunspot.month[sunspot.month != 0]
 x = seq(0, 300, by = 0.5)

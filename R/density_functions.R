@@ -20,19 +20,29 @@ get_start = function(start_str) {
     }
   }
 
-  switch(start_str,
-         uniform          = start_uniform,
-         normal           = start_normal,
-         gaussian         = start_normal,
-         gamma            = start_gamma,
-         exponential      = start_exponential,
-         inverse_gaussian = start_inverse_gaussian,
-         lognormal        = start_lognormal,
-         beta             = start_beta,
-         laplace          = start_laplace,
-         constant         = start_uniform,
-         stop(paste0("The supplied parametric start (",start_str,") is not implemented."))
-         )
+  parametric_start = switch(start_str,
+    uniform          = start_uniform,
+    normal           = start_normal,
+    gaussian         = start_normal,
+    gamma            = start_gamma,
+    exponential      = start_exponential,
+    inverse_gaussian = start_inverse_gaussian,
+    lognormal        = start_lognormal,
+    beta             = start_beta,
+    laplace          = start_laplace,
+    constant         = start_uniform
+  )
+
+  if(is.null(parametric_start)) {
+    if(exists(start_str)) {
+      parametric_start = get(start_str)
+    } else {
+      stop(paste0("The supplied parametric start (",start_str,") is not implemented."))
+    }
+  }
+
+  parametric_start
+
 }
 
 
@@ -48,7 +58,7 @@ start_normal = list(
     c(mean = mean(data),
       sd   = sd(data))
   },
-  support   = c(0, Inf)
+  support   = c(-Inf, Inf)
 )
 
 start_exponential = list(

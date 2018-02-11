@@ -87,16 +87,12 @@ plot_helper = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, pt
   args$x = range
 
   if(plot_start) {
-    kernel = attr(x, "kernel")
     start = attr(x, "start")
-    support = attr(x, "support")
 
     msg = "To use 'plot_start = TRUE', supply a parametric start that is a proper density."
     assertthat::assert_that(!is.null(start), start != "uniform", msg = msg)
 
-    kss_list = get_kernel_start_support(kernel, start, support)
-    start = kss_list$start
-    start_str = kss_list$start_str
+    start = get_start(start)
 
     parameters = attr(x, "estimates")
     parametric_start = start$density
@@ -133,6 +129,11 @@ print.kdensity <- function(obj, digits = NULL, ...)
 summary.kdensity <- function(obj, digits = NULL, ...)
 {
   parameters = attr(obj, "estimates")
+  params = NULL
+  if(length(parameters) > 0)
+  params = c("Parameter estimates:", "\n",
+  sapply(1:length(parameters), function(i) paste0(names(parameters)[i], ": ", formatC(parameters[i], digits), "\n")),
+  "\n")
   cat("\nCall: \n", deparse(attr(obj, "call")), "\n\n",
       "Data:        ", attr(obj, "data.name"), " (",attr(obj, "n"), " obs.)\n",
       "Bandwidth:   ", formatC(attr(obj, "bw"), digits = digits), " ('", attr(obj, "bw_str"), "')\n",
@@ -142,8 +143,6 @@ summary.kdensity <- function(obj, digits = NULL, ...)
       "Range:       (", formatC(attr(obj, "range")[1], digits), ", ", formatC(attr(obj, "range")[2], digits),   ")\n",
       "NAs in data: ", attr(obj, "has.na"), "\n",
       "Adjustment:  ", attr(obj, "adjust"), "\n\n",
-      "Parameter estimates:", "\n",
-      sapply(1:length(parameters), function(i) paste0(names(parameters)[i], ": ", formatC(parameters[i], digits), "\n")),
-      "\n",
+      params,
       sep = "")
 }

@@ -5,7 +5,7 @@
 \title{Helper function for the plot methods}
 \usage{
 plot_helper(x, range = NULL, plot_start = FALSE, zero_line = TRUE,
-  type = c("plot", "lines", "points"), ...)
+  ptype = c("plot", "lines", "points"), ...)
 }
 \arguments{
 \item{x}{a \code{kdensity} object.}
@@ -14,9 +14,9 @@ plot_helper(x, range = NULL, plot_start = FALSE, zero_line = TRUE,
 
 \item{plot_start}{logical; if \code{TRUE}, plots the parametric start instead of the kernel density estimate.}
 
-\item{type}{the kind of plot to make}
-
 \item{...}{further plotting parameters.}
+
+\item{type}{the kind of plot to make}
 }
 \value{
 None.

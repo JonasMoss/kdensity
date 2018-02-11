@@ -73,7 +73,7 @@ lines(density(data, adjust = 2), lwd = 2, lty = 1)
 lines(x, dexp(x, 1/mean(data)), lwd = 2, lty = 3, col = "blue")
 ```
 
-<img src="README_files/figure-gfm/gaussiankernelexp plot-1.png" width="750px" />
+<img src="README_files/figure-gfm/gaussiankernelexpplot-1.png" width="750px" />
 
 As seen from the histogram, the `kdensity` estimator with an exponential
 start (red) fits better than `density` (black). But boundary bias is
@@ -94,7 +94,7 @@ lines(kdensity(data, start = "uniform", kernel = "gamma", adjust = 1),
 lines(x, dexp(x, 1/mean(data)), lwd = 2, lty = 3, col = "blue")
 ```
 
-<img src="README_files/figure-gfm/gammakernel plot-1.png" width="750px" />
+<img src="README_files/figure-gfm/gammakernelplot-1.png" width="750px" />
 
 While this helped, the fit could certainly be better, as the density
 estimate is artificially pushed downwards at the boundary. So let us try
@@ -112,7 +112,7 @@ lines(kdensity(data, start = "exponential", kernel = "gamma", adjust = 1),
 lines(x, dexp(x, 1/mean(data)), lwd = 2, lty = 3, col = "blue")
 ```
 
-<img src="README_files/figure-gfm/gammakernelexp plot-1.png" width="750px" />
+<img src="README_files/figure-gfm/gammakernelexpplot-1.png" width="750px" />
 
 This fit is much better now. What’s more, it gives qualitatively
 different predictions about the probability of extremely many sunspots
