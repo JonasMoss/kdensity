@@ -14,18 +14,28 @@ knitr::opts_chunk$set(
 ```
 
 # kdensity <img src="man/figures/logo.png" align="right" width="247" height="70" />
-An `R` package for unidimensional density estimation with parametric starts and asymmetric kernels.
+An `R` package for univariate kernel density estimation with parametric starts and asymmetric kernels.
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(out.width='750px', dpi=200)
 ```
+
+## Overview
+kdensity is an implementation of univariate kernel density estimation with support for parametric starts and asymmetric kernels. Its main function is `kdensity`, which is has approximately the same syntax as `stats::density`. Its new functionality is:
+
+* `kdensity` has built-in support for many parametric starts, such as `normal` and `gamma`, but you can also supply your own. 
+*  In addition to support for asymmetric kernels ones such as `gcopula` and `gamma` kernels, the common symmetric ones are also supported. You can also supply your own kernels. 
+* A larger selection of choices for the bandwidth `bw`, again including an option to specify your own.
+* The returned value is callable: The density estimator returns a density function when called.
+
+A reason to use `kdensity` is to avoid *boundary bias* when estimating densities on the unit interval or the positive half-line. Asymmetric kernels such as `gamma` and `gcopula` are designed for this purpose. The support for parametric starts allows you to easily use a method that is often superior to ordinary kernel density estimation.
 
 ## Installation
 First you need to install the package `devtools` from `CRAN`. From inside `R`, use the following command.
 ```{r install, echo = TRUE, eval = FALSE}
 devtools::install_github("JonasMoss/kdensity")
 ```
-This installs the latest version of the package from GitHub. Call the `library` function and use it just like `stats:density` with additional arguments.
+This installs the latest version of the package from GitHub. Call the `library` function and use it just like `stats:density`, but with optional additional arguments.
 ```{r simpleuse, echo = TRUE, eval = FALSE}
 library("kdensity")
 plot(kdensity(mtcars$mpg, start = "normal"))
@@ -123,4 +133,11 @@ new_density = kdensity(data, start = "exponential")
 new_density(56.7)
 ```
 
+## References
+
+*  [Hjort, Nils Lid, and Ingrid K. Glad. "Nonparametric density estimation with a parametric start." The Annals of Statistics (1995): 882-904.](https://projecteuclid.org/euclid.aos/1176324627).
+
+*  [Jones, M. C., and D. A. Henderson. "Miscellanea kernel-type density estimation on the unit interval." Biometrika 94.4 (2007): 977-984.](https://academic.oup.com/biomet/article-abstract/94/4/977/246269). 
+
+* [Chen, Song Xi. "Probability density function estimation using gamma kernels." Annals of the Institute of Statistical Mathematics 52.3 (2000): 471-480.](https://link.springer.com/article/10.1023/A:1004165218295).
 
