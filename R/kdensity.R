@@ -59,6 +59,14 @@
 #' density estimation.
 #' @seealso The \code{stats} package function \code{\link[stats]{density}}. For
 #' bandwidth selection documentation, see \code{\link{bandwidth_seletor}}.
+#' @references
+#' Hjort, Nils Lid, and Ingrid K. Glad. "Nonparametric density estimation with a parametric start." The Annals of Statistics (1995): 882-904.
+#'
+#' Jones, M. C., and D. A. Henderson. "Miscellanea kernel-type density estimation on the unit interval." Biometrika 94.4 (2007): 977-984.
+#'
+#' Chen, Song Xi. "Probability density function estimation using gamma kernels." Annals of the Institute of Statistical Mathematics 52.3 (2000): 471-480.
+#'
+#' Silverman, Bernard W. Density estimation for statistics and data analysis. Vol. 26. CRC press, 1986.
 #' @examples
 #' ## Use gamma kernels to model positive data, the concentration of
 #' ## theophylline
