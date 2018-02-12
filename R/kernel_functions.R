@@ -19,6 +19,8 @@
 
 get_kernel = function(kernel_str) {
 
+  assertthat::assert_that(is.character(kernel_str))
+
   kernel = switch(kernel_str,
          gaussian     = kernel_gaussian,
          normal       = kernel_gaussian,
@@ -36,7 +38,8 @@ get_kernel = function(kernel_str) {
          gamma        = kernel_gamma,
          gamma_biased = kernel_gamma_biased
          )
-  if(is.null(kernel_str)) {
+
+  if(is.null(kernel)) {
     if(exists(kernel_str)) {
       kernel = get(kernel_str)
     } else {
@@ -45,6 +48,7 @@ get_kernel = function(kernel_str) {
   }
 
   kernel
+
 }
 
 ## This is the list of pre-defined kernels.

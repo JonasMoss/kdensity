@@ -77,18 +77,29 @@ bw.RHE = function(x, kernel = NULL, start = NULL, support = NULL) {
 #' @param bw a string specifying the density of interest.
 #' @return a bandwidth function.
 get_bw = function(bw) {
-  switch(bw,
+
+  assertthat::assert_that(is.character(bw))
+
+  final_bw = switch(bw,
          "nrd0" = function(data, kernel, start, support) stats::bw.nrd0(data),
          "nrd"  = function(data, kernel, start, support) stats::bw.nrd(data),
          "ucv"  = function(data, kernel, start, support) stats::bw.ucv(data),
          "bcv"  = function(data, kernel, start, support) stats::bw.bcv(data),
          "SJ"   = function(data, kernel, start, support) stats::bw.SJ(data),
          "JH"   = bw.JH,
-         "RHE"  = bw.RHE,
-         stop("The supplied 'bw' is no among the supported alternatives.")
+         "RHE"  = bw.RHE
          )
-}
 
+  if(is.null(final_bw)) {
+    if(exists(bw)) {
+      final_bw = get(bw)
+    } else {
+      stop("The supplied 'bw' is no among the supported alternatives.")
+    }
+  }
+
+  final_bw
+}
 
 #' Get a bandwidth string when 'bw' is unspecified.
 #'

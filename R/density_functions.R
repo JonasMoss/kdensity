@@ -14,6 +14,8 @@
 
 get_start = function(start_str) {
 
+  assertthat::assert_that(is.character(start_str))
+
   if(start_str == "start_inverse_gaussian") {
     if(!("statmod" %in% rownames(installed.packages()))) {
       stop("The option 'inverse_gaussian' requires the package 'statmod' to work.")
