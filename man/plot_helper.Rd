@@ -2,7 +2,7 @@
 % Please edit documentation in R/generics.R
 \name{plot_helper}
 \alias{plot_helper}
-\title{Helper function for the plot methods}
+\title{Helper function for the plot methods.}
 \usage{
 plot_helper(x, range = NULL, plot_start = FALSE, zero_line = TRUE,
   ptype = c("plot", "lines", "points"), ...)
@@ -22,5 +22,6 @@ plot_helper(x, range = NULL, plot_start = FALSE, zero_line = TRUE,
 None.
 }
 \description{
-Helper function for the plot methods
+A helper function for the plot methods that does most of the work under
+the hood.
 }

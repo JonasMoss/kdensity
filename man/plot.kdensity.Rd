@@ -25,8 +25,8 @@ None.
 The \code{plot} method for \code{kdensity} objects.
 }
 \examples{
-## Using the data set "precip" to eye-ball the similarity between:
-## A kernel fit, a parametric fit, and a kernel with parametric start fit.
+## Using the data set "precip" to eye-ball the similarity between
+## a kernel fit, a parametric fit, and a kernel with parametric start fit.
 kde_gamma = kdensity(precip, kernel = "gaussian", start = "gamma")
 kde = kdensity(precip, kernel = "gaussian", start = "uniform")
 
