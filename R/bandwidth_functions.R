@@ -72,19 +72,6 @@ bw.RHE = function(x, kernel = NULL, start = NULL, support = NULL) {
   return(bw)
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 #' Get bandwidth functions from string.
 #'
 #' @param bw a string specifying the density of interest.
