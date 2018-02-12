@@ -1,10 +1,8 @@
 ### ===========================================================================
 ### GENERICS
-### This package shoud support the following generics:
-### -- plot, points, lines: Should work through the same interface.
-### -- summary, print: Should be similar to 'density'
-###
-### Functions here are exported; the only other function is 'kdensity' itself.
+### This package supports the following generics:
+### -- plot, points, lines
+### -- summary, print
 ### ===========================================================================
 
 #' Supplies a plotting range from a kdensity object.
@@ -36,8 +34,8 @@ get_range = function(obj) {
 #' @return None.
 #' @seealso \code{\link{kdensity}}
 #' @examples
-#' ## Using the data set "precip" to eye-ball the similarity between:
-#' ## A kernel fit, a parametric fit, and a kernel with parametric start fit.
+#' ## Using the data set "precip" to eye-ball the similarity between
+#' ## a kernel fit, a parametric fit, and a kernel with parametric start fit.
 #' kde_gamma = kdensity(precip, kernel = "gaussian", start = "gamma")
 #' kde = kdensity(precip, kernel = "gaussian", start = "uniform")
 #'
@@ -61,7 +59,10 @@ points.kdensity = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE
   plot_helper(x, range, plot_start, zero_line, ptype = "points", type = "p", ...)
 }
 
-#' Helper function for the plot methods
+#' Helper function for the plot methods.
+#'
+#' A helper function for the plot methods that does most of the work under
+#' the hood.
 #'
 #' @inheritParams plot.kdensity
 #' @param type the kind of plot to make
