@@ -112,41 +112,43 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
   ## start itself.
 
   if(!is.null(bw)) {
-    if(bw == Inf) {
+    if(is.numeric(bw)) {
+      if(bw == Inf) {
 
-      if(!is.list(start)) {
-        msg = "bw = Inf does not work with a uniform start."
-        assertthat::assert_that(!is.null(start), start != "uniform", msg = msg)
+        if(!is.list(start)) {
+          msg = "bw = Inf does not work with a uniform start."
+          assertthat::assert_that(!is.null(start), start != "uniform", msg = msg)
+        }
+
+        kss_list = get_kernel_start_support(NULL, start, NULL)
+        start_str = ifelse(!is.list(start), kss_list$start_str, deparse(substitute(start)))
+        start = kss_list$start
+
+        parameters = start$estimator(x)
+        parametric_start = start$density
+
+        return_function = function(y) {
+          sapply(y, function(y) {
+            do.call(parametric_start, as.list(c("x" = y, parameters)))
+          })
+        }
+
+        class(return_function) = "kdensity"
+        attr(return_function, "bw_str")    = Inf
+        attr(return_function, "bw")        = Inf
+        attr(return_function, "kernel")    = "none"
+        attr(return_function, "start")     = start_str
+        attr(return_function, "support")   = start$support
+        attr(return_function, "adjust")    = 1
+        attr(return_function, "n")         = length(x)
+        attr(return_function, "h")         = Inf
+        attr(return_function, "data.name") = deparse(substitute(x))
+        attr(return_function, "has.na")    = any(is.na(x))
+        attr(return_function, "call")      = match.call()
+        attr(return_function, "range")     = c(min(x), max(x))
+        attr(return_function, "estimates") = parameters
+        return(return_function)
       }
-
-      kss_list = get_kernel_start_support(NULL, start, NULL)
-      start_str = ifelse(!is.list(start), kss_list$start_str, deparse(substitute(start)))
-      start = kss_list$start
-
-      parameters = start$estimator(x)
-      parametric_start = start$density
-
-      return_function = function(y) {
-        sapply(y, function(y) {
-          do.call(parametric_start, as.list(c("x" = y, parameters)))
-        })
-      }
-
-      class(return_function) = "kdensity"
-      attr(return_function, "bw_str")    = Inf
-      attr(return_function, "bw")        = Inf
-      attr(return_function, "kernel")    = "none"
-      attr(return_function, "start")     = start_str
-      attr(return_function, "support")   = start$support
-      attr(return_function, "adjust")    = 1
-      attr(return_function, "n")         = length(x)
-      attr(return_function, "h")         = Inf
-      attr(return_function, "data.name") = deparse(substitute(x))
-      attr(return_function, "has.na")    = any(is.na(x))
-      attr(return_function, "call")      = match.call()
-      attr(return_function, "range")     = c(min(x), max(x))
-      attr(return_function, "estimates") = parameters
-      return(return_function)
     }
   }
 
