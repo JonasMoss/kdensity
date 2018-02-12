@@ -2,7 +2,7 @@
 % Please edit documentation in R/custom_maximum_likelihood.R
 \name{mlgamma}
 \alias{mlgamma}
-\title{Fast maximum likelihood for the gamma distribution.}
+\title{Fast maximum likelihood for the gamma distribution}
 \usage{
 mlgamma(x, rel_eps = 10^-10, max_iter = 100)
 }
@@ -14,11 +14,11 @@ mlgamma(x, rel_eps = 10^-10, max_iter = 100)
 \item{max_iter}{Maximal number of Newton-Raphson iteratons.}
 }
 \value{
-a vector of two parameters, \code{shape} and \code{rate}.
+A vector of two parameters, \code{shape} and \code{rate}.
 }
 \description{
-Fast maximum likelihood for the gamma distribution.
+Fast maximum likelihood for the gamma distribution
 }
-\details{
-Implemented following wikipedia.
+\references{
+Choi, S. C, and R. Wette. "Maximum likelihood estimation of the parameters of the gamma distribution and their bias." Technometrics 11.4 (1969): 683-690.
 }

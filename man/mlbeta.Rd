@@ -20,6 +20,7 @@ a vector of two parameters, shape1 and shape2.
 Fast maximum likelihood for the beta distribution.
 }
 \details{
-The option "none" is fastest at the moment. The starting value
-is good.
+The option "none" is fastest at the moment. The algorithm is
+a straight forward implementation of maximum likelihood for beta using
+the sufficient statistics.
 }

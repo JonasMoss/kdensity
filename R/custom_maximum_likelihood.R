@@ -4,8 +4,9 @@
 #' @param start Optional start point for the \code{nlm} function.
 #' @param type Should we use a precomputed gradient function or Hessian?
 #' @return a vector of two parameters, shape1 and shape2.
-#' @details The option "none" is fastest at the moment. The starting value
-#' is good.
+#' @details The option "none" is fastest at the moment. The algorithm is
+#' a straight forward implementation of maximum likelihood for beta using
+#' the sufficient statistics.
 
 
 mlbeta = function(x, start = NULL, type = c("none", "gradient", "full")) {
@@ -47,13 +48,13 @@ mlbeta = function(x, start = NULL, type = c("none", "gradient", "full")) {
 
 }
 
-#' Fast maximum likelihood for the gamma distribution.
+#' Fast maximum likelihood for the gamma distribution
 #'
 #' @param x The data, contained in c(0, Inf)
 #' @param rel_eps Relative epsilon comparison criterion.
 #' @param max_iter Maximal number of Newton-Raphson iteratons.
-#' @return a vector of two parameters, \code{shape} and \code{rate}.
-#' @details Implemented following wikipedia.
+#' @return A vector of two parameters, \code{shape} and \code{rate}.
+#' @references Choi, S. C, and R. Wette. "Maximum likelihood estimation of the parameters of the gamma distribution and their bias." Technometrics 11.4 (1969): 683-690.
 
 
 mlgamma = function(x, rel_eps = 10^-10, max_iter = 100) {
