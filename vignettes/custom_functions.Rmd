@@ -1,0 +1,138 @@
+---
+title: "Make custom kernels, parametric starts, and bandwidth selectors"
+author: "Jonas Moss"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
+
+```{r}
+library("kdensity")
+```
+
+- Never uses retina figures
+- Has a smaller default figure size
+- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
+
+## Parametric starts
+
+You must supply two functions and one vector to `kdensity` in order to use a custom parametric start. The first is a `density` function, the second is a function that estimates the named parameters of the density, and the third is the support of the density. 
+
+```{r}
+normal = list(
+  density = dnorm,
+  
+  estimator = function(data) {
+    c(mean  = mean(data),
+      sd    = sd(data))
+  },
+  
+  support   = c(-Inf, Inf)
+)
+```
+
+The density function must take the data as its first argument, and all its parameters must be named. In addition, the function `estimator` must return a vector containing named parameters that partially match the parameter names of the density function. For instance, the arguments of `dnorm` are `x, mean, sd, log`, where `log = TRUE` means that the logarithm of the density is returned. Since `estimator` returns a named vector with names `mean` and `sd`, the names are completely matched. 
+
+The estimator function doesn't need to be simple, as the next example shows.
+
+### Example: A skew hyperbolic t-distribution start
+
+The built-in data set `LakeHuron` contains annual measurements of the water level of Lake Huron from 1875 to 1972, measured in feet. We will take a look at the distribution of differences in water level across two consecutive years. Since the data are supported on the real line and there is no good reason to assume anything else, we will use a normal start.
+
+```{r, fig2, fig.height = 5, fig.width = 5, fig.align = "center"}
+LH = diff(LakeHuron)
+kde_normal = kdensity(LH, start = "normal")
+plot(kde_normal, lwd = 2, col = "black",
+     main = "Lake Huron differences")
+```
+
+The density is clearly non-normal. Still, it looks fairly regular, and it should be possible to model it parametrically with some success. One of many parametric families of distributions more flexible than the normal family is the *skew hyperbolic t-distribution*, which is implemented in the `R` package `SkewHyperbolic`. This package contains the density function `dskewhyp` and a maximum likelihood estimating function in `skewhypFit`. Using these functions, we make the following list: 
+
+```{r}
+skew_hyperbolic = list(
+  density   = SkewHyperbolic::dskewhyp,
+  
+  estimator = function(x) {
+    SkewHyperbolic::skewhypFit(x, printOut = FALSE)$param
+  },
+  
+  support   = c(-Inf, Inf)
+)
+```
+
+Now we are ready to run `kdensity` and do some plotting. Note the `plot` option `plot_start = TRUE`. With this option on, the estimated parametric density is plotted without any non-parametric correction.
+
+```{r, fig.height = 5, fig.width = 5, fig.align = "center"}
+kde_skewhyp = kdensity(LH, start = skew_hyperbolic)
+plot(kde_skewhyp, lwd = 2, col = "blue",
+     main = "Lake Huron differences")
+lines(kde_normal)
+lines(kde_skewhyp, plot_start = TRUE, lty = 2, lwd = 2)
+rug(LH)
+```
+
+Since all the curves are in agreement, we are justified in using the skew hyperbolic t-distribution for further analysis.
+
+## Kernels
+
+If you want to make custom kernel, you will need to supply the kernel function, with arguments `y, x, h`. Here `x` is the random data you put into `kdensity`, `h` is the final bandwidth, and `y` is the point you want to evaluate at. The kernel is called as `1/h*kernel(y, x, h)`. In addition to the kernel function, you must supply a `support` argument, which states the domain of definition of the kernel. For instance, the `gcopula` kernel is defined on `c(0, 1)`. In addition, you can optionally supply the standard deviation of the kernel. This is only used for symmetric kernels, and is useful since it makes them comparable. For example, the implementation of the `gaussian` kernel is
+
+```{r}
+gaussian = list(
+  kernel  = function(y, x, h) dnorm((y-x)/h),
+  sd      = 1,
+  support = c(-Inf, Inf))
+```
+
+Custom kernels can be complicated, and don't have to be symmetric, as the next example shows.
+### Example: A skew hyperbolic t-distribution start
+## Figures
+
+The figure sizes have been customised so that you can easily put two images side-by-side. 
+
+```{r, fig.show='hold'}
+plot(1:10)
+plot(10:1)
+```
+
+You can enable figure captions by `fig_caption: yes` in YAML:
+
+    output:
+      rmarkdown::html_vignette:
+        fig_caption: yes
+
+Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+
+## More Examples
+
+You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+
+```{r, echo=FALSE, results='asis'}
+knitr::kable(head(mtcars, 10))
+```
+
+Also a quote using `>`:
+
+> "He who gives up [code] safety for [code] speed deserves neither."
+([via](https://twitter.com/hadleywickham/status/504368538874703872))
+
+
+Definition
+  : a statement of the exact meaning of a word, especially in a dictionary.
+
+List 
+  : a number of connected items or names written or printed consecutively, 
+    typically one below the other. 
+  : barriers enclosing an area for a jousting tournament.

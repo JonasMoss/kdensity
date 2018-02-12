@@ -8,32 +8,32 @@ kdensity(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
   support = NULL, na.rm = FALSE, normalized = TRUE)
 }
 \arguments{
-\item{x}{the supplied data.}
+\item{x}{Numeric vector; the data.}
 
-\item{bw}{a bandwidth function. Can be either a string, a custom made
+\item{bw}{A bandwidth function. Can be either a string, a custom made
 function, or a double.}
 
-\item{adjust}{an adjustment constant, so that \code{h = adjust*bw*sd}, where \code{sd}
+\item{adjust}{An adjustment constant, so that \code{h = adjust*bw*sd}, where \code{sd}
 varies acccording to the chosen kernel.}
 
-\item{kernel}{the kernel function. Can be a string or a custom made list
+\item{kernel}{The kernel function. Can be a string or a custom made list
 containg a function \code{kernel}, the standard deviation of the kernel,
 \code{sd}, and domain of definition for the kernel, \code{support}.}
 
-\item{start}{choice of parametric start. Can be a string or be supplied via a l
+\item{start}{Choice of parametric start. Can be a string or be supplied via a l
 ist containing a \code{density} function, an \code{estimator} function,
 and a \code{support} tuple.}
 
-\item{support}{the support of the data. Must be compatible with the supplied
+\item{support}{The support of the data. Must be compatible with the supplied
 \code{x} and the supplied \code{start} and \code{kernel}. Is used to find the
 normalization constant, see \code{normalized}.}
 
-\item{na.rm}{logical; if \code{TRUE}, \code{NA}s will be removed from \code{x}.}
+\item{na.rm}{Logical; if \code{TRUE}, \code{NA}s will be removed from \code{x}.}
 
-\item{normalized}{logical; if \code{TRUE}, the density is normalized.}
+\item{normalized}{Logical; if \code{TRUE}, the density is normalized.}
 }
 \value{
-\code{kdensity} returns a function object of \code{\link[base]{class}} "kdensity".
+\code{kdensity} Returns a function object of \code{\link[base]{class}} "kdensity".
 }
 \description{
 \code{kdensity} computes a kernel density for univariate data. It supports
@@ -44,38 +44,48 @@ asymmetric kernels and parametric starts through the \code{kernel} and
 If \code{normalized} is \code{FALSE} and \code{start != "uniform"}, the resulting
 density will not integrate to 1 in general.
 
-\strong{Bandwidth functions}: Bandwidth functions can either be specified by a string,
-be user made, or be a fixed double. If the argument is a string, it must fully match
-one of the implemented bandwidt functions. From the package \code{stats}, the bandwidth
-functions are \code{nrd0}, \code{nrd}, \code{bcv}, \code{ucv}, and \code{SJ} are avaiable,
-see \code{\link[stats]{bandwidth}}. They intended for use with a 'uniform' start and the 'gaussian' kernel, but
-work well for the other symmetric kernels as well. Implemented bandwidth functions for asymmetric
-kernels are: \code{JH} for the Gaussian copula estimator. For parametric starts, \code{RHE} is an
-Hermite expansion reference rule. Bandwidth functions for asymmetric kernels and parametric
-starts are documented in \code{\link{bandwidth_functions}}.
+  \strong{Bandwidth functions}: Bandwidth functions can either be specified by a string,
+  be user made, or be a fixed double. If the argument is a string, it must fully match
+  one of the implemented bandwidt functions. From the package \code{stats}, the bandwidth
+  functions are \code{nrd0}, \code{nrd}, \code{bcv}, \code{ucv}, and \code{SJ} are avaiable,
+  see \code{\link[stats]{bandwidth}}. They intended for use with a 'uniform' start and the 'gaussian' kernel, but
+  work well for the other symmetric kernels as well. Implemented bandwidth functions for asymmetric
+  kernels are: \code{JH} for the Gaussian copula estimator. For parametric starts, \code{RHE} is an
+  Hermite expansion reference rule. Bandwidth functions for asymmetric kernels and parametric
+  starts are documented in \code{\link{bandwidth_functions}}.
 
-\strong{Kernel functions}: Kernel functions can either be specified by a string or
-be user made. If the argument is a string, it must fully match one of the implemented
-kernels. Available symmetric kernels are \code{gaussian} (or \code{normal}), \code{epanechnikov},
-\code{rectangular} (or \code{uniform}), \code{triangular}, \code{biweight}, \code{triweight},
-\code{tricube}, \code{cosine}, \code{optcosine}, and \code{laplace}. See \code{\link[stats]{density}}.
+  \strong{Kernel functions}: Kernel functions can either be specified by a string or
+  be user made. If the argument is a string, it must fully match one of the implemented
+  kernels. Available symmetric kernels are \code{gaussian} (or \code{normal}), \code{epanechnikov},
+  \code{rectangular} (or \code{uniform}), \code{triangular}, \code{biweight}, \code{triweight},
+  \code{tricube}, \code{cosine}, \code{optcosine}, and \code{laplace}.
+  See \code{\link[stats]{density}} for more details.
 
-The implemented asymmetric kernels are:
-\itemize{
-  \item \code{gcopula}. The Gaussian copula KDE, used for data on the unit
-   interval. Described in Jones & Henderswon.
-  \item \code{gamma} and \code{gamma_biased}. Gamma kernels for data on the
-  positive half-line, \code{c(0, Inf)}. They are described in Chen.
+ The implemented asymmetric kernels are:
+  \itemize{
+    \item \code{gcopula}. The Gaussian copula KDE, used for data on the unit
+     interval. Described in Jones & Henderswon.
+    \item \code{gamma} and \code{gamma_biased}. Gamma kernels for data on the
+    positive half-line, \code{c(0, Inf)}. They are described in Chen.
+  }
+
+  \strong{Parametric starts}: The following parametric starts are supported:
+  \code{uniform} (or \code{constant}), \code{normal}, \code{gamma},
+  \code{exponential}, \code{inverse_gaussian}, \code{lognormal}, \code{beta},
+  and \code{laplace}. Their parameters are estimated by maximum likelihood.
+  The default value is \code{uniform}, which corresponds to ordinary kernel
+  density estimation.
 }
+\references{
+Hjort, Nils Lid, and Ingrid K. Glad. "Nonparametric density estimation with a parametric start." The Annals of Statistics (1995): 882-904.
 
-\strong{Parametric starts}: The following parametric starts are supported:
-\code{uniform} (or \code{constant}), \code{normal}, \code{gamma},
-\code{exponential}, \code{inverse_gaussian}, \code{lognormal}, \code{beta},
-and \code{laplace}. Their parameters are estimated by maximum likelihood.
-The default value is \code{uniform}, which corresponds to ordinary kernel
-density estimation.
-}
-\examples{
+  Jones, M. C., and D. A. Henderson. "Miscellanea kernel-type density estimation on the unit interval." Biometrika 94.4 (2007): 977-984.
+
+  Chen, Song Xi. "Probability density function estimation using gamma kernels." Annals of the Institute of Statistical Mathematics 52.3 (2000): 471-480.
+
+  Silverman, Bernard W. Density estimation for statistics and data analysis. Vol. 26. CRC press, 1986.
+
+ @examples
 ## Use gamma kernels to model positive data, the concentration of
 ## theophylline
 
@@ -104,16 +114,7 @@ plot(kde, lwd = 2, col = "blue",
 lines(kde, plot_start = TRUE, lty = 2, lwd = 2) # Plots the skew hyperbolic density.
 rug(diff(LakeHuron))
 }
-\references{
-Hjort, Nils Lid, and Ingrid K. Glad. "Nonparametric density estimation with a parametric start." The Annals of Statistics (1995): 882-904.
-
-Jones, M. C., and D. A. Henderson. "Miscellanea kernel-type density estimation on the unit interval." Biometrika 94.4 (2007): 977-984.
-
-Chen, Song Xi. "Probability density function estimation using gamma kernels." Annals of the Institute of Statistical Mathematics 52.3 (2000): 471-480.
-
-Silverman, Bernard W. Density estimation for statistics and data analysis. Vol. 26. CRC press, 1986.
-}
 \seealso{
 The \code{stats} package function \code{\link[stats]{density}}. For
-bandwidth selection documentation, see \code{\link{bandwidth_seletor}}.
+  bandwidth selection documentation, see \code{\link{bandwidth_seletor}}.
 }
