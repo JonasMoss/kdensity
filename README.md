@@ -1,6 +1,10 @@
-kdensity: Kernel density estimation with parametric starts and
-asymmetric kernels
-================
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+# kdensity <img src="man/figures/logo.png" align="right" width="247" height="70" />
+
+An `R` package for unidimensional density estimation with parametric
+starts and asymmetric kernels.
 
 ## Installation
 
@@ -186,6 +190,5 @@ Moreover, `lines` and `points` does as well. Since the return value of
 ``` r
 new_density = kdensity(data, start = "exponential")
 new_density(56.7)
+#> [1] 0.008375948
 ```
-
-    ## [1] 0.008375948

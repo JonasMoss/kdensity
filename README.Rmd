@@ -1,8 +1,20 @@
 ---
-title: 'kdensity: Kernel density estimation with parametric starts and asymmetric kernels'
-output: github_document
+output:
+  github_document:
+    html_preview: true
 ---
 
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# kdensity <img src="man/figures/logo.png" align="right" width="247" height="70" />
+An `R` package for unidimensional density estimation with parametric starts and asymmetric kernels.
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(out.width='750px', dpi=200)
