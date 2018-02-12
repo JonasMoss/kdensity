@@ -2,7 +2,25 @@ kdensity: Kernel density estimation with parametric starts and
 asymmetric kernels
 ================
 
-## Introduction
+## Installation
+
+First you need to install the package `devtools` from `CRAN`. From
+inside `R`, use the following command.
+
+``` r
+devtools::install_github("JonasMoss/kdensity")
+```
+
+This installs the latest version of the package from GitHub. Call the
+`library` function and use it just like `stats:density` with additional
+arguments.
+
+``` r
+library("kdensity")
+plot(kdensity(mtcars$mpg, start = "normal"))
+```
+
+## Description
 
 Kernel density estimation with a *parametric start* was introduced by
 Nils Lid Hjort and Ingrid Glad in their 1995 paper [Nonparametric
@@ -45,8 +63,7 @@ So the package has two main features: parametric starts and asymmetric
 kernels. The features can be combined to make asymmetric kernel
 densities estimators with parametric starts, see the example below. The
 package contains only one function, `kdensity`, in addition to the
-generics `plot`, `points`, `lines`, `summary`, and `print`. It’s not
-completely documentet yet, so stay tuned for that.
+generics `plot`, `points`, `lines`, `summary`, and `print`.
 
 ## Example
 
@@ -172,15 +189,3 @@ new_density(56.7)
 ```
 
     ## [1] 0.008375948
-
-## Installation
-
-First you need to install the package `devtools` from `CRAN`. From
-inside `R`, use the following command.
-
-``` r
-devtools::install_github("JonasMoss/kdensity")
-```
-
-This installs the latest version of the package from GitHub. Enjoy, and
-please feel compelled to e-mail us suggestions and bug reports.

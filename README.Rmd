@@ -8,7 +8,18 @@ knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(out.width='750px', dpi=200)
 ```
 
-## Introduction
+## Installation
+First you need to install the package `devtools` from `CRAN`. From inside `R`, use the following command.
+```{r install, echo = TRUE, eval = FALSE}
+devtools::install_github("JonasMoss/kdensity")
+```
+This installs the latest version of the package from GitHub. Call the `library` function and use it just like `stats:density` with additional arguments.
+```{r simpleuse, echo = TRUE, eval = FALSE}
+library("kdensity")
+plot(kdensity(mtcars$mpg, start = "normal"))
+```
+
+## Description
 
 Kernel density estimation with a *parametric start* was introduced by Nils Lid Hjort and Ingrid Glad in their 1995 paper [Nonparametric Density Estimation with a Parametric Start](https://projecteuclid.org/euclid.aos/1176324627). The idea is to start out with a parametric density before you do your kernel density estimation, so that your actual kernel density estimation will be a correction to the original parametric estimate. Why is this a good idea? Because the resulting estimator will be better than an ordinary kernel density estimator whenever the true density is close to your suggestion. And the estimator can be superior to the ordinary kernal density estimator even when the suggestion is pretty far off.
 
@@ -20,7 +31,7 @@ In addition to parametric starts, the package implements some *asymmetric kernel
 
 * Song Xi Chen's two *gamma kernels* from [Probability Density Function Estimation Using Gamma Kernels (2000)](https://link.springer.com/article/10.1023/A:1004165218295). This is used for data supported on the positive half-line. These kernels are called `gamma` and `gamma_biased`.
 
-So the package has two main features: parametric starts and asymmetric kernels. The features can be combined to make asymmetric kernel densities estimators with parametric starts, see the example below. The package contains only one function, `kdensity`, in addition to the generics `plot`, `points`, `lines`, `summary`, and `print`. It's not completely documentet yet, so stay tuned for that.
+So the package has two main features: parametric starts and asymmetric kernels. The features can be combined to make asymmetric kernel densities estimators with parametric starts, see the example below. The package contains only one function, `kdensity`, in addition to the generics `plot`, `points`, `lines`, `summary`, and `print`. 
 
 ## Example
 The data set `sunspot.month` is described at `R` site [here](https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/sunspot.month.html). This is a good example to showcase the usefulness of kernel density estimation with a parametric start, as it is supported on positive half-line. In such a case, traditional density estimators are prone to serious *boundary bias*. However, parametric starts allows us to circumvent this by using a pre-specified parametric density supported on the half-line, for instance the exponential, which clearly fits the data well.
@@ -100,9 +111,4 @@ new_density = kdensity(data, start = "exponential")
 new_density(56.7)
 ```
 
-## Installation
-First you need to install the package `devtools` from `CRAN`. From inside `R`, use the following command.
-```{r install, echo = TRUE, eval = FALSE}
-devtools::install_github("JonasMoss/kdensity")
-```
-This installs the latest version of the package from GitHub. Enjoy, and please feel compelled to e-mail us suggestions and bug reports.
+
