@@ -37,6 +37,11 @@ Bandwidth functions for parametric starts and asymmetric kernels currently inclu
 In addition to these,\code{kdensity} supports the bandwidth functions described in
 \code{\link[stats]{bandwidth}}.
 }
+\references{
+Hjort, Nils Lid, and Ingrid K. Glad. "Nonparametric density estimation with a parametric start." The Annals of Statistics (1995): 882-904.
+
+Jones, M. C., and D. A. Henderson. "Miscellanea kernel-type density estimation on the unit interval." Biometrika 94.4 (2007): 977-984.
+}
 \seealso{
 \code{\link{kdensity}}, \code{\link[stats]{bandwidth}} for the
 bandwidth selectors for \code{\link[stats]{density}}.
