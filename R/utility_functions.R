@@ -19,13 +19,13 @@
 recycle = function(..., prototype) {
 
   dots = list(...)
-  arg_names = tail(sapply(as.list(match.call()), function(x) as.character(x)), -1)
+  arg_names = utils::tail(sapply(as.list(match.call()), function(x) as.character(x)), -1)
 
   if(missing(prototype)) {
     names(dots) = names(arg_names)
     max_length = max(sapply(dots, length))
   } else {
-    arg_names = head(names(arg_names), -1)
+    arg_names = utils::head(names(arg_names), -1)
 
     ## The rules work as follows: If it is a name, check the supplied list
     ## first. If itsn't there, use ordinary scoping to check. If it is a
