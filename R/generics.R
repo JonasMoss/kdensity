@@ -5,6 +5,11 @@
 ### -- summary, print
 ### ===========================================================================
 
+#' @export
+`$.kdensity` = function(x, attr) {
+  attr(x, attr)
+}
+
 #' Supplies a plotting range from a kdensity object.
 #'
 #' @param obj a kdensity object
@@ -29,7 +34,7 @@ get_range = function(obj) {
 #' @param x a \code{kdensity} object.
 #' @param range range of x values.
 #' @param plot_start logical; if \code{TRUE}, plots the parametric start instead of the kernel density estimate.
-#' @param zero_lines logical; if \code{TRUE}, add a base line at \code{y = 0}.
+#' @param zero_line logical; if \code{TRUE}, add a base line at \code{y = 0}.
 #' @param ... further plotting parameters.
 #' @return None.
 #' @seealso \code{\link{kdensity}}
@@ -64,8 +69,12 @@ points.kdensity = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE
 #' A helper function for the plot methods that does most of the work under
 #' the hood.
 #'
-#' @inheritParams plot.kdensity
-#' @param type the kind of plot to make
+#' @param x A \code{kdensity} object.
+#' @param range An optional range vector; like \code{x} in \code{plot.default}.
+#' @param plot_start Logical; if \code{TRUE}, plots the parametric start only.
+#' @param zero_line Logical; if \code{TRUE}, adds a line at \code{y = 0}.
+#' @param ptype The kind of plot to make
+#' @param ... Passed to plot.default.
 #' @return None.
 
 plot_helper = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ptype = c("plot", "lines", "points"), ...) {
@@ -106,44 +115,46 @@ plot_helper = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, pt
   }
 
   switch(ptype,
-         plot   = do.call(plot, args),
-         lines  = do.call(lines, args),
-         points = do.call(points, args))
+         plot   = do.call(graphics::plot, args),
+         lines  = do.call(graphics::lines, args),
+         points = do.call(graphics::points, args))
 
-  if(zero_line) abline(h = 0, lwd = 0.1, col = "gray")
+  if(zero_line) graphics::abline(h = 0, lwd = 0.1, col = "gray")
 
 }
 
 #' @export
-print.kdensity <- function(obj, digits = NULL, ...)
+print.kdensity <- function(x, ...)
 {
-  cat("\nCall:\n", deparse(attr(obj, "call")), "\n\n",
-      "Data:      ", attr(obj, "data.name"), " (",attr(obj, "n"), " obs.)\n",
-      "Bandwidth: ", formatC(attr(obj, "bw"), digits = digits), " ('", attr(obj, "bw_str"), "')\n",
-      "Support:   (", attr(obj, "support")[1], ", ", attr(obj, "support")[2],   ")\n",
-      "Kernel:    ", attr(obj, "kernel"), "\n",
-      "Start:     ", attr(obj, "start"), "\n\n",
+  digits = list(...)$digits
+  cat("\nCall:\n", deparse(attr(x, "call")), "\n\n",
+      "Data:      ", attr(x, "data.name"), " (",attr(x, "n"), " obs.)\n",
+      "Bandwidth: ", formatC(attr(x, "bw"), digits = digits), " ('", attr(x, "bw_str"), "')\n",
+      "Support:   (", attr(x, "support")[1], ", ", attr(x, "support")[2],   ")\n",
+      "Kernel:    ", attr(x, "kernel"), "\n",
+      "Start:     ", attr(x, "start"), "\n\n",
       sep = "")
 }
 
 #' @export
-summary.kdensity <- function(obj, digits = NULL, ...)
+summary.kdensity <- function(object, ...)
 {
-  parameters = attr(obj, "estimates")
+  digits = list(...)$digits
+  parameters = attr(object, "estimates")
   params = NULL
   if(length(parameters) > 0)
   params = c("Parameter estimates:", "\n",
   sapply(1:length(parameters), function(i) paste0(names(parameters)[i], ": ", formatC(parameters[i], digits), "\n")),
   "\n")
-  cat("\nCall: \n", deparse(attr(obj, "call")), "\n\n",
-      "Data:        ", attr(obj, "data.name"), " (",attr(obj, "n"), " obs.)\n",
-      "Bandwidth:   ", formatC(attr(obj, "bw"), digits = digits), " ('", attr(obj, "bw_str"), "')\n",
-      "Support:     (", attr(obj, "support")[1], ", ", attr(obj, "support")[2],   ")\n",
-      "Kernel:      ", attr(obj, "kernel"), "\n",
-      "Start:       ", attr(obj, "start"), "\n",
-      "Range:       (", formatC(attr(obj, "range")[1], digits), ", ", formatC(attr(obj, "range")[2], digits),   ")\n",
-      "NAs in data: ", attr(obj, "has.na"), "\n",
-      "Adjustment:  ", attr(obj, "adjust"), "\n\n",
+  cat("\nCall: \n", deparse(attr(object, "call")), "\n\n",
+      "Data:        ", attr(object, "data.name"), " (",attr(object, "n"), " obs.)\n",
+      "Bandwidth:   ", formatC(attr(object, "bw"), digits = digits), " ('", attr(object, "bw_str"), "')\n",
+      "Support:     (", attr(object, "support")[1], ", ", attr(object, "support")[2],   ")\n",
+      "Kernel:      ", attr(object, "kernel"), "\n",
+      "Start:       ", attr(object, "start"), "\n",
+      "Range:       (", formatC(attr(object, "range")[1], digits), ", ", formatC(attr(object, "range")[2], digits),   ")\n",
+      "NAs in data: ", attr(object, "has.na"), "\n",
+      "Adjustment:  ", attr(object, "adjust"), "\n\n",
       params,
       sep = "")
 }
