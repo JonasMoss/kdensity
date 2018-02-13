@@ -6,21 +6,20 @@
 #'
 #' @export
 #'
-#' @param x Numeric vector; the data.
+#' @param x Numeric vector containg the data.
 #'
 #' @param bw A bandwidth function. Can be either a string, a custom made
-#' function, or a double.
+#' function, or a double. The supported bandwith functions are documented
+#' in \code{\link{bandwidths}}.
 #'
 #' @param adjust An adjustment constant, so that \code{h = adjust*bw*sd}, where \code{sd}
 #' varies acccording to the chosen kernel.
 #'
-#' @param kernel The kernel function. Can be a string or a custom made list
-#' containg a function \code{kernel}, the standard deviation of the kernel,
-#' \code{sd}, and domain of definition for the kernel, \code{support}.
+#' @param kernel The kernel function. Can be chosen from the list of built-in
+#' kernels or be custom made. See \code{\link{kernels}} for details.
 #'
-#' @param start Choice of parametric start. Can be a string or be supplied via a l
-#' ist containing a \code{density} function, an \code{estimator} function,
-#' and a \code{support} tuple.
+#' @param start Parametric start. Can be chosen from the list of built-in
+#' parametric starts or be custom made. See \code{\link{starts}} for details.
 #'
 #' @param support The support of the data. Must be compatible with the supplied
 #' \code{x} and the supplied \code{start} and \code{kernel}. Is used to find the
@@ -30,45 +29,31 @@
 #'
 #' @param na.rm Logical; if \code{TRUE}, \code{NA}s will be removed from \code{x}.
 #'
-#' @return \code{kdensity} Returns a function object of \code{\link[base]{class}} "kdensity".
+#' @return \code{kdensity} returns an S3 function object of
+#' \code{\link[base]{class}} "kdensity". This is a callable function with the
+#' following elements, accessible by '$':
+#' \describe{
+#'   \item{\code{bw_str, bw, adjust, h}}{The bandwidth function, the resulting
+#'               bandwidth, the \code{adjust} argument, and the adjusted
+#'               bandwidth.}
+#'   \item{\code{kernel, start, support }}{Name of the kernel, name of the
+#'               parametric start, and the support of the density.}
+#'   \item{\code{data.name, n, range, has.na}}{Name of the data, number of
+#'               observations, the range of the data, and whether the data
+#'               \code{x} contained \code{NA} values.}
+#'   \item{\code{call}}{The \code{call} to \code{kdensity}.}
+#'   \item{\code{estimates}}{Named numeric vector containing the parameter
+#'               estimates from the parametric start.}
+#'
+#' }
+#'
 #'
 #' @details If \code{normalized} is \code{FALSE} and \code{start != "uniform"}, the resulting
 #' density will not integrate to 1 in general.
 #'
-#'   \strong{Bandwidth functions}: Bandwidth functions can either be specified by a string,
-#'   be user made, or be a fixed double. If the argument is a string, it must fully match
-#'   one of the implemented bandwidt functions. From the package \code{stats}, the bandwidth
-#'   functions are \code{nrd0}, \code{nrd}, \code{bcv}, \code{ucv}, and \code{SJ} are avaiable,
-#'   see \code{\link[stats]{bandwidth}}. They intended for use with a 'uniform' start and the 'gaussian' kernel, but
-#'   work well for the other symmetric kernels as well. Implemented bandwidth functions for asymmetric
-#'   kernels are: \code{JH} for the Gaussian copula estimator. For parametric starts, \code{RHE} is an
-#'   Hermite expansion reference rule. Bandwidth functions for asymmetric kernels and parametric
-#'   starts are documented in \code{\link{bandwidth_functions}}.
-#'
-#'   \strong{Kernel functions}: Kernel functions can either be specified by a string or
-#'   be user made. If the argument is a string, it must fully match one of the implemented
-#'   kernels. Available symmetric kernels are \code{gaussian} (or \code{normal}), \code{epanechnikov},
-#'   \code{rectangular} (or \code{uniform}), \code{triangular}, \code{biweight}, \code{triweight},
-#'   \code{tricube}, \code{cosine}, \code{optcosine}, and \code{laplace}.
-#'   See \code{\link[stats]{density}} for more details.
-#'
-#'  The implemented asymmetric kernels are:
-#'   \itemize{
-#'     \item \code{gcopula}. The Gaussian copula KDE, used for data on the unit
-#'      interval. Described in Jones & Henderswon.
-#'     \item \code{gamma} and \code{gamma_biased}. Gamma kernels for data on the
-#'     positive half-line, \code{c(0, Inf)}. They are described in Chen.
-#'   }
-#'
-#'   \strong{Parametric starts}: The following parametric starts are supported:
-#'   \code{uniform} (or \code{constant}), \code{normal}, \code{gamma},
-#'   \code{exponential}, \code{inverse_gaussian}, \code{lognormal}, \code{beta},
-#'   and \code{laplace}. Their parameters are estimated by maximum likelihood.
-#'   The default value is \code{uniform}, which corresponds to ordinary kernel
-#'   density estimation.
-#' @seealso The \code{stats} package function \code{\link[stats]{density}}. For
-#'   bandwidth selection documentation, see \code{\link{bandwidth_seletor}}.
-#' @references Hjort, Nils Lid, and Ingrid K. Glad. "Nonparametric density estimation with a parametric start." The Annals of Statistics (1995): 882-904.
+#' @seealso The \code{stats} package function \code{\link[stats]{density}}.
+#' @references
+#'   Hjort, Nils Lid, and Ingrid K. Glad. "Nonparametric density estimation with a parametric start." The Annals of Statistics (1995): 882-904.
 #'
 #'   Jones, M. C., and D. A. Henderson. "Miscellanea kernel-type density estimation on the unit interval." Biometrika 94.4 (2007): 977-984.
 #'
@@ -76,7 +61,7 @@
 #'
 #'   Silverman, Bernard W. Density estimation for statistics and data analysis. Vol. 26. CRC press, 1986.
 #'
-#'  @examples
+#' @examples
 #' ## Use gamma kernels to model positive data, the concentration of
 #' ## theophylline
 #'
@@ -95,7 +80,7 @@
 #'
 #' skew_hyperbolic = list(
 #'   density   = SkewHyperbolic::dskewhyp,
-#'   estimator = function(x) SkewHyperbolic::skewhypFit(dat,printOut = FALSE)$param,
+#'   estimator = function(x) SkewHyperbolic::skewhypFit(x, printOut = FALSE)$param,
 #'   support   = c(-Inf, Inf)
 #' )
 #'
@@ -104,6 +89,12 @@
 #'      main = "Annual differences in water level (ft) of Lake Huron, 1875 - 1972")
 #' lines(kde, plot_start = TRUE, lty = 2, lwd = 2) # Plots the skew hyperbolic density.
 #' rug(diff(LakeHuron))
+#'
+#' kde$estimates
+#' # Displays the parameter estimates:
+#' #        mu     delta      beta        nu
+#' # -1.140713  3.301112  2.551657 26.462469
+#'
 
 kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
                     support = NULL, na.rm = FALSE, normalized = TRUE)
@@ -207,7 +198,7 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
       bw     = get_bw(bw)(x, kernel_str, start_str, support)
     } else {
       bw_str = deparse(substitute(bw))
-      bw     = bw(data, kernel_str, start_str, support)
+      bw     = bw(x, kernel_str, start_str, support)
     }
   } else {
     bw_str = "user supplied"
@@ -237,7 +228,7 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
       }
     }
 
-    normalization = tryCatch(integrate(pre_function, lower = support[1], upper = support[2])$value,
+    normalization = tryCatch(stats::integrate(pre_function, lower = support[1], upper = support[2])$value,
                           error = function(e) {
                             stop("Normalization error: The function will not integrate. Two common causes are: 1.) The kernel is non-smooth, try a smooth kernel if possible. 2.) The supplied support is incorrect.")
                           })
