@@ -9,10 +9,25 @@ Description: Deals with non-parametric density estimation with parametric starts
 License: MIT
 Encoding: UTF-8
 LazyData: true
-Imports: assertthat
-Suggests: statmod,
-          EQL,
+Imports: assertthat,
+    testthat,
+    statmod,
+    EQL,
     knitr,
-    rmarkdown
+    rmarkdown,
+    SkewHyperbolic
+Suggests: 
 RoxygenNote: 6.0.1
 VignetteBuilder: knitr
+Collate: 
+    'builtin_bandwidths.R'
+    'builtin_bandwidths_get_bw.R'
+    'builtin_kernels.R'
+    'builtin_kernels_get_kernel.R'
+    'builtin_starts_custom_maximum_likelihood.R'
+    'builtin_starts.R'
+    'builtin_starts_get_start.R'
+    'generics.R'
+    'kdensity.R'
+    'kdensity_helpers.R'
+    'utility_functions.R'
