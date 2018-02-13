@@ -8,15 +8,17 @@ plot_helper(x, range = NULL, plot_start = FALSE, zero_line = TRUE,
   ptype = c("plot", "lines", "points"), ...)
 }
 \arguments{
-\item{x}{a \code{kdensity} object.}
+\item{x}{A \code{kdensity} object.}
 
-\item{range}{range of x values.}
+\item{range}{An optional range vector; like \code{x} in \code{plot.default}.}
 
-\item{plot_start}{logical; if \code{TRUE}, plots the parametric start instead of the kernel density estimate.}
+\item{plot_start}{Logical; if \code{TRUE}, plots the parametric start only.}
 
-\item{...}{further plotting parameters.}
+\item{zero_line}{Logical; if \code{TRUE}, adds a line at \code{y = 0}.}
 
-\item{type}{the kind of plot to make}
+\item{ptype}{The kind of plot to make}
+
+\item{...}{Passed to plot.default.}
 }
 \value{
 None.

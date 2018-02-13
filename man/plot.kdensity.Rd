@@ -14,9 +14,9 @@
 
 \item{plot_start}{logical; if \code{TRUE}, plots the parametric start instead of the kernel density estimate.}
 
-\item{...}{further plotting parameters.}
+\item{zero_line}{logical; if \code{TRUE}, add a base line at \code{y = 0}.}
 
-\item{zero_lines}{logical; if \code{TRUE}, add a base line at \code{y = 0}.}
+\item{...}{further plotting parameters.}
 }
 \value{
 None.
