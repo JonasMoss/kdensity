@@ -9,9 +9,9 @@ get_bw = function(bw) {
   final_bw = switch(bw,
          "nrd0" = function(data, kernel, start, support) stats::bw.nrd0(data),
          "nrd"  = function(data, kernel, start, support) stats::bw.nrd(data),
-         "ucv"  = function(data, kernel, start, support) stats::bw.ucv(data),
          "bcv"  = function(data, kernel, start, support) stats::bw.bcv(data),
          "SJ"   = function(data, kernel, start, support) stats::bw.SJ(data),
+         "ucv"  = bw.ucv,
          "JH"   = bw.JH,
          "RHE"  = bw.RHE
          )

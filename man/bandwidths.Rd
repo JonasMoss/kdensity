@@ -4,7 +4,11 @@
 \alias{bandwidths}
 \alias{bw.JH}
 \alias{bw.RHE}
+\alias{bw.ucv}
 \title{Bandwidth Selectors}
+\usage{
+bw.ucv(x, kernel = NULL, start = NULL, support = NULL)
+}
 \description{
 Bandwidth selectors for \code{kdensity}. These are the available options
 for the option \code{bw} in \code{kdensity}.
@@ -17,10 +21,6 @@ for the option \code{bw} in \code{kdensity}.
    constant parametric starts.
 
 
-  \code{"ucv"}: Unbiased cross validation. The usual standard option for
-  asymmetric kernels.
-
-
   \code{"JH"}: Selector for the Gaussian copula kernel, based on
   normal reference rule. Described in Jones & Henderson. The default method when
   the \code{gcopula} kernel is used in \code{kdensity}.
@@ -30,6 +30,10 @@ for the option \code{bw} in \code{kdensity}.
   based on a reference rule with Hermite polynomials.
   Described in Hjort & Glad (1995). The default method in \code{kdensity} when a parametric
   start is supplied and the kernel is symmetric.
+
+
+  \code{"ucv"}: Unbiased cross validation. The usual standard option for
+  asymmetric kernels.
 }
 
 \section{Structure}{

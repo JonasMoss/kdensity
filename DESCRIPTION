@@ -20,6 +20,7 @@ Suggests:
 RoxygenNote: 6.0.1
 VignetteBuilder: knitr
 Collate: 
+    'buildin_bandwidths_ucv_helpers.R'
     'builtin_bandwidths.R'
     'builtin_bandwidths_get_bw.R'
     'builtin_kernels.R'
