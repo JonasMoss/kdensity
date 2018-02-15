@@ -52,9 +52,7 @@
 #' Jones, M. C., and D. A. Henderson. "Kernel-type density estimation on the unit interval." Biometrika 94.4 (2007): 977-984.
 #' Hjort, Nils Lid, and Ingrid K. Glad. "Nonparametric density estimation with a parametric start." The Annals of Statistics (1995): 882-904.
 #' @name bandwidths
-
-
-#' @rdname bandwidths
+NULL
 
 bw.JH = function(x, kernel = NULL, start = NULL, support = NULL) {
 

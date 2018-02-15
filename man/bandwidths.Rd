@@ -2,16 +2,24 @@
 % Please edit documentation in R/builtin_bandwidths.R
 \name{bandwidths}
 \alias{bandwidths}
-\alias{bw.JH}
-\alias{bw.RHE}
-\alias{bw.ucv}
 \title{Bandwidth Selectors}
-\usage{
-bw.ucv(x, kernel = NULL, start = NULL, support = NULL)
+\arguments{
+\item{x}{The input data.}
+
+\item{kernel_str}{A string specifying the kernel, e.g. "gaussian."}
+
+\item{start_str}{A string specifying the parametric start, e.g. "normal".}
+
+\item{support}{The domain of definiton for the kernel. (-Inf, Inf) for
+symmetric kernels.}
 }
 \description{
 Bandwidth selectors for \code{kdensity}. These are the available options
 for the option \code{bw} in \code{kdensity}.
+}
+\details{
+The bandwidth functions are not exported. They can be accessed by the
+kdensity:: prefix, e.g. kdensity::JE.
 }
 \section{Bandwidth selectors}{
 
@@ -20,20 +28,17 @@ for the option \code{bw} in \code{kdensity}.
    "nrd0" is the standard bandwidth selector for symmetric kernels with
    constant parametric starts.
 
+   \code{"ucv"}: Unbiased cross validation. The usual standard option for
+   asymmetric kernels.
 
-  \code{"JH"}: Selector for the Gaussian copula kernel, based on
-  normal reference rule. Described in Jones & Henderson. The default method when
-  the \code{gcopula} kernel is used in \code{kdensity}.
+   \code{"RHE"}: Selector for parametric starts with a symmetric kernel,
+   based on a reference rule with Hermite polynomials.
+   Described in Hjort & Glad (1995). The default method in \code{kdensity} when a parametric
+   start is supplied and the kernel is symmetric.
 
-
-  \code{"RHE"}: Selector for parametric starts with a symmetric kernel,
-  based on a reference rule with Hermite polynomials.
-  Described in Hjort & Glad (1995). The default method in \code{kdensity} when a parametric
-  start is supplied and the kernel is symmetric.
-
-
-  \code{"ucv"}: Unbiased cross validation. The usual standard option for
-  asymmetric kernels.
+   \code{"JH"}: Selector for the Gaussian copula kernel, based on
+   normal reference rule. Described in Jones & Henderson. The default method when
+   the \code{gcopula} kernel is used in \code{kdensity}.
 }
 
 \section{Structure}{
@@ -54,7 +59,6 @@ for the option \code{bw} in \code{kdensity}.
 }
 \references{
 Jones, M. C., and D. A. Henderson. "Kernel-type density estimation on the unit interval." Biometrika 94.4 (2007): 977-984.
-
 Hjort, Nils Lid, and Ingrid K. Glad. "Nonparametric density estimation with a parametric start." The Annals of Statistics (1995): 882-904.
 }
 \seealso{
