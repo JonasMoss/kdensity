@@ -46,8 +46,8 @@
 #'    act like an ordinary kernel density estimator. The default value for any
 #'    choice of kernel or support.
 start_uniform = list(
-  density   = function(x) 1,
-  estimator = function(data) {},
+  density   = function(x, dummy = NULL) 1,
+  estimator = function(data) c(dummy = 1),
   support   = c(-Inf, Inf)
 )
 

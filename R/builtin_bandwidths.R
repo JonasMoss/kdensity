@@ -92,46 +92,39 @@ bw.RHE = function(x, kernel = NULL, start = NULL, support = NULL) {
 #'   asymmetric kernels.
 
 bw.ucv = function(x, kernel = NULL, start = NULL, support = NULL) {
-  kernel_obj = get_kernel(kernel)
-  start_obj = get_start(start)
-  kernel_fun = kernel_obj$kernel
-  start_density = start_obj$density
+  kernel_obj      = get_kernel(kernel)
+  start_obj       = get_start(start)
+  kernel_fun      = kernel_obj$kernel
+  start_density   = start_obj$density
   start_estimator = start_obj$estimator
-  start_support = start_obj$support
+  start_support   = start_obj$support
   n = length(x)
 
   # Name of the variable where the density is evaluated. Typically x.
   x_name = names(formals(start_density))[1]
 
+  full_parameters = start_estimator(x)
+
+  arguments = list()
+  arguments[[1]] = data
+  names(arguments)[1] = x_name
+
   dstart = function(data, parameters) {
-    sapply(data, function(datum) {
-      arguments = as.list(c("x" = datum, parameters))
-      names(arguments)[1] = x_name
-      do.call(start_density, arguments)
-    })
+    arguments = list()
+    arguments[[1]] = data
+    names(arguments)[1] = x_name
+    arguments = append(arguments, as.list(parameters))
+    do.call(start_density, arguments)
   }
 
-  full_parameters = start_estimator(x)
   full_density_values = dstart(x, full_parameters)
 
   param_loo = list()
   for (i in 1:n) {
     param_loo[[i]] = start_estimator(x[-i])
   }
-#
-#   print(x)
-#   print(kernel_fun)
-#   print(start_density)
-#   print(full_parameters)
-#   print(support)
 
-  parametric_start_vector = function(data) {
-    sapply(data, function(datum) {
-      arguments = as.list(c("x" = datum, full_parameters))
-      names(arguments)[1] = x_name
-      do.call(start_density, arguments)
-    })
-  }
+  parametric_start_vector = function(data) dstart(data, full_parameters)
 
   parametric_start_data = parametric_start_vector(x)
 
@@ -160,7 +153,12 @@ bw.ucv = function(x, kernel = NULL, start = NULL, support = NULL) {
     return(obj_func_value)
   }
 
-  bw = optimize(obj_func, lower = 0.0001, upper = 10 * sd(x), tol = 0.0001)$minimum
+  ## The range of allowable bandwidths vary from kernel to kernel.
+  lower = 0.0001
+  upper = upper = 10 * sd(x)
+  eps = 10^-10
+  if(kernel == "beta") upper = 1/4 - eps
+  bw = optimize(obj_func, lower = lower, upper, tol = 0.0001)$minimum
   return(bw)
 }
 

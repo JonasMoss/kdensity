@@ -206,15 +206,16 @@ kernel_beta = list(
     cut_points = c(2*h, 1 - 2*h)
     sectioning = findInterval(y, cut_points)
 
-    par = switch(as.character(sectioning),
-                 "1" = c(y/h, (1-y)/h),
-                 "0" = c(rho(y, h), (1-y)/h),
-                 "2" = c(y/h, rho(1-y, h)))
+    y0 = y[sectioning == 0]
+    y1 = y[sectioning == 1]
+    y2 = y[sectioning == 2]
 
+    par1 = c(rho(y0, h), y1/h, y2/h)
+    par2 = c((1 - y0)/h, (1 - y1)/h, rho(1-y2, h))
 
-
-    h*dbeta(x, par[1], par[2])
-  },
+    h*dbeta(x, par1, par2)
+  }
+  ,
   support = c(0, 1)
 )
 
