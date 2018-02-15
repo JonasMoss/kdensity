@@ -27,15 +27,16 @@ AIC.kdensity = function(object, ..., k = 2) {
   -2*logLik(object) + k*length(coef(object))
 }
 
+
 #' @export
 BIC.kdensity = function(object, ...) {
   msg = "'BIC' only makes sense for kdensity objects with a non-uniform parametric start."
   assertthat::assert_that(object$start != "uniform" & object$start != "constant", msg = msg)
-  -2*logLik(object) + log(kde$n)*length(coef(object))
+  -2*logLik(object) + log(object$n)*length(coef(object))
 }
 
 #' @export
-confint.kdensity = function(object, parm, level = 0.95) {
+confint.kdensity = function(object, parm, level = 0.95, ...) {
   # Implement pointwise confidence intervals in some way.
 }
 
