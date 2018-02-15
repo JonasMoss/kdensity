@@ -75,10 +75,10 @@ Since the return value of `kdensity` is a function, it is callable, as in:
 kde(10)
 ```
 
-You can access the parameter estimates by using `$estimates`:
+You can access the parameter estimates by using `coef`:
 
 ```{r dollar, echo = TRUE}
-kde$estimates
+coef(kde)
 ```
 ## References
 

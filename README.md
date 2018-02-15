@@ -119,10 +119,10 @@ kde(10)
 #> [1] 0.1029127
 ```
 
-You can access the parameter estimates by using `$estimates`:
+You can access the parameter estimates by using `coef`:
 
 ``` r
-kde$estimates
+coef(kde)
 #>     shape      rate 
 #> 7.1872898 0.7217954
 ```
