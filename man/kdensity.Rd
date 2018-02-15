@@ -88,7 +88,7 @@ plot(kde, lwd = 2, col = "blue",
 lines(kde, plot_start = TRUE, lty = 2, lwd = 2) # Plots the skew hyperbolic density.
 rug(diff(LakeHuron))
 
-kde$estimates
+kde$estimates # Also: coef(kde)
 # Displays the parameter estimates:
 #        mu     delta      beta        nu
 # -1.140713  3.301112  2.551657 26.462469
