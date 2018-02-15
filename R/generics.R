@@ -17,29 +17,17 @@ coef.kdensity = function(object, ...) object$estimate
 logLik.kdensity = function(object, ...) {
   msg = "'logLik' only makes sense for kdensity objects with a non-uniform parametric start."
   assertthat::assert_that(object$start != "uniform" & object$start != "constant", msg = msg)
-  object$logLik
-}
-
-#' @export
-AIC.kdensity = function(object, ..., k = 2) {
-  msg = "'AIC' only makes sense for kdensity objects with a non-uniform parametric start."
-  assertthat::assert_that(object$start != "uniform" & object$start != "constant", msg = msg)
-  -2*logLik(object) + k*length(coef(object))
-}
-
-
-#' @export
-BIC.kdensity = function(object, ...) {
-  msg = "'BIC' only makes sense for kdensity objects with a non-uniform parametric start."
-  assertthat::assert_that(object$start != "uniform" & object$start != "constant", msg = msg)
-  -2*logLik(object) + log(object$n)*length(coef(object))
+  val = object$logLik
+  attr(val, "nobs") = length(object$n)
+  attr(val, "df")   = length(coef(object))
+  class(val) = "logLik"
+  val
 }
 
 #' @export
 confint.kdensity = function(object, parm, level = 0.95, ...) {
   # Implement pointwise confidence intervals in some way.
 }
-
 
 #' Supplies a plotting range from a kdensity object.
 #'
