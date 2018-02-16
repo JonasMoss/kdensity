@@ -1,15 +1,20 @@
-#' Fast maximum likelihood for the beta distribution.
+#' Estimates the parameter of the Beta distribution using maximum likelihood
 #'
-#' @param x The data, contained in the unit interval.
-#' @param start Optional start point for the \code{nlm} function.
-#' @param type Should we use a precomputed gradient function or Hessian?
-#' @return a vector of two parameters, shape1 and shape2.
-#' @details The option "none" is fastest at the moment. The algorithm is
-#' a straight forward implementation of maximum likelihood for beta using
-#' the sufficient statistics.
+#' Uses \code{stat::nlm} to estimate the parameters of the Beta distribution.
+#'
+#' @param x The data from which the estimate is to be computed.
+#' @param start Optional starting parameter values for the minimization.
+#' Passed to the \code{stats::nlm} function.
+#' @param type Whether a dedicated \code{gradient} or \code{hessian} should be
+#' passed to \code{stats::nlm}.
+#' @return A named numeric vector with maximum likelihood estimates for
+#' \code{shape1} and \code{shap2}.
+#' @details For \code{type}, the option \code{none} is fastest. The algorithm
+#' is a straight forwardimplementation of maximum likelihood for beta using
+#' the sufficient statistics of the beta distribution,
 
 
-mlbeta = function(x, start = NULL, type = c("none", "gradient", "full")) {
+mlbeta = function(x, start = NULL, type = c("none", "gradient", "hessian")) {
   type = match.arg(type, c("none","gradient","full"))
 
   val1 = mean(log(x))
@@ -48,16 +53,19 @@ mlbeta = function(x, start = NULL, type = c("none", "gradient", "full")) {
 
 }
 
-#' Fast maximum likelihood for the gamma distribution
+#' Estimates the parameter of the Gamma distribution using maximum likelihood
 #'
-#' @param x The data, contained in c(0, Inf)
-#' @param rel_eps Relative epsilon comparison criterion.
-#' @param max_iter Maximal number of Newton-Raphson iteratons.
-#' @return A vector of two parameters, \code{shape} and \code{rate}.
+#' Uses Newton-Raphson to estimate the parameters of the Gamma distribution.
+#'
+#' @param x The data from which the estimate is to be computed.
+#' @param rel.tol Relative accuracy requested.
+#' @param iterlim A positive integer specifying the maximum number of
+#' iterations to be performed before the program is terminated.
+#' @return A named numeric vector with maximum likelihood estimates for
+#' \code{shape} and \code{rate}.
 #' @references Choi, S. C, and R. Wette. "Maximum likelihood estimation of the parameters of the gamma distribution and their bias." Technometrics 11.4 (1969): 683-690.
 
-
-mlgamma = function(x, rel_eps = 10^-10, max_iter = 100) {
+mlgamma = function(x, rel_eps = 10^-10, iterlim = 100) {
 
   mean_hat = mean(x)
   s = log(mean_hat) - mean(log(x))
@@ -66,18 +74,115 @@ mlgamma = function(x, rel_eps = 10^-10, max_iter = 100) {
   shape = 1/(12*s)*(3 - s + sqrt((s-3)^2 + 24*s))
 
   ## The Newton-Raphson steps.
-  for(i in 1:max_iter) {
+  for(i in 1:iterlim) {
     shape_next = shape - (1/(1/shape - trigamma(shape))*(log(shape) - digamma(shape) - s))
     if(abs((shape - shape_next)/shape) < rel_eps) break
     shape = shape_next
   }
 
-  # gamma_objective = function(shape) {
-  #   -((shape-1)*geom_hat - shape - shape*log_mean_hat + shape*log(shape) - lgamma(shape))
-  # }
-  #
-  # optimize(gamma_objective, interval = c(0, 100))
+  if(i == iterlim) {
+    warning(paste0("The iteration limit (iterlim = ", iterlim, ") was reached",
+                   " before the relative tolerance requirement (rel.tol = ",
+                   rel.tol_str, ")."))
+  }
+
+  ## Given the shape, the rate is easy to compute.
+  rate = shape/mean_hat
 
   c(shape = shape, rate = shape/mean_hat)
 
+}
+
+
+#' Estimates the parameter of a Weibull distribution by maximum likelihood
+#'
+#' Uses Newton-Raphson to estimate the parameters of the Weibull distribution.
+#'
+#' @param x The data from which the estimate is to be computed.
+#' @param shape0 An optional starting value for the \code{shape} parameter.
+#' @param rel.tol Relative accuracy requested.
+#' @param iterlim A positive integer specifying the maximum number of
+#' iterations to be performed before the program is terminated.
+#'
+#' @return A named numeric vector with maximum likelihood estimates for
+#' \code{shape} and \code{scale}.
+
+mlweibull = function(x, shape0 = 2, rel.tol = .Machine$double.eps^0.25,
+                     iterlim = 100) {
+
+  rel.tol_str = deparse(substitute(rel.tol))
+  log_x = log(x)
+  l_hat = mean(log_x)
+  log_xsq = log_x^2
+
+  for(i in 1:iterlim) {
+    shape0_lsum     = mean(x^shape0*log_x)
+    shape0_lsum_sqr = mean(x^shape0*log_xsq)
+    shape0_sum      = mean(x^shape0)
+    A = shape0_lsum/shape0_sum
+    B = shape0_lsum_sqr/shape0_sum
+    top = 1/shape0 + l_hat - A
+    bottom = -1/shape0^2 + A^2 - B
+    shape = shape0 - top/bottom
+
+    if(abs((shape0 - shape)/shape0) < rel.tol) break
+
+    shape0 = shape
+  }
+
+  if(i == iterlim) {
+    warning(paste0("The iteration limit (iterlim = ", iterlim, ") was reached",
+                   " before the relative tolerance requirement (rel.tol = ",
+                   rel.tol_str, ")."))
+  }
+
+  ## Given the shape, the scale is easy to compute.
+  scale = (mean(x^shape))^(1/shape)
+  c(shape = shape, scale = scale)
+}
+
+#' Estimates the parameter of a Gumbel distribution by maximum likelihood
+#'
+#' Uses Newton-Raphson to estimate the parameters of the Gumbel distribution.
+#'
+#' @param x The data from which the estimate is to be computed.
+#' @param scale0 An optional starting value for the \code{scale} parameter.
+#' @param rel.tol Relative accuracy requested.
+#' @param iterlim A positive integer specifying the maximum number of
+#' iterations to be performed before the program is terminated.
+#'
+#' @return A named numeric vector with maximum likelihood estimates for
+#' \code{shape} and \code{scale}.
+
+mlgumbel = function(x, scale0 = 1, rel.tol = .Machine$double.eps^0.25,
+                     iterlim = 100) {
+
+  rel.tol_str = deparse(substitute(rel.tol))
+  mean_x = mean(x)
+
+  for(i in 1:iterlim) {
+
+    A = sum(x*exp(-x/scale0))
+    B = sum(exp(-x/scale0))
+    C = sum(x^2*exp(-x/scale0))
+
+    top = mean_x - scale0 - A/B
+    bottom = -1 - 1/scale0^2*(C/B - (A/B)^2)
+
+    scale = scale0 - top/bottom
+
+    if(abs((scale0 - scale)/scale0) < rel.tol) break
+
+    scale0 = scale
+  }
+
+  if(i == iterlim) {
+    warning(paste0("The iteration limit (iterlim = ", iterlim, ") was reached",
+                   " before the relative tolerance requirement (rel.tol = ",
+                   rel.tol_str, ")."))
+  }
+
+  ## Given the shape, the scale is easy to compute.
+  loc = -scale*log(mean(exp(-x/scale)))
+  c(loc = loc, scale = scale)
 }

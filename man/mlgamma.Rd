@@ -2,22 +2,24 @@
 % Please edit documentation in R/builtin_starts_custom_maximum_likelihood.R
 \name{mlgamma}
 \alias{mlgamma}
-\title{Fast maximum likelihood for the gamma distribution}
+\title{Estimates the parameter of the Gamma distribution using maximum likelihood}
 \usage{
-mlgamma(x, rel_eps = 10^-10, max_iter = 100)
+mlgamma(x, rel_eps = 10^-10, iterlim = 100)
 }
 \arguments{
-\item{x}{The data, contained in c(0, Inf)}
+\item{x}{The data from which the estimate is to be computed.}
 
-\item{rel_eps}{Relative epsilon comparison criterion.}
+\item{iterlim}{A positive integer specifying the maximum number of
+iterations to be performed before the program is terminated.}
 
-\item{max_iter}{Maximal number of Newton-Raphson iteratons.}
+\item{rel.tol}{Relative accuracy requested.}
 }
 \value{
-A vector of two parameters, \code{shape} and \code{rate}.
+A named numeric vector with maximum likelihood estimates for
+\code{shape} and \code{rate}.
 }
 \description{
-Fast maximum likelihood for the gamma distribution
+Uses Newton-Raphson to estimate the parameters of the Gamma distribution.
 }
 \references{
 Choi, S. C, and R. Wette. "Maximum likelihood estimation of the parameters of the gamma distribution and their bias." Technometrics 11.4 (1969): 683-690.

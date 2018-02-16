@@ -273,4 +273,3 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
 
   return_function
 }
-

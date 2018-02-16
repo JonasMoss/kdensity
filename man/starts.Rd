@@ -25,17 +25,18 @@ parametric starts are possible, see the Structure section.
 
 
    \code{gaussian, normal}: The normal distribution. A natural choice for
-   densities on R.
+   densities on \code{c(-Inf, Inf)}.
 
 
-   \code{laplace}: The Laplace distribution.
+   \code{laplace, gumbel}: Densities
+   supported on \code{c(-Inf, Inf)}.
 
 
-   \code{exponential, gamma, lognormal, inverse_gaussian}: Densities
-   supported on c(0, Inf).
+   \code{exponential, gamma, lognormal, inverse_gaussian, weibull}: Densities
+   supported on \code{c(0, Inf)}.
 
 
-   \code{beta}: The beta distribution, supported on c(0, 1).
+   \code{beta}: The beta distribution, supported on \code{c(0, 1)}.
 }
 
 \section{Structure}{

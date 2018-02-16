@@ -132,5 +132,3 @@ start_beta = list(
   estimator = mlbeta,
   support   = c(0, 1)
 )
-
-

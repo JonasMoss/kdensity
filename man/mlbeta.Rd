@@ -2,25 +2,28 @@
 % Please edit documentation in R/builtin_starts_custom_maximum_likelihood.R
 \name{mlbeta}
 \alias{mlbeta}
-\title{Fast maximum likelihood for the beta distribution.}
+\title{Estimates the parameter of the Beta distribution using maximum likelihood}
 \usage{
-mlbeta(x, start = NULL, type = c("none", "gradient", "full"))
+mlbeta(x, start = NULL, type = c("none", "gradient", "hessian"))
 }
 \arguments{
-\item{x}{The data, contained in the unit interval.}
+\item{x}{The data from which the estimate is to be computed.}
 
-\item{start}{Optional start point for the \code{nlm} function.}
+\item{start}{Optional starting parameter values for the minimization.
+Passed to the \code{stats::nlm} function.}
 
-\item{type}{Should we use a precomputed gradient function or Hessian?}
+\item{type}{Whether a dedicated \code{gradient} or \code{hessian} should be
+passed to \code{stats::nlm}.}
 }
 \value{
-a vector of two parameters, shape1 and shape2.
+A named numeric vector with maximum likelihood estimates for
+\code{shape1} and \code{shap2}.
 }
 \description{
-Fast maximum likelihood for the beta distribution.
+Uses \code{stat::nlm} to estimate the parameters of the Beta distribution.
 }
 \details{
-The option "none" is fastest at the moment. The algorithm is
-a straight forward implementation of maximum likelihood for beta using
-the sufficient statistics.
+For \code{type}, the option \code{none} is fastest. The algorithm
+is a straight forwardimplementation of maximum likelihood for beta using
+the sufficient statistics of the beta distribution,
 }
