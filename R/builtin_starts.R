@@ -2,7 +2,7 @@
 #'
 #' A parametric start is a density function with associated estimator which
 #' is used as a starting point in \code{kdensity}. Several parametric starts
-#' are implemented, all with maximum likelihood estimation. Custom made
+#' are implemented, all with maximum likelihood estimation. Custom-made
 #' parametric starts are possible, see the Structure section.
 #'
 #' @section Built-in starts:
@@ -56,7 +56,7 @@ start_uniform = list(
 #' @format NULL
 #' @section Built-in starts:
 #'    \code{gaussian, normal}: The normal distribution. A natural choice for
-#'    densities on R.
+#'    densities on the real line \eqn{\mathbb{R}}.
 start_normal = list(
   density = dnorm,
   estimator = function(data) {
@@ -89,7 +89,7 @@ start_laplace = list(
 #' @format NULL
 #' @section Built-in starts:
 #'    \code{exponential, gamma, lognormal, inverse_gaussian}: Densities
-#'    supported on c(0, Inf).
+#'    supported on the positive real line \eqn{(0, \infty)}.
 start_exponential = list(
   density = dexp,
   estimator = function(data) {
@@ -126,7 +126,7 @@ start_gamma = list(
 #' @usage NULL
 #' @format NULL
 #' @section Built-in starts:
-#'    \code{beta}: The beta distribution, supported on c(0, 1).
+#'    \code{beta}: The beta distribution, supported on the unit interval \eqn{[0, 1]}.
 start_beta = list(
   density   = dbeta,
   estimator = mlbeta,

@@ -1,14 +1,14 @@
-#' Kernel density estimator with parametric start
+#' Parametrically guided kernel density estimation
 #'
-#' \code{kdensity} computes a kernel density for univariate data. It supports
-#' asymmetric kernels and parametric starts through the \code{kernel} and
+#' \code{kdensity} computes a parametrically guided kernel density estimate for univariate data.
+#' It supports asymmetric kernels and parametric starts through the \code{kernel} and
 #' \code{start} arguments.
 #'
 #' @export
 #'
 #' @param x Numeric vector containg the data.
 #'
-#' @param bw A bandwidth function. Can be either a string, a custom made
+#' @param bw A bandwidth function. Can be either a string, a custom-made
 #' function, or a double. The supported bandwith functions are documented
 #' in \code{\link{bandwidths}}.
 #'
@@ -16,10 +16,10 @@
 #' varies acccording to the chosen kernel.
 #'
 #' @param kernel The kernel function. Can be chosen from the list of built-in
-#' kernels or be custom made. See \code{\link{kernels}} for details.
+#' kernels or be custom-made. See \code{\link{kernels}} for details.
 #'
 #' @param start Parametric start. Can be chosen from the list of built-in
-#' parametric starts or be custom made. See \code{\link{starts}} for details.
+#' parametric starts or be custom-made. See \code{\link{starts}} for details.
 #'
 #' @param support The support of the data. Must be compatible with the supplied
 #' \code{x} and the supplied \code{start} and \code{kernel}. Is used to find the
