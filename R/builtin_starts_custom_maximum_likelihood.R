@@ -74,7 +74,7 @@ mlgamma = function(x, rel_eps = 10^-10, iterlim = 100) {
   shape = 1/(12*s)*(3 - s + sqrt((s-3)^2 + 24*s))
 
   ## The Newton-Raphson steps.
-  for(i in 1:max_iter) {
+  for(i in 1:iterlim) {
     shape_next = shape - (1/(1/shape - trigamma(shape))*(log(shape) - digamma(shape) - s))
     if(abs((shape - shape_next)/shape) < rel_eps) break
     shape = shape_next
@@ -106,13 +106,58 @@ mlgamma = function(x, rel_eps = 10^-10, iterlim = 100) {
 #'
 #' @return A named numeric vector with maximum likelihood estimates for
 #' \code{shape} and \code{scale}.
-#' @export
 
-mlweibull = function(x, initial = NULL, rel.tol = .Machine$double.eps^0.25,
+mlweibull = function(x, shape0 = 2, rel.tol = .Machine$double.eps^0.25,
                      iterlim = 100) {
 
   rel.tol_str = deparse(substitute(rel.tol))
-  shape0 = 2
+  log_x = log(x)
+  l_hat = mean(log_x)
+  log_xsq = log_x^2
+
+  for(i in 1:iterlim) {
+    shape0_lsum     = mean(x^shape0*log_x)
+    shape0_lsum_sqr = mean(x^shape0*log_xsq)
+    shape0_sum      = mean(x^shape0)
+    A = shape0_lsum/shape0_sum
+    B = shape0_lsum_sqr/shape0_sum
+    top = 1/shape0 + l_hat - A
+    bottom = -1/shape0^2 + A^2 - B
+    shape = shape0 - top/bottom
+
+    if(abs((shape0 - shape)/shape0) < rel.tol) break
+
+    shape0 = shape
+  }
+
+  if(i == iterlim) {
+    warning(paste0("The iteration limit (iterlim = ", iterlim, ") was reached",
+                   " before the relative tolerance requirement (rel.tol = ",
+                   rel.tol_str, ")."))
+  }
+
+  ## Given the shape, the scale is easy to compute.
+  scale = (mean(x^shape))^(1/shape)
+  c(shape = shape, scale = scale)
+}
+
+#' Estimates the parameter of a Gumbel distribution by maximum likelihood
+#'
+#' Uses Newton-Raphson to estimate the parameters of the Gumbel distribution.
+#'
+#' @param x The data from which the estimate is to be computed.
+#' @param scale0 An optional starting value for the \code{scale} parameter.
+#' @param rel.tol Relative accuracy requested.
+#' @param iterlim A positive integer specifying the maximum number of
+#' iterations to be performed before the program is terminated.
+#'
+#' @return A named numeric vector with maximum likelihood estimates for
+#' \code{shape} and \code{scale}.
+
+mlgumbel = function(x, scale0 = 2, rel.tol = .Machine$double.eps^0.25,
+                     iterlim = 100) {
+
+  rel.tol_str = deparse(substitute(rel.tol))
   log_x = log(x)
   l_hat = mean(log_x)
   log_xsq = log_x^2
