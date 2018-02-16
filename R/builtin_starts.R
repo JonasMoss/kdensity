@@ -88,7 +88,7 @@ start_laplace = list(
 #' @usage NULL
 #' @format NULL
 #' @section Built-in starts:
-#'    \code{exponential, gamma, lognormal, inverse_gaussian}: Densities
+#'    \code{exponential, gamma, lognormal, inverse_gaussian, weibull}: Densities
 #'    supported on c(0, Inf).
 start_exponential = list(
   density = dexp,
@@ -122,6 +122,12 @@ start_gamma = list(
   support   = c(0, Inf)
 )
 
+start_weibull = list(
+  density   = dweibull,
+  estimator = mlweibull,
+  support   = c(0, Inf)
+)
+
 #' @rdname starts
 #' @usage NULL
 #' @format NULL
@@ -132,5 +138,3 @@ start_beta = list(
   estimator = mlbeta,
   support   = c(0, 1)
 )
-
-

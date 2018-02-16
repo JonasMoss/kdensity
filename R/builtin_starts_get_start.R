@@ -23,6 +23,7 @@ get_start = function(start_str) {
     lognormal        = start_lognormal,
     beta             = start_beta,
     laplace          = start_laplace,
+    weibull          = start_weibull,
     constant         = start_uniform
   )
 
