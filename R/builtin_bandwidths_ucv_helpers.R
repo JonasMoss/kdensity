@@ -15,7 +15,6 @@ kdensity_sq = function(x, h, kernel_fun, parametric_start, parametric_start_data
   return_function = function(y) {
     n = length(y)
     parametric_start_vector_y = parametric_start_vector(y)
-    print(parametric_start_vector_y )
     sapply(1:n, function(i) {
       (1/h*mean(kernel_fun(y[i], x, h)*parametric_start_vector_y[i]/parametric_start_data)/normalization)
     })

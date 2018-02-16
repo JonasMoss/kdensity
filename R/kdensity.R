@@ -134,7 +134,7 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
         }
 
         class(return_function) = "kdensity"
-        attr(return_function, "bw_str")    = Inf
+        attr(return_function, "bw_str")    = NULL
         attr(return_function, "bw")        = Inf
         attr(return_function, "kernel")    = "none"
         attr(return_function, "start")     = start_str
@@ -201,7 +201,7 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
       bw     = bw(x, kernel_str, start_str, support)
     }
   } else {
-    bw_str = "user supplied"
+    bw_str = NULL
   }
 
   ## The parameter h is computed. The basic bandwidth is h = bw*adjust for the

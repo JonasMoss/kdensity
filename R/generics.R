@@ -105,10 +105,15 @@ plot_helper = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, pt
   ## Potential arguments in ellipses are handled here. They are modelled
   ## after the structure of the 'density' function.
   supplied = list(...)
+
+  bw_string = NULL
+  if(!is.null(x$bw_str)) bw_string = paste0(" ('", x$bw_str, "')")
+
   defaults = list(type = "l",
                   main = deparse(attr(x, "call")),
                   ylab = "Density",
-                  xlab = paste("N =", attr(x, "n"), "  Bandwidth =", formatC(attr(x, "bw"))),
+                  xlab = paste0("N = ", x$n, "   Bandwidth = ", formatC(x$bw),
+                               bw_string),
                   lwd  = 1)
 
   args = listmerge(x = defaults,
@@ -139,6 +144,8 @@ plot_helper = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, pt
          points = do.call(graphics::points, args))
 
   if(zero_line) graphics::abline(h = 0, lwd = 0.1, col = "gray")
+
+  invisible(x)
 
 }
 
