@@ -2,7 +2,7 @@
 #'
 #' A parametric start is a density function with associated estimator which
 #' is used as a starting point in \code{kdensity}. Several parametric starts
-#' are implemented, all with maximum likelihood estimation. Custom made
+#' are implemented, all with maximum likelihood estimation. Custom-made
 #' parametric starts are possible, see the Structure section.
 #'
 #' @section Built-in starts:
@@ -56,7 +56,7 @@ start_uniform = list(
 #' @format NULL
 #' @section Built-in starts:
 #'    \code{gaussian, normal}: The normal distribution. A natural choice for
-#'    densities on \code{c(-Inf, Inf)}.
+#'    densities on the real line \eqn{\mathbb{R}}.
 start_normal = list(
   density = dnorm,
   estimator = function(data) {
@@ -70,8 +70,7 @@ start_normal = list(
 #' @usage NULL
 #' @format NULL
 #' @section Built-in starts:
-#'    \code{laplace, gumbel}: Densities
-#'    supported on \code{c(-Inf, Inf)}.
+#'    \code{laplace, gumbel}: Distributions on  \eqn{\mathbb{R}}.
 start_laplace = list(
   density = function(x, mu, b) {
     1/(2*b)*exp(-1/b*abs(x-mu))
@@ -87,12 +86,10 @@ start_laplace = list(
 
 start_gumbel = list(
   density = function(x, loc, scale) {
-    z = 1/scale*(x - loc)
-    1/scale*exp(-(z + exp(-z)))
+      z = 1/scale*(x - loc)
+      1/scale*exp(-(z + exp(-z)))
   },
-
   estimator = mlgumbel,
-
   support   = c(-Inf, Inf)
 )
 
@@ -101,7 +98,7 @@ start_gumbel = list(
 #' @format NULL
 #' @section Built-in starts:
 #'    \code{exponential, gamma, lognormal, inverse_gaussian, weibull}: Densities
-#'    supported on \code{c(0, Inf)}.
+#'    supported on the positive real line \eqn{(0, \infty)}.
 start_exponential = list(
   density = dexp,
   estimator = function(data) {
@@ -138,13 +135,13 @@ start_weibull = list(
   density   = dweibull,
   estimator = mlweibull,
   support   = c(0, Inf)
-)
+  )
 
 #' @rdname starts
 #' @usage NULL
 #' @format NULL
 #' @section Built-in starts:
-#'    \code{beta}: The beta distribution, supported on \code{c(0, 1)}.
+#'    \code{beta}: The beta distribution, supported on the unit interval \eqn{[0, 1]}.
 start_beta = list(
   density   = dbeta,
   estimator = mlbeta,

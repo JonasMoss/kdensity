@@ -10,18 +10,17 @@ starts and asymmetric kernels.
 
 kdensity is an implementation of univariate kernel density estimation
 with support for parametric starts and asymmetric kernels. Its main
-function is `kdensity`, which is has approximately the same syntax as
-`stats::density`. Its new functionality is:
+function is `kdensity`, which has approximately the same syntax as
+`stats::density`. Its extra functionality is:
 
-  - `kdensity` has built-in support for many *parametric starts*, such
+  - Built-in support for many *parametric starts*, such
     as `normal` and `gamma`, but you can also supply your own.
-  - It supports several asymmetric kernels ones such as `gcopula` and
-    `gamma` kernels, but also the common symmetric ones. In addition,
-    you can also supply your own kernels.
+  - Built-in support for several asymmetric kernels, like `gcopula` and
+    `gamma` kernels, in addition to the common symmetric ones. You can also use your own custom kernel.
   - A selection of choices for the bandwidth function `bw`, again
     including an option to specify your own.
   - The returned value is callable: The density estimator returns a
-    density function when called.
+    density function when called (see "How to use" below).
 
 A reason to use `kdensity` is to avoid *boundary bias* when estimating
 densities on the unit interval or the positive half-line. Asymmetric
@@ -56,7 +55,7 @@ is to start out with a parametric density before you do your kernel
 density estimation, so that your actual kernel density estimation will
 be a correction to the original parametric estimate. This is a good idea
 because the resulting estimator will be better than an ordinary kernel
-density estimator whenever the true density is close to your suggestion;
+density estimator whenever the true density is close to your suggested start;
 and the estimator can be superior to the ordinary kernal density
 estimator even when the suggestion is pretty far off.
 
