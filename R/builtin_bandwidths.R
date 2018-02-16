@@ -113,12 +113,11 @@ bw.ucv = function(x, kernel = NULL, start = NULL, support = NULL) {
   arguments = list()
   arguments[[1]] = data
   names(arguments)[1] = x_name
+  arguments = append(arguments, as.list(full_parameters))
 
   dstart = function(data, parameters) {
-    arguments = list()
     arguments[[1]] = data
-    names(arguments)[1] = x_name
-    arguments = append(arguments, as.list(parameters))
+    for(i in 1:length(parameters)) arguments[[i + 1]] = parameters[[i]]
     do.call(start_density, arguments)
   }
 
