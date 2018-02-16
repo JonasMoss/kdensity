@@ -65,19 +65,19 @@ mlbeta = function(x, start = NULL, type = c("none", "gradient", "hessian")) {
 #' \code{shape} and \code{rate}.
 #' @references Choi, S. C, and R. Wette. "Maximum likelihood estimation of the parameters of the gamma distribution and their bias." Technometrics 11.4 (1969): 683-690.
 
-mlgamma = function(x, rel_eps = 10^-10, iterlim = 100) {
+mlgamma = function(x, rel.tol = .Machine$double.eps^0.25, iterlim = 100) {
 
   mean_hat = mean(x)
   s = log(mean_hat) - mean(log(x))
 
   ## This start estimator is very close to the ML estimator already.
-  shape = 1/(12*s)*(3 - s + sqrt((s-3)^2 + 24*s))
+  shape0 = 1/(12*s)*(3 - s + sqrt((s-3)^2 + 24*s))
 
   ## The Newton-Raphson steps.
   for(i in 1:iterlim) {
-    shape_next = shape - (1/(1/shape - trigamma(shape))*(log(shape) - digamma(shape) - s))
-    if(abs((shape - shape_next)/shape) < rel_eps) break
-    shape = shape_next
+    shape = shape0 - (1/(1/shape0 - trigamma(shape0))*(log(shape0) - digamma(shape0) - s))
+    if(abs((shape - shape0)/shape0) < rel.tol) break
+    shape0 = shape
   }
 
   if(i == iterlim) {

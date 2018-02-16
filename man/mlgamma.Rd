@@ -4,15 +4,15 @@
 \alias{mlgamma}
 \title{Estimates the parameter of the Gamma distribution using maximum likelihood}
 \usage{
-mlgamma(x, rel_eps = 10^-10, iterlim = 100)
+mlgamma(x, rel.tol = .Machine$double.eps^0.25, iterlim = 100)
 }
 \arguments{
 \item{x}{The data from which the estimate is to be computed.}
 
+\item{rel.tol}{Relative accuracy requested.}
+
 \item{iterlim}{A positive integer specifying the maximum number of
 iterations to be performed before the program is terminated.}
-
-\item{rel.tol}{Relative accuracy requested.}
 }
 \value{
 A named numeric vector with maximum likelihood estimates for
