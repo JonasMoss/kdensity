@@ -70,7 +70,7 @@ start_normal = list(
 #' @usage NULL
 #' @format NULL
 #' @section Built-in starts:
-#'    \code{laplace}: The Laplace distribution.
+#'    \code{laplace, gumbel}: Distributions on  \eqn{\mathbb{R}}.
 start_laplace = list(
   density = function(x, mu, b) {
     1/(2*b)*exp(-1/b*abs(x-mu))
@@ -84,11 +84,20 @@ start_laplace = list(
   support   = c(-Inf, Inf)
 )
 
+start_gumbel = list(
+  density = function(x, loc, scale) {
+      z = 1/scale*(x - loc)
+      1/scale*exp(-(z + exp(-z)))
+  },
+  estimator = mlgumbel,
+  support   = c(-Inf, Inf)
+)
+
 #' @rdname starts
 #' @usage NULL
 #' @format NULL
 #' @section Built-in starts:
-#'    \code{exponential, gamma, lognormal, inverse_gaussian}: Densities
+#'    \code{exponential, gamma, lognormal, inverse_gaussian, weibull}: Densities
 #'    supported on the positive real line \eqn{(0, \infty)}.
 start_exponential = list(
   density = dexp,
@@ -121,6 +130,12 @@ start_gamma = list(
   estimator = mlgamma,
   support   = c(0, Inf)
 )
+
+start_weibull = list(
+  density   = dweibull,
+  estimator = mlweibull,
+  support   = c(0, Inf)
+  )
 
 #' @rdname starts
 #' @usage NULL
