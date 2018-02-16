@@ -35,10 +35,16 @@ get_bw = function(bw) {
 #' @return a bandwidth string.
 
 get_standard_bw = function (kernel_str, start_str, support) {
-  if(kernel_str == "gcopula") {
-    bw = "JH"
-  } else if (start_str != "uniform") {
-    bw = "RHE"
+  if(start_str != "constant" & start_str != "uniform") {
+    if(kernel_str != "gaussian" & kernel_str != "normal") {
+      if(kernel_str == "gcopula") {
+        bw = "JH"
+      } else {
+        bw = "ucv"
+      }
+    } else {
+      bw = "RHE"
+    }
   } else {
     bw ="nrd0"
   }
