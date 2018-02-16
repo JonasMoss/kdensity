@@ -24,6 +24,7 @@ get_start = function(start_str) {
     beta             = start_beta,
     laplace          = start_laplace,
     weibull          = start_weibull,
+    gumbel           = start_gumbel,
     constant         = start_uniform
   )
 

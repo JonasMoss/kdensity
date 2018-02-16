@@ -154,27 +154,26 @@ mlweibull = function(x, shape0 = 2, rel.tol = .Machine$double.eps^0.25,
 #' @return A named numeric vector with maximum likelihood estimates for
 #' \code{shape} and \code{scale}.
 
-mlgumbel = function(x, scale0 = 2, rel.tol = .Machine$double.eps^0.25,
+mlgumbel = function(x, scale0 = 1, rel.tol = .Machine$double.eps^0.25,
                      iterlim = 100) {
 
   rel.tol_str = deparse(substitute(rel.tol))
-  log_x = log(x)
-  l_hat = mean(log_x)
-  log_xsq = log_x^2
+  mean_x = mean(x)
 
   for(i in 1:iterlim) {
-    shape0_lsum     = mean(x^shape0*log_x)
-    shape0_lsum_sqr = mean(x^shape0*log_xsq)
-    shape0_sum      = mean(x^shape0)
-    A = shape0_lsum/shape0_sum
-    B = shape0_lsum_sqr/shape0_sum
-    top = 1/shape0 + l_hat - A
-    bottom = -1/shape0^2 + A^2 - B
-    shape = shape0 - top/bottom
 
-    if(abs((shape0 - shape)/shape0) < rel.tol) break
+    A = sum(x*exp(-x/scale0))
+    B = sum(exp(-x/scale0))
+    C = sum(x^2*exp(-x/scale0))
 
-    shape0 = shape
+    top = mean_x - scale0 - A/B
+    bottom = -1 - 1/scale0^2*(C/B - (A/B)^2)
+
+    scale = scale0 - top/bottom
+
+    if(abs((scale0 - scale)/scale0) < rel.tol) break
+
+    scale0 = scale
   }
 
   if(i == iterlim) {
@@ -184,6 +183,6 @@ mlgumbel = function(x, scale0 = 2, rel.tol = .Machine$double.eps^0.25,
   }
 
   ## Given the shape, the scale is easy to compute.
-  scale = (mean(x^shape))^(1/shape)
-  c(shape = shape, scale = scale)
+  loc = -scale*log(mean(exp(-x/scale)))
+  c(loc = loc, scale = scale)
 }
