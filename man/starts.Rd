@@ -8,11 +8,12 @@
 \alias{start_laplace}
 \alias{start_exponential}
 \alias{start_beta}
+\alias{start_pareto}
 \title{Parametric starts}
 \description{
 A parametric start is a density function with associated estimator which
 is used as a starting point in \code{kdensity}. Several parametric starts
-are implemented, all with maximum likelihood estimation. Custom made
+are implemented, all with maximum likelihood estimation. Custom-made
 parametric starts are possible, see the Structure section.
 }
 \section{Built-in starts}{
@@ -25,18 +26,21 @@ parametric starts are possible, see the Structure section.
 
 
    \code{gaussian, normal}: The normal distribution. A natural choice for
-   densities on \code{c(-Inf, Inf)}.
+   densities on the real line \eqn{\mathbb{R}}.
 
 
-   \code{laplace, gumbel}: Densities
-   supported on \code{c(-Inf, Inf)}.
+   \code{laplace, gumbel}: Distributions on  \eqn{\mathbb{R}}.
 
 
    \code{exponential, gamma, lognormal, inverse_gaussian, weibull}: Densities
-   supported on \code{c(0, Inf)}.
+   supported on the positive real line \eqn{(0, \infty)}.
 
 
-   \code{beta}: The beta distribution, supported on \code{c(0, 1)}.
+   \code{beta}: The beta distribution, supported on the unit interval \eqn{[0, 1]}.
+
+
+   \code{pareto}: The Pareto distribution, supported on \eqn{[1, \infty)}.
+   Has heavy tails.
 }
 
 \section{Structure}{

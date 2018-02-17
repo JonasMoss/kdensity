@@ -2,7 +2,7 @@
 % Please edit documentation in R/kdensity.R
 \name{kdensity}
 \alias{kdensity}
-\title{Kernel density estimator with parametric start}
+\title{Parametrically guided kernel density estimation}
 \usage{
 kdensity(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
   support = NULL, na.rm = FALSE, normalized = TRUE)
@@ -10,7 +10,7 @@ kdensity(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
 \arguments{
 \item{x}{Numeric vector containg the data.}
 
-\item{bw}{A bandwidth function. Can be either a string, a custom made
+\item{bw}{A bandwidth function. Can be either a string, a custom-made
 function, or a double. The supported bandwith functions are documented
 in \code{\link{bandwidths}}.}
 
@@ -18,10 +18,10 @@ in \code{\link{bandwidths}}.}
 varies acccording to the chosen kernel.}
 
 \item{kernel}{The kernel function. Can be chosen from the list of built-in
-kernels or be custom made. See \code{\link{kernels}} for details.}
+kernels or be custom-made. See \code{\link{kernels}} for details.}
 
 \item{start}{Parametric start. Can be chosen from the list of built-in
-parametric starts or be custom made. See \code{\link{starts}} for details.}
+parametric starts or be custom-made. See \code{\link{starts}} for details.}
 
 \item{support}{The support of the data. Must be compatible with the supplied
 \code{x} and the supplied \code{start} and \code{kernel}. Is used to find the
@@ -51,8 +51,8 @@ following elements, accessible by '$':
 }
 }
 \description{
-\code{kdensity} computes a kernel density for univariate data. It supports
-asymmetric kernels and parametric starts through the \code{kernel} and
+\code{kdensity} computes a parametrically guided kernel density estimate for univariate data.
+It supports asymmetric kernels and parametric starts through the \code{kernel} and
 \code{start} arguments.
 }
 \details{
