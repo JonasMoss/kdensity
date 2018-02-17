@@ -25,7 +25,8 @@ get_start = function(start_str) {
     laplace          = start_laplace,
     weibull          = start_weibull,
     gumbel           = start_gumbel,
-    constant         = start_uniform
+    constant         = start_uniform,
+    pareto           = start_pareto
   )
 
   if(is.null(parametric_start)) {

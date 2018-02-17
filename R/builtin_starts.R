@@ -147,3 +147,17 @@ start_beta = list(
   estimator = mlbeta,
   support   = c(0, 1)
 )
+
+
+#' @rdname starts
+#' @usage NULL
+#' @format NULL
+#' @section Built-in starts:
+#'    \code{pareto}: The Pareto distribution, supported on \eqn{[1, \infty)}.
+#'    Has heavy tails.
+start_pareto = list(
+  density   = function(x, alpha) alpha*x^(-alpha-1),
+  estimator = function(x) 1/mean(log(x)),
+  support   = c(1, Inf)
+)
+
