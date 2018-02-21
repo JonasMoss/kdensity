@@ -97,6 +97,19 @@ bw.RHE = function(x, kernel = NULL, start = NULL, support = NULL) {
 }
 
 bw.ucv = function(x, kernel = NULL, start = NULL, support = NULL) {
+  ## We check for the combination start == "uniform" and kernel == "gaussian",
+  ## as this is handled by stats::density's related functions.
+
+  if(!is.null(start)) {
+    if (start == "constant" | start == "uniform") {
+      if(!is.null(get_kernel(kernel)$sd)) {
+        return(stats::bw.ucv(x))
+      }
+    }
+  }
+
+
+  ## If we are here, we must do our own cross-validation.
   kernel_obj      = get_kernel(kernel)
   start_obj       = get_start(start)
   kernel_fun      = kernel_obj$kernel
@@ -117,16 +130,13 @@ bw.ucv = function(x, kernel = NULL, start = NULL, support = NULL) {
 
   dstart = function(data, parameters) {
     arguments[[1]] = data
-    for(i in 1:length(parameters)) arguments[[i + 1]] = parameters[[i]]
+    if(length(parameters) > 0) {
+      for(i in 1:length(parameters)) arguments[[i + 1]] = parameters[[i]]
+    }
     do.call(start_density, arguments)
   }
 
-  full_density_values = dstart(x, full_parameters)
-
-  param_loo = list()
-  for (i in 1:n) {
-    param_loo[[i]] = start_estimator(x[-i])
-  }
+  param_loo = lapply(1:n, function(i) start_estimator(x[-i]))
 
   parametric_start_vector = function(data) dstart(data, full_parameters)
 
@@ -147,8 +157,9 @@ bw.ucv = function(x, kernel = NULL, start = NULL, support = NULL) {
 
     term2_vec = rep(0, n)
     for (i in 1:n) {
-      term2_vec[i] = mean(kernel_fun(x, x[i], h) *
-                          dstart(x, param_loo[[i]])) /
+      # Will not work fro asymmetric? Difference between x and y in kernel.
+      term2_vec[i] = mean(1/h*kernel_fun(x[-i], x[i], h) /
+                            dstart(x[-i], param_loo[[i]])) *
                           dstart(x[i], param_loo[[i]])
     }
     term2 = 2 * mean(term2_vec)
@@ -157,13 +168,34 @@ bw.ucv = function(x, kernel = NULL, start = NULL, support = NULL) {
     return(obj_func_value)
   }
 
-  ## The range of allowable bandwidths vary from kernel to kernel.
-  lower = 0.0001
-  upper = upper = 10 * sd(x)
+
+  # The range of allowable bandwidths vary from kernel to kernel.
+
   eps = 10^-10
-  if(kernel == "beta") upper = 1/4 - eps
-  bw = optimize(obj_func, lower = lower, upper, tol = 0.0001)$minimum
+
+  if(kernel == "gcopula" | kernel == "beta" | kernel == "beta_biased") {
+    using_str = "JH"
+    using = bw.JH(x)
+    lower = 1/4*using
+    upper = 1/4 - eps
+  } else if (start == "constant" | start == "uniform"){
+    using_str = "nrd0"
+    using = bw.nrd0(x)
+    lower = 1/5 * using
+    upper = 5 * using
+  } else {
+    using_str = "RHE"
+    using = bw.RHE(x)
+    lower = 1/5 * using
+    upper = 5 * using
+  }
+
+  bw = optimize(obj_func, lower = lower, upper = upper, tol = 0.0001)$minimum
+  # bw = tryCatch(optimize(obj_func, lower = lower, upper = upper, tol = 0.0001)$minimum,
+  #               error = function(e) {
+  #                 warning(paste0("Integration failed when finding bandwidth using 'ucv'. Using '", using_str, "' instead."), call. = FALSE)
+  #                 using
+  #                 }
+  #               )
   return(bw)
 }
-
-
