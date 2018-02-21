@@ -18,6 +18,7 @@ rug(data)
 
 ## Gamma kernels and ucv.
 xx = seq(0, 20, by = 0.01)
+data = rbeta(100, 2, 7)
 kdensity(data, kernel = "gamma", start = "uniform", bw = "ucv") %>%
   plot(col = "blue")
 kdensity(data, kernel = "gamma", start = "gumbel", bw = "ucv") %>%
