@@ -25,13 +25,13 @@
 #'   )
 #'
 #'   start_inverse_gaussian = list(
-#'     density = statmod::dinvgauss,
+#'     density = extraDistr::dwald,
 #'     estimator = function(data) {
-#'       c(mean       = mean(data),
-#'         dispersion = mean(1/data - 1/mean(data)))
+#'       c(mu       = mean(data),
+#'         lambda   = mean(1/data - 1/mean(data)))
 #'     },
 #'     support   = c(0, Inf)
-#'   )
+#'  )
 #'
 #' @seealso \code{\link{kdensity}}; \code{\link{kernels}}; \code{\link{bandwidths}}
 #'
@@ -125,6 +125,12 @@ if(requireNamespace("extraDistr", quietly = TRUE)) {
     },
     support   = c(0, Inf)
   )
+} else {
+  start_inverse_gaussian = list(
+    density   = function(x) stop("Package 'extraDistr' required for option 'inverse_gaussian'."),
+    estimator = function(x) stop("Package 'extraDistr' required for option 'inverse_gaussian'."),
+    support   = c(0, Inf)
+  )
 }
 
 start_gamma = list(
@@ -155,6 +161,12 @@ if(requireNamespace("extraDistr", quietly = TRUE)) {
     density   = extraDistr::dkumar,
     estimator = mlkumar,
     support   = c(0, 1)
+  )
+} else {
+  start_kumar = list(
+    density   = function(x) stop("Package 'extraDistr' required for option 'kumaraswsamy'."),
+    estimator = function(x) stop("Package 'extraDistr' required for option 'kumaraswsamy'."),
+    support   = c(0, Inf)
   )
 }
 

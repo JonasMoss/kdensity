@@ -62,13 +62,13 @@ parametric starts are possible, see the Structure section.
   )
 
   start_inverse_gaussian = list(
-    density = statmod::dinvgauss,
+    density = extraDistr::dwald,
     estimator = function(data) {
-      c(mean       = mean(data),
-        dispersion = mean(1/data - 1/mean(data)))
+      c(mu       = mean(data),
+        lambda   = mean(1/data - 1/mean(data)))
     },
     support   = c(0, Inf)
-  )
+ )
 
 }
 \seealso{
