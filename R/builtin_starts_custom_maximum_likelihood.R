@@ -15,7 +15,7 @@
 
 
 mlbeta = function(x, start = NULL, type = c("none", "gradient", "hessian")) {
-  type = match.arg(type, c("none","gradient","full"))
+  type = match.arg(type)
 
   val1 = mean(log(x))
   val2 = mean(log(1-x))
@@ -32,7 +32,7 @@ mlbeta = function(x, start = NULL, type = c("none", "gradient", "hessian")) {
     lbeta(p[1],p[2]) - p[1]*val1 - p[2]*val2
   }
 
-  if(type == "gradient" | type == "full") {
+  if(type == "gradient" | type == "hessian") {
     attr(beta_objective, "gradient") = function(p) {
       digamma_alpha_beta = digamma(p[1] + p[2])
       c(digamma(p[1]) - digamma_alpha_beta - val1,
@@ -40,7 +40,7 @@ mlbeta = function(x, start = NULL, type = c("none", "gradient", "hessian")) {
     }
   }
 
-  if(type == "full") {
+  if(type == "hessian") {
     attr(beta_objective, "hessian") = function(p) {
       trigamma_alpha_beta = -trigamma(p[1] + p[2])
       matrix(trigamma_alpha_beta, nrow = 2, ncol = 2) +
