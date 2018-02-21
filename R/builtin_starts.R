@@ -141,10 +141,16 @@ start_weibull = list(
 #' @usage NULL
 #' @format NULL
 #' @section Built-in starts:
-#'    \code{beta}: The beta distribution, supported on the unit interval \eqn{[0, 1]}.
+#'    \code{beta, kumaraswamy}: The beta distribution, supported on the unit interval \eqn{[0, 1]}.
 start_beta = list(
   density   = dbeta,
   estimator = mlbeta,
+  support   = c(0, 1)
+)
+
+start_kumar = list(
+  density   = extraDistr::dkumar,
+  estimator = mlkumar,
   support   = c(0, 1)
 )
 
