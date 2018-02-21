@@ -36,7 +36,7 @@ parametric starts are possible, see the Structure section.
    supported on the positive real line \eqn{(0, \infty)}.
 
 
-   \code{beta}: The beta distribution, supported on the unit interval \eqn{[0, 1]}.
+   \code{beta, kumaraswamy}: The beta distribution, supported on the unit interval \eqn{[0, 1]}.
 
 
    \code{pareto}: The Pareto distribution, supported on \eqn{[1, \infty)}.
@@ -62,13 +62,13 @@ parametric starts are possible, see the Structure section.
   )
 
   start_inverse_gaussian = list(
-    density = statmod::dinvgauss,
+    density = extraDistr::dwald,
     estimator = function(data) {
-      c(mean       = mean(data),
-        dispersion = mean(1/data - 1/mean(data)))
+      c(mu       = mean(data),
+        lambda   = mean(1/data - 1/mean(data)))
     },
     support   = c(0, Inf)
-  )
+ )
 
 }
 \seealso{

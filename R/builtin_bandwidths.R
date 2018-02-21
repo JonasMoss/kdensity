@@ -124,7 +124,7 @@ bw.ucv = function(x, kernel = NULL, start = NULL, support = NULL) {
   full_parameters = start_estimator(x)
 
   arguments = list()
-  arguments[[1]] = data
+  arguments[[1]] = x
   names(arguments)[1] = x_name
   arguments = append(arguments, as.list(full_parameters))
 
@@ -180,7 +180,7 @@ bw.ucv = function(x, kernel = NULL, start = NULL, support = NULL) {
     upper = 1/4 - eps
   } else if (start == "constant" | start == "uniform"){
     using_str = "nrd0"
-    using = bw.nrd0(x)
+    using = stats::bw.nrd0(x)
     lower = 1/5 * using
     upper = 5 * using
   } else {
@@ -190,12 +190,11 @@ bw.ucv = function(x, kernel = NULL, start = NULL, support = NULL) {
     upper = 5 * using
   }
 
-  bw = optimize(obj_func, lower = lower, upper = upper, tol = 0.0001)$minimum
-  # bw = tryCatch(optimize(obj_func, lower = lower, upper = upper, tol = 0.0001)$minimum,
-  #               error = function(e) {
-  #                 warning(paste0("Integration failed when finding bandwidth using 'ucv'. Using '", using_str, "' instead."), call. = FALSE)
-  #                 using
-  #                 }
-  #               )
+  bw = tryCatch(stats::optimize(obj_func, lower = lower, upper = upper, tol = 0.0001)$minimum,
+                error = function(e) {
+                  warning(paste0("Integration failed when finding bandwidth using 'ucv'. Using '", using_str, "' instead."), call. = FALSE)
+                  using
+                  }
+                )
   return(bw)
 }

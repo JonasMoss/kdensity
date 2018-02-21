@@ -25,13 +25,13 @@
 #'   )
 #'
 #'   start_inverse_gaussian = list(
-#'     density = statmod::dinvgauss,
+#'     density = extraDistr::dwald,
 #'     estimator = function(data) {
-#'       c(mean       = mean(data),
-#'         dispersion = mean(1/data - 1/mean(data)))
+#'       c(mu       = mean(data),
+#'         lambda   = mean(1/data - 1/mean(data)))
 #'     },
 #'     support   = c(0, Inf)
-#'   )
+#'  )
 #'
 #' @seealso \code{\link{kdensity}}; \code{\link{kernels}}; \code{\link{bandwidths}}
 #'
@@ -116,14 +116,22 @@ start_lognormal = list(
   support   = c(0, Inf)
 )
 
-start_inverse_gaussian = list(
-  density = statmod::dinvgauss,
-  estimator = function(data) {
-    c(mean       = mean(data),
-      dispersion = mean(1/data - 1/mean(data)))
-  },
-  support   = c(0, Inf)
-)
+if(requireNamespace("extraDistr", quietly = TRUE)) {
+  start_inverse_gaussian = list(
+    density = extraDistr::dwald,
+    estimator = function(data) {
+      c(mu       = mean(data),
+        lambda   = mean(1/data - 1/mean(data)))
+    },
+    support   = c(0, Inf)
+  )
+} else {
+  start_inverse_gaussian = list(
+    density   = function(x) stop("Package 'extraDistr' required for option 'inverse_gaussian'."),
+    estimator = function(x) stop("Package 'extraDistr' required for option 'inverse_gaussian'."),
+    support   = c(0, Inf)
+  )
+}
 
 start_gamma = list(
   density   = dgamma,
@@ -141,13 +149,26 @@ start_weibull = list(
 #' @usage NULL
 #' @format NULL
 #' @section Built-in starts:
-#'    \code{beta}: The beta distribution, supported on the unit interval \eqn{[0, 1]}.
+#'    \code{beta, kumaraswamy}: The beta distribution, supported on the unit interval \eqn{[0, 1]}.
 start_beta = list(
   density   = dbeta,
   estimator = mlbeta,
   support   = c(0, 1)
 )
 
+if(requireNamespace("extraDistr", quietly = TRUE)) {
+  start_kumar = list(
+    density   = extraDistr::dkumar,
+    estimator = mlkumar,
+    support   = c(0, 1)
+  )
+} else {
+  start_kumar = list(
+    density   = function(x) stop("Package 'extraDistr' required for option 'kumaraswsamy'."),
+    estimator = function(x) stop("Package 'extraDistr' required for option 'kumaraswsamy'."),
+    support   = c(0, Inf)
+  )
+}
 
 #' @rdname starts
 #' @usage NULL
