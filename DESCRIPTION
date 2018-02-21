@@ -6,7 +6,7 @@ Author: Jonas Moss, Martin Tveten
 Maintainer: Jonas Moss <jonas.gjertsen@gmail.com>
 Description: Deals with non-parametric density estimation with parametric starts
     and asymmetric kernels in a simple and flexible way. 
-License: MIT
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Suggests: extraDistr,
