@@ -170,9 +170,6 @@ if(requireNamespace("extraDistr", quietly = TRUE)) {
   )
 }
 
-
-#stop("Package 'extraDistr' required for option 'kumaraswamy'.")),
-
 #' @rdname starts
 #' @usage NULL
 #' @format NULL
