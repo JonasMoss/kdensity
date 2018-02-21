@@ -55,7 +55,7 @@ In addition to parametric starts, the package implements some *asymmetric kernel
 
 These features can be combined to make asymmetric kernel densities estimators with parametric starts, see the example below. The package contains only one function, `kdensity`, in addition to the generics `plot`, `points`, `lines`, `summary`, and `print`. 
 
-## How to use
+## Usage
 
 The function `kdensity` takes some `data`, a kernel `kernel` and a parametric start `start`. You can optionally specify the `support` parameter, which is used to find the normalizing constant.
 
@@ -75,10 +75,12 @@ Since the return value of `kdensity` is a function, it is callable, as in:
 kde(10)
 ```
 
-You can access the parameter estimates by using `coef`:
+You can access the parameter estimates by using `coef`. You can also access the log likelihood (`logLik`), AIC and BIC of the parametric start distribution.
 
 ```{r dollar, echo = TRUE}
 coef(kde)
+logLik(kde)
+AIC(kde)
 ```
 ## References
 
