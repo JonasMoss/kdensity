@@ -19,7 +19,7 @@ logLik.kdensity = function(object, ...) {
   assertthat::assert_that(object$start != "uniform" & object$start != "constant", msg = msg)
   val = object$logLik
   attr(val, "nobs") = length(object$n)
-  attr(val, "df")   = length(coef(object))
+  attr(val, "df")   = length(stats::coef(object))
   class(val) = "logLik"
   val
 }
