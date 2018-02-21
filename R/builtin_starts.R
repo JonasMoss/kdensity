@@ -116,14 +116,16 @@ start_lognormal = list(
   support   = c(0, Inf)
 )
 
-start_inverse_gaussian = list(
-  density = statmod::dinvgauss,
-  estimator = function(data) {
-    c(mean       = mean(data),
-      dispersion = mean(1/data - 1/mean(data)))
-  },
-  support   = c(0, Inf)
-)
+if(requireNamespace("extraDistr", quietly = TRUE)) {
+  start_inverse_gaussian = list(
+    density = extraDistr::dwald,
+    estimator = function(data) {
+      c(mu       = mean(data),
+        lambda   = mean(1/data - 1/mean(data)))
+    },
+    support   = c(0, Inf)
+  )
+}
 
 start_gamma = list(
   density   = dgamma,
@@ -148,12 +150,16 @@ start_beta = list(
   support   = c(0, 1)
 )
 
-start_kumar = list(
-  density   = extraDistr::dkumar,
-  estimator = mlkumar,
-  support   = c(0, 1)
-)
+if(requireNamespace("extraDistr", quietly = TRUE)) {
+  start_kumar = list(
+    density   = extraDistr::dkumar,
+    estimator = mlkumar,
+    support   = c(0, 1)
+  )
+}
 
+
+#stop("Package 'extraDistr' required for option 'kumaraswamy'.")),
 
 #' @rdname starts
 #' @usage NULL

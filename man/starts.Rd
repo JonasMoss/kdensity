@@ -36,7 +36,7 @@ parametric starts are possible, see the Structure section.
    supported on the positive real line \eqn{(0, \infty)}.
 
 
-   \code{beta}: The beta distribution, supported on the unit interval \eqn{[0, 1]}.
+   \code{beta, kumaraswamy}: The beta distribution, supported on the unit interval \eqn{[0, 1]}.
 
 
    \code{pareto}: The Pareto distribution, supported on \eqn{[1, \infty)}.
