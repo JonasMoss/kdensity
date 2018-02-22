@@ -42,7 +42,7 @@ bw_environment = new.env(hash = FALSE)
 #'
 #' @seealso \code{\link{kdensity}}, \code{\link[stats]{bandwidth}} for the
 #'    bandwidth selectors of \code{\link[stats]{density}}. In addition,
-#'    \code{\link{kernels}}; \code{\link{starts}}
+#'    \code{\link{kernels}}; \code{\link{parametric_starts}}
 #'
 #' @examples
 #'    ## Not a serious bandwidth function.
@@ -90,7 +90,7 @@ bw_environment$RHE = function(x, kernel = NULL, start = NULL, support = NULL) {
   return(bw)
 }
 
-bw_environment$nrd = function(data, kernel, start, support) stats::bw.nrd0(data)
+bw_environment$nrd0 = function(data, kernel, start, support) stats::bw.nrd0(data)
 bw_environment$nrd = function(data, kernel, start, support) stats::bw.nrd(data)
 bw_environment$bcv = function(data, kernel, start, support) stats::bw.bcv(data)
 bw_environment$SJ = function(data, kernel, start, support) stats::bw.SJ(data)

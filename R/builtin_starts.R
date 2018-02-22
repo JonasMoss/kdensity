@@ -37,9 +37,9 @@ starts_environment = new.env(hash = FALSE)
 #'
 #' @seealso \code{\link{kdensity}}; \code{\link{kernels}}; \code{\link{bandwidths}}
 #'
-#' @name starts
+#' @name parametric_starts
 
-#' @rdname starts
+#' @rdname parametric_starts
 #' @include builtin_starts_custom_maximum_likelihood.R
 #' @usage NULL
 #' @format NULL
@@ -47,6 +47,8 @@ starts_environment = new.env(hash = FALSE)
 #'    \code{uniform, constant}: Selecting the uniform start makes \code{kdensity}
 #'    act like an ordinary kernel density estimator. The default value for any
 #'    choice of kernel or support.
+roxygen_useless = NULL
+
 starts_environment$uniform = list(
   density   = function(x) rep(1, length(x)),
   estimator = function(data) NULL,
@@ -55,12 +57,14 @@ starts_environment$uniform = list(
 
 starts_environment$constant = starts_environment$uniform
 
-#' @rdname starts
+#' @rdname parametric_starts
 #' @usage NULL
 #' @format NULL
 #' @section Built-in starts:
 #'    \code{gaussian, normal}: The normal distribution. A natural choice for
 #'    densities on the real line \eqn{\mathbb{R}}.
+roxygen_useless = NULL
+
 starts_environment$normal = list(
   density = dnorm,
   estimator = function(data) {
@@ -72,11 +76,13 @@ starts_environment$normal = list(
 
 starts_environment$gaussian = starts_environment$normal
 
-#' @rdname starts
+#' @rdname parametric_starts
 #' @usage NULL
 #' @format NULL
 #' @section Built-in starts:
 #'    \code{laplace, gumbel}: Distributions on  \eqn{\mathbb{R}}.
+roxygen_useless = NULL
+
 starts_environment$laplace = list(
   density = function(x, mu, b) {
     1/(2*b)*exp(-1/b*abs(x-mu))
@@ -99,12 +105,14 @@ starts_environment$gumbel = list(
   support   = c(-Inf, Inf)
 )
 
-#' @rdname starts
+#' @rdname parametric_starts
 #' @usage NULL
 #' @format NULL
 #' @section Built-in starts:
 #'    \code{exponential, gamma, lognormal, inverse_gaussian, weibull}: Densities
 #'    supported on the positive real line \eqn{(0, \infty)}.
+roxygen_useless = NULL
+
 starts_environment$exponential = list(
   density = dexp,
   estimator = function(data) {
@@ -153,11 +161,13 @@ starts_environment$weibull = list(
   support   = c(0, Inf)
   )
 
-#' @rdname starts
+#' @rdname parametric_starts
 #' @usage NULL
 #' @format NULL
 #' @section Built-in starts:
 #'    \code{beta, kumaraswamy}: The beta distribution, supported on the unit interval \eqn{[0, 1]}.
+roxygen_useless = NULL
+
 starts_environment$beta = list(
   density   = dbeta,
   estimator = mlbeta,
@@ -179,12 +189,14 @@ if(requireNamespace("extraDistr", quietly = TRUE)) {
 }
 
 
-#' @rdname starts
+#' @rdname parametric_starts
 #' @usage NULL
 #' @format NULL
 #' @section Built-in starts:
 #'    \code{pareto}: The Pareto distribution, supported on \eqn{[1, \infty)}.
 #'    Has heavy tails.
+roxygen_useless = NULL
+
 starts_environment$pareto = list(
   density   = function(x, alpha) alpha*x^(-alpha-1),
   estimator = function(x) 1/mean(log(x)),

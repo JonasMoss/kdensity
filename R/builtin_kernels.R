@@ -43,7 +43,8 @@ kernel_environment = new.env(hash = FALSE)
 #'   support = c(0, 1)
 #' )
 #'
-#' @seealso \code{\link{kdensity}}; \code{\link{starts}}; \code{\link{bandwidths}}
+#' @seealso \code{\link{kdensity}}; \code{\link{parametric_starts}};
+#' \code{\link{bandwidths}}.
 #'
 #' @name kernels
 

@@ -90,6 +90,7 @@ Chen, Song Xi. "Probability density function estimation using gamma kernels." An
 Chen, Song Xi. "Beta kernel estimators for density functions." Computational Statistics & Data Analysis 31.2 (1999): 131-145.
 }
 \seealso{
-\code{\link{kdensity}}; \code{\link{starts}}; \code{\link{bandwidths}}
+\code{\link{kdensity}}; \code{\link{parametric_starts}};
+\code{\link{bandwidths}}.
 }
 \keyword{datasets}

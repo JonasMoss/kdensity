@@ -12,7 +12,7 @@ get_bw = function(bw_str) {
     if(exists(bw_str)) {
       parametric_start = get(bw_str)
     } else {
-      stop(paste0("The supplied kernel ('", bw_str,"') is not implemented."))
+      stop(paste0("The supplied bandwidth function ('", bw_str,"') is not implemented."))
     }
   }
 

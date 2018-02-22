@@ -38,7 +38,7 @@ add_start = function(start_str, start) {
   ## Checks for the right elements in start.
   density_msg = paste0("The parametric start ('", start_str, "') must contain a function named 'density'.")
   estimator_msg = paste0("The parametric start ('", start_str, "') must contain a function named 'estimator.")
-  density_msg = paste0("The parametric start ('", start_str, "') must contain a function named 'support'.")
+  support_msg = paste0("The parametric start ('", start_str, "') must contain a function named 'support'.")
 
   assertthat::assert_that(!is.null(start$density), msg = density_msg)
   assertthat::assert_that(!is.null(start$estimator), msg = estimator_msg)

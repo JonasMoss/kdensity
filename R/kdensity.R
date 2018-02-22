@@ -19,7 +19,8 @@
 #' kernels or be custom-made. See \code{\link{kernels}} for details.
 #'
 #' @param start Parametric start. Can be chosen from the list of built-in
-#' parametric starts or be custom-made. See \code{\link{starts}} for details.
+#' parametric starts or be custom-made. See \code{\link{parametric_starts}} for
+#' details.
 #'
 #' @param support The support of the data. Must be compatible with the supplied
 #' \code{x} and the supplied \code{start} and \code{kernel}. Is used to find the
@@ -294,6 +295,7 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
   attr(return_function, "range")     = c(min(x), max(x))
   attr(return_function, "estimates") = parameters
   attr(return_function, "logLik")    = logLik
+  attr(return_function, "srcref")    = NULL
 
   return_function
 }
