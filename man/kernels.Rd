@@ -3,21 +3,12 @@
 \docType{data}
 \name{kernels}
 \alias{kernels}
-\alias{kernel_gaussian}
-\alias{kernel_laplace}
-\alias{kernel_epanechnikov}
-\alias{kernel_rectangular}
-\alias{kernel_triangular}
-\alias{kernel_biweight}
-\alias{kernel_triweight}
-\alias{kernel_tricube}
-\alias{kernel_cosine}
-\alias{kernel_optcosine}
-\alias{kernel_gcopula}
-\alias{kernel_gamma}
-\alias{kernel_gamma_biased}
-\alias{kernel_beta}
-\alias{kernel_beta_biased}
+\alias{kernel_doc_useless}
+\alias{kernel_doc_useless}
+\alias{kernel_doc_useless}
+\alias{kernel_doc_useless}
+\alias{kernel_doc_useless}
+\alias{kernel_doc_useless}
 \title{Kernel functions}
 \description{
 Kernel functions are an important part of \code{kdensity}. This document
@@ -29,10 +20,10 @@ for the intended kernel.
 
 
 
-   \code{gaussian}: The Gaussian kernel, defined as bla bla.
+   \code{gaussian}: The Gaussian kernel.
 
 
-   \code{laplace}: The Laplace kernel, defined as bla bla.
+   \code{laplace}: The Laplace kernel.
 
 
    \code{epanechnikov}: The Epanechnikov kernel, defined as bla bla.
@@ -99,6 +90,7 @@ Chen, Song Xi. "Probability density function estimation using gamma kernels." An
 Chen, Song Xi. "Beta kernel estimators for density functions." Computational Statistics & Data Analysis 31.2 (1999): 131-145.
 }
 \seealso{
-\code{\link{kdensity}}; \code{\link{starts}}; \code{\link{bandwidths}}
+\code{\link{kdensity}}; \code{\link{parametric_starts}};
+\code{\link{bandwidths}}.
 }
 \keyword{datasets}

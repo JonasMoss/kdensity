@@ -21,7 +21,8 @@ varies acccording to the chosen kernel.}
 kernels or be custom-made. See \code{\link{kernels}} for details.}
 
 \item{start}{Parametric start. Can be chosen from the list of built-in
-parametric starts or be custom-made. See \code{\link{starts}} for details.}
+parametric starts or be custom-made. See \code{\link{parametric_starts}} for
+details.}
 
 \item{support}{The support of the data. Must be compatible with the supplied
 \code{x} and the supplied \code{start} and \code{kernel}. Is used to find the

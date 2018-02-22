@@ -1,31 +1,47 @@
 #' Get bandwidth functions from string.
 #'
-#' @param bw a string specifying the density of interest.
+#' @param bw_str a string specifying the density of interest.
 #' @return a bandwidth function.
-get_bw = function(bw) {
+get_bw = function(bw_str) {
 
-  assertthat::assert_that(is.character(bw))
+  assertthat::assert_that(is.character(bw_str))
 
-  final_bw = switch(bw,
-         "nrd0" = function(data, kernel, start, support) stats::bw.nrd0(data),
-         "nrd"  = function(data, kernel, start, support) stats::bw.nrd(data),
-         "bcv"  = function(data, kernel, start, support) stats::bw.bcv(data),
-         "SJ"   = function(data, kernel, start, support) stats::bw.SJ(data),
-         "ucv"  = bw.ucv,
-         "JH"   = bw.JH,
-         "RHE"  = bw.RHE
-         )
+  bw = bw_environment[[bw_str]]
 
-  if(is.null(final_bw)) {
-    if(exists(bw)) {
-      final_bw = get(bw)
+  if(is.null(bw)) {
+    if(exists(bw_str)) {
+      parametric_start = get(bw_str)
     } else {
-      stop("The supplied 'bw' is no among the supported alternatives.")
+      stop(paste0("The supplied bandwidth function ('", bw_str,"') is not implemented."))
     }
   }
 
-  final_bw
+  bw
+
 }
+
+
+#' Add a new bw to \code{bw_environment}.
+#'
+#' @param bw_str A string giving the name of the density.
+#' @param bw The bw function.
+#' @return None.
+
+add_bw = function(bw_str, bw) {
+  assertthat::assert_that(is.character(bw_str))
+  assertthat::assert_that(all(bw_str == make.names(bw_str)),
+                          msg = "The name of the  bw is not valid. Use a short, valid name. (E.g. kdensity(x, bw = nrd0), where 'nrd0' is a predefined bw function.)")
+
+  func_msg = paste0("The bw ('", bw_str, "') must be a function.")
+  form_msg = paste0("The bw ('", bw_str, "') must take the arguments 'x', 'kernel', 'start', 'support'.")
+  assertthat::assert_that(is.function(bw), msg = func_msg)
+  assertthat::assert_that(all(formals(bw) == c("x", "kernel", "start", "support")),
+                          msg = form_msg)
+
+  bw_environment[[bw_str]] = bw
+}
+
+
 
 #' Get a bandwidth string when 'bw' is unspecified.
 #'
