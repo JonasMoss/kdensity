@@ -167,7 +167,7 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
   if(!is.null(kernel)){
     if(!is.character(kernel)) {
       kernel_str = deparse(substitute(kernel))
-      add_start(kernel_str = kernel_str, kernel = kernel)
+      add_kernel(kernel_str = kernel_str, kernel = kernel)
       kernel = kernel_str
     }
   }

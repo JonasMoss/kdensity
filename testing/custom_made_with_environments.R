@@ -17,10 +17,16 @@ rug(data)
 
 ## Testing custom kernel:
 
+t4 = list(
+  kernel   = function(y, x, h) dt((x-y)/h, df = 4),
+  sd       = 1.41,
+  support   = c(-Inf, Inf)
+)
+
 
 # Gumbel and mtcars$mpg
 data = mtcars$mpg
-kdensity(data, kernel = "normal", start = "gumbel", bw = "ucv") %>%
+kdensity(data, kernel = t4, start = "gumbel", bw = "nrd0") %>%
   plot(main = "Miles per Gallon") %>%
   lines(col = "red", plot_start = TRUE) %>%
   coef
