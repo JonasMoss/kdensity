@@ -65,7 +65,7 @@ update.kdensity = function(object, ...) {
 }
 
 #' @export
-coef.kdensity = function(object, ...) object$estimate
+coef.kdensity = function(object, ...) object$estimates
 
 #' @export
 logLik.kdensity = function(object, ...) {
@@ -175,14 +175,14 @@ plot_helper = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, pt
   args$x = range
 
   if(plot_start) {
-    start = x$start
+    start = x$start_str
 
     msg = "To use 'plot_start = TRUE', supply a parametric start that is a proper density."
     assertthat::assert_that(!is.null(start), start != "uniform", msg = msg)
 
     start = get_start(start)
 
-    parameters = x$estimates
+    parameters = stats::coef(x)
     parametric_start = start$density
 
     args$y = sapply(range, function(y) {

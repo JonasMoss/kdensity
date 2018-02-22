@@ -155,7 +155,7 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
          support[1], ", ", support[2], ").")
   }
 
-  parameters = start$estimator(x)
+  estimates = start$estimator(x)
   parametric_start = start$density
 
   # Name of the variable where the density is evaluated. Typically x.
@@ -165,7 +165,7 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
     arguments = list()
     arguments[[1]] = x
     names(arguments)[1] = x_name
-    arguments = append(arguments, as.list(parameters))
+    arguments = append(arguments, as.list(estimates))
     do.call(parametric_start, arguments)
   }
 
@@ -252,7 +252,7 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
        arguments = list()
        arguments[[1]] = y
        names(arguments)[1] = x_name
-       arguments = append(arguments, as.list(parameters))
+       arguments = append(arguments, as.list(estimates))
        do.call(parametric_start, arguments)
     }
 
