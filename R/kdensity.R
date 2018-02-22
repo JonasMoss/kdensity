@@ -152,15 +152,18 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
     }
   }
 
-
   ## Now we massage and handle the combinations of kernel, start and support.
+  ## This is fancy defaults management.
+
   kss_list = get_kernel_start_support(kernel, start, support)
 
-  start_str = ifelse(!is.list(start), kss_list$start_str, deparse(substitute(start)))
+  ## start_str and kernel_str is used to keep track of the name of the kernel / start.
+  start_str  = ifelse(!is.list(start), kss_list$start_str, deparse(substitute(start)))
   kernel_str = ifelse(!is.list(kernel), kss_list$kernel_str, deparse(substitute(kernel)))
 
-  kernel = kss_list$kernel
-  start = kss_list$start
+  ## We overwrite the kernel, start, and support with what we obtained from kss.
+  kernel  = kss_list$kernel
+  start   = kss_list$start
   support = kss_list$support
 
   ## Tests for incompabibilities in the supplied values.
@@ -174,15 +177,16 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
 
   parameters = start$estimator(x)
   parametric_start = start$density
+
   # Name of the variable where the density is evaluated. Typically x.
   x_name = names(formals(start$density))[1]
 
-  parametric_start_vector = function(data) {
-    sapply(data, function(datum) {
-      arguments = as.list(c("x" = datum, parameters))
-      names(arguments)[1] = x_name
-      do.call(parametric_start, arguments)
-      })
+  parametric_start_vector = function(x) {
+    arguments = list()
+    arguments[[1]] = x
+    names(arguments)[1] = x_name
+    arguments = append(arguments, as.list(parameters))
+    do.call(parametric_start, arguments)
   }
 
   ## Takes care of the bandwidth. Can be either a double, a string, or a
