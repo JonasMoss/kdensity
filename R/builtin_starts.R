@@ -1,3 +1,5 @@
+starts_environment = new.env(hash = FALSE)
+
 #' Parametric starts
 #'
 #' A parametric start is a density function with associated estimator which
@@ -45,11 +47,13 @@
 #'    \code{uniform, constant}: Selecting the uniform start makes \code{kdensity}
 #'    act like an ordinary kernel density estimator. The default value for any
 #'    choice of kernel or support.
-start_uniform = list(
+starts_environment$uniform = list(
   density   = function(x) rep(1, length(x)),
   estimator = function(data) NULL,
   support   = c(-Inf, Inf)
 )
+
+starts_environment$constant = starts_environment$uniform
 
 #' @rdname starts
 #' @usage NULL
@@ -57,7 +61,7 @@ start_uniform = list(
 #' @section Built-in starts:
 #'    \code{gaussian, normal}: The normal distribution. A natural choice for
 #'    densities on the real line \eqn{\mathbb{R}}.
-start_normal = list(
+starts_environment$normal = list(
   density = dnorm,
   estimator = function(data) {
     c(mean = mean(data),
@@ -66,12 +70,14 @@ start_normal = list(
   support   = c(-Inf, Inf)
 )
 
+starts_environment$gaussian = starts_environment$normal
+
 #' @rdname starts
 #' @usage NULL
 #' @format NULL
 #' @section Built-in starts:
 #'    \code{laplace, gumbel}: Distributions on  \eqn{\mathbb{R}}.
-start_laplace = list(
+starts_environment$laplace = list(
   density = function(x, mu, b) {
     1/(2*b)*exp(-1/b*abs(x-mu))
   },
@@ -84,7 +90,7 @@ start_laplace = list(
   support   = c(-Inf, Inf)
 )
 
-start_gumbel = list(
+starts_environment$gumbel = list(
   density = function(x, loc, scale) {
       z = 1/scale*(x - loc)
       1/scale*exp(-(z + exp(-z)))
@@ -99,7 +105,7 @@ start_gumbel = list(
 #' @section Built-in starts:
 #'    \code{exponential, gamma, lognormal, inverse_gaussian, weibull}: Densities
 #'    supported on the positive real line \eqn{(0, \infty)}.
-start_exponential = list(
+starts_environment$exponential = list(
   density = dexp,
   estimator = function(data) {
     c(rate = 1/mean(data))
@@ -107,7 +113,7 @@ start_exponential = list(
   support   = c(0, Inf)
 )
 
-start_lognormal = list(
+starts_environment$lognormal = list(
   density = dlnorm,
   estimator = function(data) {
     c(meanlog = mean(log(data)),
@@ -117,7 +123,7 @@ start_lognormal = list(
 )
 
 if(requireNamespace("extraDistr", quietly = TRUE)) {
-  start_inverse_gaussian = list(
+  starts_environment$inverse_gaussian = list(
     density = extraDistr::dwald,
     estimator = function(data) {
       c(mu       = mean(data),
@@ -126,20 +132,22 @@ if(requireNamespace("extraDistr", quietly = TRUE)) {
     support   = c(0, Inf)
   )
 } else {
-  start_inverse_gaussian = list(
+  starts_environment$inverse_gaussian = list(
     density   = function(x) stop("Package 'extraDistr' required for option 'inverse_gaussian'."),
     estimator = function(x) stop("Package 'extraDistr' required for option 'inverse_gaussian'."),
     support   = c(0, Inf)
   )
 }
 
-start_gamma = list(
+starts_environment$wald = starts_environment$inverse_gaussian
+
+starts_environment$gamma = list(
   density   = dgamma,
   estimator = mlgamma,
   support   = c(0, Inf)
 )
 
-start_weibull = list(
+starts_environment$weibull = list(
   density   = dweibull,
   estimator = mlweibull,
   support   = c(0, Inf)
@@ -150,25 +158,26 @@ start_weibull = list(
 #' @format NULL
 #' @section Built-in starts:
 #'    \code{beta, kumaraswamy}: The beta distribution, supported on the unit interval \eqn{[0, 1]}.
-start_beta = list(
+starts_environment$beta = list(
   density   = dbeta,
   estimator = mlbeta,
   support   = c(0, 1)
 )
 
 if(requireNamespace("extraDistr", quietly = TRUE)) {
-  start_kumar = list(
+  starts_environment$kumar = list(
     density   = extraDistr::dkumar,
     estimator = mlkumar,
     support   = c(0, 1)
   )
 } else {
-  start_kumar = list(
+  starts_environment$kumar = list(
     density   = function(x) stop("Package 'extraDistr' required for option 'kumaraswsamy'."),
     estimator = function(x) stop("Package 'extraDistr' required for option 'kumaraswsamy'."),
     support   = c(0, Inf)
   )
 }
+
 
 #' @rdname starts
 #' @usage NULL
@@ -176,7 +185,7 @@ if(requireNamespace("extraDistr", quietly = TRUE)) {
 #' @section Built-in starts:
 #'    \code{pareto}: The Pareto distribution, supported on \eqn{[1, \infty)}.
 #'    Has heavy tails.
-start_pareto = list(
+starts_environment$pareto = list(
   density   = function(x, alpha) alpha*x^(-alpha-1),
   estimator = function(x) 1/mean(log(x)),
   support   = c(1, Inf)

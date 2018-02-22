@@ -7,36 +7,13 @@ get_start = function(start_str) {
 
   assertthat::assert_that(is.character(start_str))
 
-  if(start_str == "start_inverse_gaussian") {
-    if(!("statmod" %in% rownames(utils::installed.packages()))) {
-      stop("The option 'inverse_gaussian' requires the package 'statmod' to work.")
-    }
-  }
-
-  parametric_start = switch(start_str,
-    uniform          = start_uniform,
-    normal           = start_normal,
-    gaussian         = start_normal,
-    gamma            = start_gamma,
-    exponential      = start_exponential,
-    inverse_gaussian = start_inverse_gaussian,
-    wald             = start_inverse_gaussian,
-    lognormal        = start_lognormal,
-    beta             = start_beta,
-    kumar            = start_kumar,
-    kumaraswamy      = start_kumar,
-    laplace          = start_laplace,
-    weibull          = start_weibull,
-    gumbel           = start_gumbel,
-    constant         = start_uniform,
-    pareto           = start_pareto
-  )
+  parametric_start = starts_environment[[start_str]]
 
   if(is.null(parametric_start)) {
     if(exists(start_str)) {
       parametric_start = get(start_str)
     } else {
-      stop(paste0("The supplied parametric start (",start_str,") is not implemented."))
+      stop(paste0("The supplied parametric start ('",start_str,"') is not implemented."))
     }
   }
 
@@ -44,3 +21,28 @@ get_start = function(start_str) {
 
 }
 
+#' Add a new parametric start to \code{starts_environment}.
+#'
+#' @param start_str A string giving the name of the density.
+#' @param start The parametric start function.
+#' @return None.
+
+add_start = function(start_str, start) {
+  assertthat::assert_that(is.character(start_str))
+  assertthat::assert_that(all(start_str == make.names(start_str)),
+      msg = "The name of the parametric start is not valid. Use a short, valid name. (E.g. kdensity(x, start = gaussian), where gaussian is a predefined start function.)")
+
+  list_msg = paste0("The parametric start ('", start_str, "') must be a list.")
+  assertthat::assert_that(is.list(start), msg = list_msg)
+
+  ## Checks for the right elements in start.
+  density_msg = paste0("The parametric start ('", start_str, "') must contain a function named 'density'.")
+  estimator_msg = paste0("The parametric start ('", start_str, "') must contain a function named 'estimator.")
+  density_msg = paste0("The parametric start ('", start_str, "') must contain a function named 'support'.")
+
+  assertthat::assert_that(!is.null(start$density), msg = density_msg)
+  assertthat::assert_that(!is.null(start$estimator), msg = estimator_msg)
+  assertthat::assert_that(!is.null(start$support), msg = support_msg)
+
+  starts_environment[[start_str]] = start
+}

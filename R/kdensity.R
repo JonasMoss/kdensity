@@ -152,13 +152,26 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
     }
   }
 
+
+  ## 'kernel', 'start' and 'bw' can be custom made: In this case, they must
+  ## be added to their environments.
+
+  if(!is.null(start)){
+    if(!is.character(start)) {
+      start_str = deparse(substitute(start))
+      add_start(start_str = start_str, start = start)
+    } else {
+      start_str == start
+    }
+  }
+
   ## Now we massage and handle the combinations of kernel, start and support.
   ## This is fancy defaults management.
 
-  kss_list = get_kernel_start_support(kernel, start, support)
+  kss_list = get_kernel_start_support(kernel, start_str, support)
 
   ## start_str and kernel_str is used to keep track of the name of the kernel / start.
-  start_str  = ifelse(!is.list(start), kss_list$start_str, deparse(substitute(start)))
+
   kernel_str = ifelse(!is.list(kernel), kss_list$kernel_str, deparse(substitute(kernel)))
 
   ## We overwrite the kernel, start, and support with what we obtained from kss.
