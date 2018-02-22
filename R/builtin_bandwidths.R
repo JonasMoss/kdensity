@@ -1,3 +1,5 @@
+bw_environment = new.env(hash = FALSE)
+
 #' Bandwidth Selectors
 #'
 #' Bandwidth selectors for \code{kdensity}. These are the available options
@@ -54,15 +56,7 @@
 #' @name bandwidths
 NULL
 
-bw.JH = function(x, kernel = NULL, start = NULL, support = NULL) {
-
-  # if(kernel != "gcopula") {
-  #   warning("The bandwidth selection method JH is made for the asymmetric kernel 'gcopula'.")
-  # }
-  #
-  # if(support[1] < 0 | support[2] > 1) {
-  #   warning("The bandwidth selection method JH is made for densities on the unit interval.")
-  # }
+bw_environment$JH = function(x, kernel = NULL, start = NULL, support = NULL) {
 
   ## The data is transfomed through qnorm, with singularities removed.
   transformed_x = stats::qnorm(x)
@@ -73,9 +67,9 @@ bw.JH = function(x, kernel = NULL, start = NULL, support = NULL) {
   min(sigma * (2 * mu^2 * sigma^2 + 3*(1 - sigma^2)^2)^(-1/5)*n^(-1/5), 0.5)
 }
 
-bw.RHE = function(x, kernel = NULL, start = NULL, support = NULL) {
+bw_environment$RHE = function(x, kernel = NULL, start = NULL, support = NULL) {
   assertthat::assert_that("EQL" %in% rownames(utils::installed.packages()), msg =
-                            "The bandwidth function 'bw.RHE' requires the package 'EQL' to work.")
+                            "The bandwidth function 'RHE' requires the package 'EQL' to work.")
 
   max_degree = 5  # The maximum degree of the Hermite polynomials.
   n <- length(x)
@@ -96,7 +90,12 @@ bw.RHE = function(x, kernel = NULL, start = NULL, support = NULL) {
   return(bw)
 }
 
-bw.ucv = function(x, kernel = NULL, start = NULL, support = NULL) {
+bw_environment$nrd = function(data, kernel, start, support) stats::bw.nrd0(data)
+bw_environment$nrd = function(data, kernel, start, support) stats::bw.nrd(data)
+bw_environment$bcv = function(data, kernel, start, support) stats::bw.bcv(data)
+bw_environment$SJ = function(data, kernel, start, support) stats::bw.SJ(data)
+
+bw_environment$ucv = function(x, kernel = NULL, start = NULL, support = NULL) {
   ## We check for the combination start == "uniform" and kernel == "gaussian",
   ## as this is handled by stats::density's related functions.
 
@@ -175,7 +174,7 @@ bw.ucv = function(x, kernel = NULL, start = NULL, support = NULL) {
 
   if(kernel == "gcopula" | kernel == "beta" | kernel == "beta_biased") {
     using_str = "JH"
-    using = bw.JH(x)
+    using = bw_environment$JH(x)
     lower = 1/4*using
     upper = 1/4 - eps
   } else if (start == "constant" | start == "uniform"){
@@ -185,7 +184,7 @@ bw.ucv = function(x, kernel = NULL, start = NULL, support = NULL) {
     upper = 5 * using
   } else {
     using_str = "RHE"
-    using = bw.RHE(x)
+    using = bw_environment$RHE(x)
     lower = 1/5 * using
     upper = 5 * using
   }

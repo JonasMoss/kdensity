@@ -16,7 +16,6 @@
 
 get_kernel_start_support = function(kernel, start, support) {
 
-
   ## First we handle the parametric start. This is easy, since its default
   ## value equals uniform.
 

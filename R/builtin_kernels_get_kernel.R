@@ -58,7 +58,7 @@ add_start = function(start_str, start) {
 add_kernel = function(kernel_str, kernel) {
   assertthat::assert_that(is.character(kernel_str))
   assertthat::assert_that(all(kernel_str == make.names(kernel_str)),
-                          msg = "The name of the parametric kernel is not valid. Use a short, valid name. (E.g. kdensity(x, kernel = gaussian), where gaussian is a predefined kernel function.)")
+                          msg = "The name of the kernel is not valid. Use a short, valid name. (E.g. kdensity(x, kernel = gaussian), where gaussian is a predefined kernel function.)")
 
   list_msg = paste0("The kernel ('", kernel_str, "') must be a list.")
   assertthat::assert_that(is.list(kernel), msg = list_msg)

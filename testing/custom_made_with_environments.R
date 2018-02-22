@@ -23,11 +23,24 @@ t4 = list(
   support   = c(-Inf, Inf)
 )
 
-
 # Gumbel and mtcars$mpg
-data = mtcars$mpg
-kdensity(data, kernel = t4, start = "gumbel", bw = "nrd0") %>%
+kdensity(mtcars$mpg, kernel = t4, start = "gumbel") %>%
   plot(main = "Miles per Gallon") %>%
   lines(col = "red", plot_start = TRUE) %>%
   coef
-rug(data)
+rug(mtcars$mpg)
+
+
+## Testing custom bw function.
+
+cool = function(x, kernel, start, support) {
+  0.1
+}
+
+# Gumbel and mtcars$mpg
+kdensity(mtcars$mpg, kernel = "gaussian", start = "gumbel", bw = cool) %>%
+  plot(main = "Miles per Gallon") %>%
+  lines(col = "red", plot_start = TRUE) %>%
+  coef
+rug(mtcars$mpg)
+
