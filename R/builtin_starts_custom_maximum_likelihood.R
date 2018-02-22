@@ -195,34 +195,29 @@ mlgumbel = function(x, scale0 = 1, rel.tol = .Machine$double.eps^0.25,
 #' Uses Newton-Raphson to estimate the parameters of the Kumaraswamy distribution.
 #'
 #' @param x The data from which the estimate is to be computed.
-#' @param scale0 An optional starting value for the \code{scale} parameter.
+#' @param a0 An optional starting value for the \code{a} parameter.
 #' @param rel.tol Relative accuracy requested.
 #' @param iterlim A positive integer specifying the maximum number of
-#' iterations to be performed before the program is terminated.
+#'     iterations to be performed before the program is terminated.
 #'
 #' @return A named numeric vector with maximum likelihood estimates for
-#' \code{shape} and \code{scale}.
+#'     \code{a} and \code{b}.
+#'
+#' @references Jones, M. C. "Kumaraswamy's distribution: A beta-type distribution with some tractability advantages." Statistical Methodology 6.1 (2009): 70-81.
+#'
+#'      Kumaraswamy, Ponnambalam. "A generalized probability density function for double-bounded random processes." Journal of Hydrology 46.1-2 (1980): 79-88.
+#'
 
-mlkumar = function(x, scale0 = 1, rel.tol = .Machine$double.eps^0.25,
+mlkumar = function(x, a0 = 1, rel.tol = .Machine$double.eps^0.25,
                     iterlim = 100) {
 
+  stop("Kumaraswamy is not yet implemented.")
   rel.tol_str = deparse(substitute(rel.tol))
-  mean_x = mean(x)
 
   for(i in 1:iterlim) {
+    a = a0
+    if(abs((a0 - a)/a0) < rel.tol) break
 
-    A = sum(x*exp(-x/scale0))
-    B = sum(exp(-x/scale0))
-    C = sum(x^2*exp(-x/scale0))
-
-    top = mean_x - scale0 - A/B
-    bottom = -1 - 1/scale0^2*(C/B - (A/B)^2)
-
-    scale = scale0 - top/bottom
-
-    if(abs((scale0 - scale)/scale0) < rel.tol) break
-
-    scale0 = scale
   }
 
   if(i == iterlim) {
@@ -232,7 +227,7 @@ mlkumar = function(x, scale0 = 1, rel.tol = .Machine$double.eps^0.25,
   }
 
   ## Given the shape, the scale is easy to compute.
-  loc = -scale*log(mean(exp(-x/scale)))
-  c(loc = loc, scale = scale)
+  b = -1/mean(log(1 - x^a))
+  c(a = a, b = b)
 }
 
