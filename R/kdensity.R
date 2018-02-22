@@ -258,26 +258,15 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
 
   }
 
+  ## 'R6'-ish attributes:
+  call = match.call()
+  range = c(min(x), max(x))
+  n = length(x)
   logLik = ifelse(start_str == "uniform" | start_str == "constant", NA,
                   sum(parametric_start_vector(x)))
 
-  ## Finally, we assign the return_function its class and required attributes.
+  ## S3 attributes:
   class(return_function) = "kdensity"
-  attr(return_function, "bw_str")    = bw_str
-  attr(return_function, "bw")        = bw
-  attr(return_function, "kernel")    = kernel_str
-  attr(return_function, "start")     = start_str
-  attr(return_function, "support")   = support
-  attr(return_function, "adjust")    = adjust
-  attr(return_function, "n")         = length(x)
-  attr(return_function, "h")         = h
-  attr(return_function, "data.name") = data.name
-  attr(return_function, "has.na")    = has.na
-  attr(return_function, "call")      = match.call()
-  attr(return_function, "range")     = c(min(x), max(x))
-  attr(return_function, "estimates") = parameters
-  attr(return_function, "logLik")    = logLik
-  attr(return_function, "srcref")    = NULL
-
+  attr(return_function, "srcref") = NULL
   return_function
 }

@@ -6,8 +6,62 @@
 ### ===========================================================================
 
 #' @export
-`$.kdensity` = function(x, attr) {
-  attr(x, attr)
+`[[.kdensity` = function(x, i) {
+  environment(x)[[i]]
+}
+
+#' @export
+`[[<-.kdensity` = function(x, i, value) {
+  allowed_arg = c("x", "bw", "adjust", "kernel", "start", "support",
+                   "na.rm", "normalized")
+
+  i = match.arg(i, allowed_arg)
+  args = list(object = x)
+  args[[i]] = value
+  do.call(update.kdensity, args)
+}
+
+
+#' @export
+`$<-.kdensity` = function(x, name, value) {
+  x[[name]] = value
+}
+
+
+#' @export
+`$.kdensity` = function(x, name) {
+  x[[name]]
+}
+
+#' @export
+update.kdensity = function(object, ...) {
+  current = list(x = object$x,
+                 bw = object$bw_str,
+                 adjust = object$adjust,
+                 kernel = object$kernel_str,
+                 start = object$start_str,
+                 support = object$support,
+                 na.rm = object$na.rm,
+                 normalized = object$normalized)
+
+  passed = list(...)
+  arg_names = lapply(match.call(expand.dots=TRUE)[-1], deparse)
+  args = listmerge(current, passed, type = "template")
+  new_object = do.call(kdensity, args)
+
+  if("x" %in% names(arg_names)) {
+    data.name = arg_names$x
+  } else {
+    data.name = object$data.name
+  }
+
+  call = call("kdensity", x = data.name, adjust = args$adjust,
+                kernel = args$kernel, start = args$start, support = args$support)
+
+  environment(new_object)$call = call
+
+  environment(new_object)$data.name = data.name
+  object <<- new_object
 }
 
 #' @export
@@ -35,9 +89,9 @@ confint.kdensity = function(object, parm, level = 0.95, ...) {
 #' @return a vector of size 1000, used for plotting.
 
 get_range = function(obj) {
-  support = attr(obj, "support")
-  minimum = attr(obj, "range")[1]
-  maximum = attr(obj, "range")[2]
+  support = obj$support
+  minimum = obj$range[1]
+  maximum = obj$range[2]
   obj_range = maximum - minimum
   addition = obj_range/10
   xmin = max(minimum - addition, support[1])
@@ -110,7 +164,7 @@ plot_helper = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, pt
   if(!is.null(x$bw_str)) bw_string = paste0(" ('", x$bw_str, "')")
 
   defaults = list(type = "l",
-                  main = deparse(attr(x, "call")),
+                  main = deparse(x$call),
                   ylab = "Density",
                   xlab = paste0("N = ", x$n, "   Bandwidth = ", formatC(x$bw),
                                bw_string),
@@ -121,14 +175,14 @@ plot_helper = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, pt
   args$x = range
 
   if(plot_start) {
-    start = attr(x, "start")
+    start = x$start
 
     msg = "To use 'plot_start = TRUE', supply a parametric start that is a proper density."
     assertthat::assert_that(!is.null(start), start != "uniform", msg = msg)
 
     start = get_start(start)
 
-    parameters = attr(x, "estimates")
+    parameters = x$estimates
     parametric_start = start$density
 
     args$y = sapply(range, function(y) {
@@ -150,15 +204,14 @@ plot_helper = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, pt
 }
 
 #' @export
-print.kdensity <- function(x, ...)
-{
+print.kdensity <- function(x, ...) {
   digits = list(...)$digits
-  cat("\nCall:\n", deparse(attr(x, "call")), "\n\n",
-      "Data:      ", attr(x, "data.name"), " (",attr(x, "n"), " obs.)\n",
-      "Bandwidth: ", formatC(attr(x, "bw"), digits = digits), " ('", attr(x, "bw_str"), "')\n",
-      "Support:   (", attr(x, "support")[1], ", ", attr(x, "support")[2],   ")\n",
-      "Kernel:    ", attr(x, "kernel"), "\n",
-      "Start:     ", attr(x, "start"), "\n\n",
+  cat("\nCall:\n", deparse(x$call), "\n\n",
+      "Data:      ", x$data.name, " (",x$n, " obs.)\n",
+      "Bandwidth: ", formatC(x$bw, digits = digits), " ('", x$bw_str, "')\n",
+      "Support:   (", x$support[1], ", ", x$support[2],   ")\n",
+      "Kernel:    ", x$kernel_str, "\n",
+      "Start:     ", x$start_str, "\n\n",
       sep = "")
 }
 
@@ -166,21 +219,21 @@ print.kdensity <- function(x, ...)
 summary.kdensity <- function(object, ...)
 {
   digits = list(...)$digits
-  parameters = attr(object, "estimates")
+  parameters = object$estimates
   params = NULL
   if(length(parameters) > 0)
   params = c("Parameter estimates:", "\n",
   sapply(1:length(parameters), function(i) paste0(names(parameters)[i], ": ", formatC(parameters[i], digits), "\n")),
   "\n")
-  cat("\nCall: \n", deparse(attr(object, "call")), "\n\n",
-      "Data:        ", attr(object, "data.name"), " (",attr(object, "n"), " obs.)\n",
-      "Bandwidth:   ", formatC(attr(object, "bw"), digits = digits), " ('", attr(object, "bw_str"), "')\n",
-      "Support:     (", attr(object, "support")[1], ", ", attr(object, "support")[2],   ")\n",
-      "Kernel:      ", attr(object, "kernel"), "\n",
-      "Start:       ", attr(object, "start"), "\n",
-      "Range:       (", formatC(attr(object, "range")[1], digits), ", ", formatC(attr(object, "range")[2], digits),   ")\n",
-      "NAs in data: ", attr(object, "has.na"), "\n",
-      "Adjustment:  ", attr(object, "adjust"), "\n\n",
+  cat("\nCall: \n", deparse(object$call), "\n\n",
+      "Data:        ", object$data.name, " (",object$n, " obs.)\n",
+      "Bandwidth:   ", formatC(object$bw, digits = digits), " ('", object$bw_str, "')\n",
+      "Support:     (", object$support[1], ", ", object$support[2],   ")\n",
+      "Kernel:      ", object$kernel_str, "\n",
+      "Start:       ", object$start_str, "\n",
+      "Range:       (", formatC(object$range[1], digits), ", ", formatC(object$range[2], digits),   ")\n",
+      "NAs in data: ", object$has.na, "\n",
+      "Adjustment:  ", object$adjust, "\n\n",
       params,
       sep = "")
 }
