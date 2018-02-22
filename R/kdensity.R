@@ -160,19 +160,26 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
     if(!is.character(start)) {
       start_str = deparse(substitute(start))
       add_start(start_str = start_str, start = start)
-    } else {
-      start_str == start
+      start = start_str
+    }
+  }
+
+  if(!is.null(kernel)){
+    if(!is.character(kernel)) {
+      kernel_str = deparse(substitute(kernel))
+      add_start(kernel_str = kernel_str, kernel = kernel)
+      kernel = kernel_str
     }
   }
 
   ## Now we massage and handle the combinations of kernel, start and support.
   ## This is fancy defaults management.
+  kss_list = get_kernel_start_support(kernel, start, support)
 
-  kss_list = get_kernel_start_support(kernel, start_str, support)
-
-  ## start_str and kernel_str is used to keep track of the name of the kernel / start.
-
-  kernel_str = ifelse(!is.list(kernel), kss_list$kernel_str, deparse(substitute(kernel)))
+  ## The strings are used for reporting and inside bandwidth functions,
+  ## at must be preserved.
+  start_str  = kss_list$start_str
+  kernel_str = kss_list$kernel_str
 
   ## We overwrite the kernel, start, and support with what we obtained from kss.
   kernel  = kss_list$kernel

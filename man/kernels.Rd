@@ -3,21 +3,12 @@
 \docType{data}
 \name{kernels}
 \alias{kernels}
-\alias{kernel_gaussian}
-\alias{kernel_laplace}
-\alias{kernel_epanechnikov}
-\alias{kernel_rectangular}
-\alias{kernel_triangular}
-\alias{kernel_biweight}
-\alias{kernel_triweight}
-\alias{kernel_tricube}
-\alias{kernel_cosine}
-\alias{kernel_optcosine}
-\alias{kernel_gcopula}
-\alias{kernel_gamma}
-\alias{kernel_gamma_biased}
-\alias{kernel_beta}
-\alias{kernel_beta_biased}
+\alias{kernel_doc_useless}
+\alias{kernel_doc_useless}
+\alias{kernel_doc_useless}
+\alias{kernel_doc_useless}
+\alias{kernel_doc_useless}
+\alias{kernel_doc_useless}
 \title{Kernel functions}
 \description{
 Kernel functions are an important part of \code{kdensity}. This document
@@ -29,10 +20,10 @@ for the intended kernel.
 
 
 
-   \code{gaussian}: The Gaussian kernel, defined as bla bla.
+   \code{gaussian}: The Gaussian kernel.
 
 
-   \code{laplace}: The Laplace kernel, defined as bla bla.
+   \code{laplace}: The Laplace kernel.
 
 
    \code{epanechnikov}: The Epanechnikov kernel, defined as bla bla.

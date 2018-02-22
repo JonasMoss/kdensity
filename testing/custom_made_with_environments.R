@@ -16,3 +16,12 @@ kdensity(data, kernel = "normal", start = skew_hyperbolic, bw = "ucv") %>%
 rug(data)
 
 ## Testing custom kernel:
+
+
+# Gumbel and mtcars$mpg
+data = mtcars$mpg
+kdensity(data, kernel = "normal", start = "gumbel", bw = "ucv") %>%
+  plot(main = "Miles per Gallon") %>%
+  lines(col = "red", plot_start = TRUE) %>%
+  coef
+rug(data)
