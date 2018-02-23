@@ -35,7 +35,7 @@ add_bw = function(bw_str, bw) {
   func_msg = paste0("The bw ('", bw_str, "') must be a function.")
   form_msg = paste0("The bw ('", bw_str, "') must take the arguments 'x', 'kernel', 'start', 'support'.")
   assertthat::assert_that(is.function(bw), msg = func_msg)
-  assertthat::assert_that(all(formals(bw) == c("x", "kernel", "start", "support")),
+  assertthat::assert_that(all(names(formals(bw)) == c("x", "kernel", "start", "support")),
                           msg = form_msg)
 
   bw_environment[[bw_str]] = bw
