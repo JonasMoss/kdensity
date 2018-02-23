@@ -48,7 +48,11 @@ recycle = function(..., prototype) {
         if(prototype >= 0) max_length = ceiling(prototype)
         else stop("supply a valid type. prototype is numeric and negative.")
     } else if (is.character(prototype)) {
-        max_length = length(dots[[prototype]])
+        if(prototype %in% arg_names) {
+          max_length = length(dots[[prototype]])
+        } else {
+          stop("The supplied prototype does not match any element of the supplied list.")
+        }
     } else {
         stop("supply a valid type for the prototype argument.")
     }
