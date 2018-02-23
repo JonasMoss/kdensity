@@ -14,6 +14,8 @@ knitr::opts_chunk$set(
 ```
 
 # kdensity <img src="man/figures/logo.png" align="right" width="247" height="70" />
+[![Build Status](https://travis-ci.org/JonasMoss/kdensity.svg?branch=master)](https://travis-ci.org/JonasMoss/kdensity)
+
 An `R` package for univariate kernel density estimation with parametric starts and asymmetric kernels.
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
