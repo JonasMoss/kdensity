@@ -4,10 +4,10 @@
 \alias{get_bw}
 \title{Get bandwidth functions from string.}
 \usage{
-get_bw(bw)
+get_bw(bw_str)
 }
 \arguments{
-\item{bw}{a string specifying the density of interest.}
+\item{bw_str}{a string specifying the density of interest.}
 }
 \value{
 a bandwidth function.

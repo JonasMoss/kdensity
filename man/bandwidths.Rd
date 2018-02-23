@@ -64,5 +64,5 @@ Hjort, Nils Lid, and Ingrid K. Glad. "Nonparametric density estimation with a pa
 \seealso{
 \code{\link{kdensity}}, \code{\link[stats]{bandwidth}} for the
    bandwidth selectors of \code{\link[stats]{density}}. In addition,
-   \code{\link{kernels}}; \code{\link{starts}}
+   \code{\link{kernels}}; \code{\link{parametric_starts}}
 }

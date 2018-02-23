@@ -19,7 +19,8 @@
 #' kernels or be custom-made. See \code{\link{kernels}} for details.
 #'
 #' @param start Parametric start. Can be chosen from the list of built-in
-#' parametric starts or be custom-made. See \code{\link{starts}} for details.
+#' parametric starts or be custom-made. See \code{\link{parametric_starts}} for
+#' details.
 #'
 #' @param support The support of the data. Must be compatible with the supplied
 #' \code{x} and the supplied \code{start} and \code{kernel}. Is used to find the
@@ -100,67 +101,49 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
                     support = NULL, na.rm = FALSE, normalized = TRUE)
  {
 
+  ## These tests are based purely on the data, and should be run no matter what.
   data.name = deparse(substitute(x))
-  has.na = any(is.na(x))
+  has.na = anyNA(x)
 
   if(has.na) {
     if(!na.rm) stop("x contains NAs and na.rm = FALSE.")
     x = x[!is.na(x)]
   }
 
-  ## The case of bw == Inf is special! In this case, we return the parametric
-  ## start itself.
+  ## 'kernel', 'start' and 'bw' can be custom made: In this case, they must
+  ## be added to their environments.
 
-  if(!is.null(bw)) {
-    if(is.numeric(bw)) {
-      if(bw == Inf) {
-
-        if(!is.list(start)) {
-          msg = "bw = Inf does not work with a uniform start."
-          assertthat::assert_that(!is.null(start), start != "uniform", msg = msg)
-        }
-
-        kss_list = get_kernel_start_support(NULL, start, NULL)
-        start_str = ifelse(!is.list(start), kss_list$start_str, deparse(substitute(start)))
-        start = kss_list$start
-
-        parameters = start$estimator(x)
-        parametric_start = start$density
-
-        return_function = function(y) {
-          sapply(y, function(y) {
-            do.call(parametric_start, as.list(c("x" = y, parameters)))
-          })
-        }
-
-        class(return_function) = "kdensity"
-        attr(return_function, "bw_str")    = Inf
-        attr(return_function, "bw")        = Inf
-        attr(return_function, "kernel")    = "none"
-        attr(return_function, "start")     = start_str
-        attr(return_function, "support")   = start$support
-        attr(return_function, "adjust")    = 1
-        attr(return_function, "n")         = length(x)
-        attr(return_function, "h")         = Inf
-        attr(return_function, "data.name") = deparse(substitute(x))
-        attr(return_function, "has.na")    = any(is.na(x))
-        attr(return_function, "call")      = match.call()
-        attr(return_function, "range")     = c(min(x), max(x))
-        attr(return_function, "estimates") = parameters
-        return(return_function)
-      }
+  if(!is.null(start)){
+    if(!is.character(start)) {
+      start_str = deparse(substitute(start))
+      add_start(start_str = start_str, start = start)
+      start = start_str
     }
   }
 
+  if(!is.null(kernel)){
+    if(!is.character(kernel)) {
+      kernel_str = deparse(substitute(kernel))
+      add_kernel(kernel_str = kernel_str, kernel = kernel)
+      kernel = kernel_str
+    }
+  }
+
+  ## The case of bw == Inf is special! In this case, we return the parametric
+  ## start itself.
 
   ## Now we massage and handle the combinations of kernel, start and support.
+  ## This is fancy defaults management.
   kss_list = get_kernel_start_support(kernel, start, support)
 
-  start_str = ifelse(!is.list(start), kss_list$start_str, deparse(substitute(start)))
-  kernel_str = ifelse(!is.list(kernel), kss_list$kernel_str, deparse(substitute(kernel)))
+  ## The strings are used for reporting and inside bandwidth functions,
+  ## at must be preserved.
+  start_str  = kss_list$start_str
+  kernel_str = kss_list$kernel_str
 
-  kernel = kss_list$kernel
-  start = kss_list$start
+  ## We overwrite the kernel, start, and support with what we obtained from kss.
+  kernel  = kss_list$kernel
+  start   = kss_list$start
   support = kss_list$support
 
   ## Tests for incompabibilities in the supplied values.
@@ -172,17 +155,18 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
          support[1], ", ", support[2], ").")
   }
 
-  parameters = start$estimator(x)
+  estimates = start$estimator(x)
   parametric_start = start$density
+
   # Name of the variable where the density is evaluated. Typically x.
   x_name = names(formals(start$density))[1]
 
-  parametric_start_vector = function(data) {
-    sapply(data, function(datum) {
-      arguments = as.list(c("x" = datum, parameters))
-      names(arguments)[1] = x_name
-      do.call(parametric_start, arguments)
-      })
+  parametric_start_vector = function(x) {
+    arguments = list()
+    arguments[[1]] = x
+    names(arguments)[1] = x_name
+    arguments = append(arguments, as.list(estimates))
+    do.call(parametric_start, arguments)
   }
 
   ## Takes care of the bandwidth. Can be either a double, a string, or a
@@ -202,6 +186,10 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
     }
   } else {
     bw_str = "user supplied"
+    if(bw == Inf) {
+      msg = "bw = Inf does not work with a uniform start."
+      assertthat::assert_that(start_str != "uniform", start_str != "constant", msg = msg)
+    }
   }
 
   ## The parameter h is computed. The basic bandwidth is h = bw*adjust for the
@@ -210,28 +198,32 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
   sd = ifelse(!is.null(kss_list$kernel$sd), kss_list$kernel$sd, 1)
   h = bw*adjust*sd
 
-  ## The denominator can be computed once and for all.
+  ## The denominator can be computed.
   parametric_start_data = parametric_start_vector(x)
 
-  ## Now we handle normalization. If the supplied start density is uniform,
-  ## there is nothing to do. If it isn't uniform, the R-function integrate is
-  ## used to find the normalization constant unless normalized is FALSE.
+  ## Now we handle normalization.
 
   normalization = 1
 
-  if(normalized & !(start_str == "uniform" & all(support == c(-Inf, Inf)))) {
-    pre_function = function(y) {
-      if(length(y) == 1) {
-        mean(1/h*kernel$kernel(y, x, h)*parametric_start_vector(y)/parametric_start_data)
-      } else {
-        sapply(y, function(y) mean(1/h*kernel$kernel(y, x, h)/parametric_start_data)*parametric_start_vector(y))
-      }
+  if(normalized & bw != Inf) {
+
+    integrand = function(y) {
+        sapply(y, function(y) mean(1/h*kernel$kernel(y, x, h) /
+                                     parametric_start_data) *
+                                     parametric_start_vector(y))
     }
 
-    normalization = tryCatch(stats::integrate(pre_function, lower = support[1], upper = support[2])$value,
-                          error = function(e) {
-                            stop("Normalization error: The function will not integrate. Two common causes are: 1.) The kernel is non-smooth, try a smooth kernel if possible. 2.) The supplied support is incorrect.")
-                          })
+    normalization = tryCatch(
+      stats::integrate(integrand,
+                       lower = support[1],
+                       upper = support[2])$value,
+
+      error = function(e) {
+        stop(paste0("Normalization error: The function will not integrate.",
+                    "Two common causes are: 1.) The kernel is non-smooth, ",
+                    "try a smooth kernel if possible. 2.) The supplied ",
+                    "support is incorrect."))
+      })
 
   }
 
@@ -239,37 +231,42 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
   ## This is the main part of the returned object.
 
   return_function = function(y) {
-    if(length(y) == 1) {
-      mean(1/h*kernel$kernel(y, x, h)*parametric_start_vector(y)/parametric_start_data)/normalization
+
+    if(missing(y)) {
+      stop("A kdensity object is a density function. Call it with numerical input.")
+    }
+
+    if(h != Inf)  {
+      if(length(y) == 1) {
+        mean(1/h*kernel$kernel(y, x, h) * parametric_start_vector(y) /
+               parametric_start_data)/normalization
+      } else {
+        sapply(y, function(y) {
+          parametric_start_vector_y = parametric_start_vector(y)
+          1/h*mean(kernel$kernel(y, x, h) * parametric_start_vector_y /
+                     parametric_start_data)/normalization
+        })
+      }
     } else {
-      sapply(y, function(y) {
-        parametric_start_vector_y = parametric_start_vector(y)
-        1/h*mean(kernel$kernel(y, x, h)*parametric_start_vector_y/parametric_start_data)/normalization
-      })
+       ## If bw = Inf, the parametric start is returned.
+       arguments = list()
+       arguments[[1]] = y
+       names(arguments)[1] = x_name
+       arguments = append(arguments, as.list(estimates))
+       do.call(parametric_start, arguments)
     }
 
   }
 
-
+  ## 'R6'-ish attributes:
+  call = match.call()
+  range = c(min(x), max(x))
+  n = length(x)
   logLik = ifelse(start_str == "uniform" | start_str == "constant", NA,
                   sum(parametric_start_vector(x)))
 
-  ## Finally, we assign the return_function its class and required attributes.
+  ## S3 attributes:
   class(return_function) = "kdensity"
-  attr(return_function, "bw_str")    = bw_str
-  attr(return_function, "bw")        = bw
-  attr(return_function, "kernel")    = kernel_str
-  attr(return_function, "start")     = start_str
-  attr(return_function, "support")   = support
-  attr(return_function, "adjust")    = adjust
-  attr(return_function, "n")         = length(x)
-  attr(return_function, "h")         = h
-  attr(return_function, "data.name") = data.name
-  attr(return_function, "has.na")    = has.na
-  attr(return_function, "call")      = match.call()
-  attr(return_function, "range")     = c(min(x), max(x))
-  attr(return_function, "estimates") = parameters
-  attr(return_function, "logLik")    = logLik
-
+  attr(return_function, "srcref") = NULL
   return_function
 }
