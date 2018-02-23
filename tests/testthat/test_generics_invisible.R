@@ -1,0 +1,8 @@
+context("return value of generics")
+obj = kdensity(precip, start = "gaussian")
+expect_identical(print(obj), obj)
+expect_identical(summary(obj), obj)
+expect_identical(plot(obj), obj)
+expect_identical(plot(obj, plot_start = TRUE), obj)
+expect_identical(points(obj), obj)
+expect_identical(lines(obj), obj)
