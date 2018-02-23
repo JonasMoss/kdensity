@@ -10,8 +10,7 @@ r:
   - devel
 
 os:
-- linux
-- osx
+  - linux
 
 r_packages:
   - covr
