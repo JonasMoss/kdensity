@@ -10,7 +10,8 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Suggests: extraDistr,
-    SkewHyperbolic
+    SkewHyperbolic,
+    testthat
 Imports: assertthat,
     testthat,
     EQL,
@@ -18,7 +19,7 @@ Imports: assertthat,
     rmarkdown
 RoxygenNote: 6.0.1
 VignetteBuilder: knitr
-Collate: 
+Collate:
     'builtin_bandwidths.R'
     'builtin_bandwidths_get_bw.R'
     'builtin_bandwidths_ucv_helpers.R'
