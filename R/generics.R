@@ -225,6 +225,7 @@ print.kdensity <- function(x, ...) {
       "Kernel:    ", x$kernel_str, "\n",
       "Start:     ", x$start_str, "\n\n",
       sep = "")
+  invisible(x)
 }
 
 #' @export
@@ -248,4 +249,5 @@ summary.kdensity <- function(object, ...)
       "Adjustment:  ", object$adjust, "\n\n",
       params,
       sep = "")
+  invisible(object)
 }
