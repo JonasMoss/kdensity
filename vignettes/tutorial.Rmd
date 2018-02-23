@@ -1,5 +1,5 @@
 ---
-title: "Make custom kernels, parametric starts, and bandwidth selectors"
+title: "Tutorial for `kdensity`"
 author: "Jonas Moss"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -16,16 +16,47 @@ knitr::opts_chunk$set(
 )
 ```
 
-Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
+# Basic usage
 
-```{r}
+`kdensity` is called using a syntax similar to `stats::density`, but with some additional arguments. A call to `kdensity` returns a density function (with class `kdensity`), which can used as ordinary `R`-function:
+
+```{r mpg_example_start, echo = TRUE}
 library("kdensity")
+kde = kdensity(mtcars$mpg, start = "gumbel", kernel = "gaussian")
+kde(20)
+```
+Hence it can be used to calculate functionals, such as the expectation:
+
+```{r mpg_example_expectation, echo = TRUE}
+integrate(function(x) x*kde(x), lower = -Inf, upper = Inf)$value 
 ```
 
-- Never uses retina figures
-- Has a smaller default figure size
-- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
+Plotting works as with `stats::density`. If `kdensity` was called with a parametric start, use `plot_start = TRUE` inside a plotting function in order to plot the estimated parametric start density instead of the kernel density.
 
+```{r mpg_example_plot, echo = TRUE,fig.height = 5, fig.width = 5, fig.align = "center"}
+plot(kde, main = "Miles per Gallon")
+lines(kde, plot_start = TRUE, col = "red")
+rug(mtcars$mpg)
+```
+
+If the R-package `magrittr` is installed, you can use pipes to plot:
+
+```{r mpg_example_plot_magrittr, echo = TRUE, eval = FALSE}
+library("magrittr")
+kde %>%
+  plot(main = "Miles per Gallon") %>%
+  lines(plot_start = TRUE, col = "red")
+```
+
+The generics `coef`, `logLik`, `AIC` and `BIC` are supported, but work only on the parametric start. 
+
+```{r mpg_example_generics, echo = TRUE}
+coef(kde)
+logLik(kde)
+AIC(kde)
+```
+
+# Custom densities and kernels
 ## Parametric starts
 
 You must supply two functions and one vector to `kdensity` in order to use a custom parametric start. The first is a `density` function, the second is a function that estimates the named parameters of the density, and the third is the support of the density. 
@@ -87,7 +118,7 @@ Since all the curves are in agreement, we are justified in using the skew hyperb
 
 ## Kernels
 
-If you want to make custom kernel, you will need to supply the kernel function, with arguments `y, x, h`. Here `x` is the random data you put into `kdensity`, `h` is the final bandwidth, and `y` is the point you want to evaluate at. The kernel is called as `1/h*kernel(y, x, h)`. In addition to the kernel function, you must supply a `support` argument, which states the domain of definition of the kernel. For instance, the `gcopula` kernel is defined on `c(0, 1)`. In addition, you can optionally supply the standard deviation of the kernel. This is only used for symmetric kernels, and is useful since it makes them comparable. For example, the implementation of the `gaussian` kernel is
+If you want to make custom kernel, you will need to supply the kernel function, with arguments `y, x, h`. Here `x` is the random data you put into `kdensity`, `h` is the final bandwidth, and `y` is the point you want to evaluate at. The kernel is called as `1/h*kernel(y, x, h)`, and should be vectorized in both `x` and `y`. In addition to the kernel function, you must supply a `support` argument, which states the domain of definition of the kernel. For instance, the `gcopula` kernel is defined on `c(0, 1)`. In addition, you can optionally supply the standard deviation of the kernel. This is only used for symmetric kernels, and is useful since it makes them comparable. For example, the implementation of the `gaussian` kernel is
 
 ```{r}
 gaussian = list(
@@ -96,43 +127,4 @@ gaussian = list(
   support = c(-Inf, Inf))
 ```
 
-Custom kernels can be complicated, and don't have to be symmetric, as the next example shows.
-### Example: A skew hyperbolic t-distribution start
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side. 
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
-```
-
-You can enable figure captions by `fig_caption: yes` in YAML:
-
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
-
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
-
-## More Examples
-
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
-
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
-```
-
-Also a quote using `>`:
-
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
-
-
-Definition
-  : a statement of the exact meaning of a word, especially in a dictionary.
-
-List 
-  : a number of connected items or names written or printed consecutively, 
-    typically one below the other. 
-  : barriers enclosing an area for a jousting tournament.
+Custom kernels can be complicated, and do not have to be symmetric.
