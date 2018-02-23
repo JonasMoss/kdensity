@@ -5,6 +5,8 @@
 
 [![Build
 Status](https://travis-ci.org/JonasMoss/kdensity.svg?branch=master)](https://travis-ci.org/JonasMoss/kdensity)
+[![AppVeyor Build
+Status](https://ci.appveyor.com/api/projects/status/github/JonasMoss/kdensity?branch=master&svg=true)](https://ci.appveyor.com/project/JonasMoss/kdensity)
 
 An `R` package for univariate kernel density estimation with parametric
 starts and asymmetric kernels.
