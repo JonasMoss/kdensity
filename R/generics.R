@@ -16,15 +16,18 @@
                    "na.rm", "normalized")
 
   i = match.arg(i, allowed_arg)
+  environment(x)$obj_name = "x"
   args = list(object = x)
   args[[i]] = value
   do.call(update.kdensity, args)
+  x
 }
 
 
 #' @export
 `$<-.kdensity` = function(x, name, value) {
   x[[name]] = value
+  x
 }
 
 
@@ -35,6 +38,8 @@
 
 #' @export
 update.kdensity = function(object, ...) {
+
+
   current = list(x = object$x,
                  bw = object$bw_str,
                  adjust = object$adjust,
@@ -45,6 +50,14 @@ update.kdensity = function(object, ...) {
                  normalized = object$normalized)
 
   passed = list(...)
+
+  ## Part of a hack to make $<- and [[<- work.
+  if(!is.null(environment(object)$obj_name)) {
+    obj_name = environment(object)$obj_name
+  } else {
+    obj_name = deparse(substitute(object))
+  }
+
   arg_names = lapply(match.call(expand.dots=TRUE)[-1], deparse)
   args = listmerge(current, passed, type = "template")
   new_object = do.call(kdensity, args)
@@ -61,7 +74,7 @@ update.kdensity = function(object, ...) {
   environment(new_object)$call = call
 
   environment(new_object)$data.name = data.name
-  object <<- new_object
+  assign(obj_name, new_object, envir = parent.frame())
 }
 
 #' @export
