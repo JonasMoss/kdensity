@@ -8,13 +8,8 @@ get_bw = function(bw_str) {
 
   bw = bw_environment[[bw_str]]
 
-  if(is.null(bw)) {
-    if(exists(bw_str)) {
-      parametric_start = get(bw_str)
-    } else {
-      stop(paste0("The supplied bandwidth function ('", bw_str,"') is not implemented."))
-    }
-  }
+  msg = paste0("The supplied bandwidth function ('", bw_str,"') is not implemented.")
+  assertthat::assert_that(!is.null(bw), msg = msg)
 
   bw
 
@@ -51,18 +46,20 @@ add_bw = function(bw_str, bw) {
 #' @return a bandwidth string.
 
 get_standard_bw = function (kernel_str, start_str, support) {
-  if(start_str != "constant" & start_str != "uniform") {
-    if(kernel_str != "gaussian" & kernel_str != "normal") {
-      if(kernel_str == "gcopula") {
-        bw = "JH"
-      } else {
-        bw = "ucv"
-      }
-    } else {
+  if(kernel_str == "gcopula" & (start_str == "constant" |
+                                start_str == "uniform")) {
+    bw = "JH"
+  } else if(start_str != "constant" & start_str != "uniform") {
+    if(!is.null(get_kernel(kernel_str)$sd)) {
       bw = "RHE"
+    } else {
+      bw = "ucv"
     }
-  } else {
+  } else if (!is.null(get_kernel(kernel_str)$sd)) {
     bw ="nrd0"
+  } else {
+    bw = "ucv"
   }
+
   bw
 }
