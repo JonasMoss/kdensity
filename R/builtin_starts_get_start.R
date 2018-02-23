@@ -9,13 +9,8 @@ get_start = function(start_str) {
 
   parametric_start = starts_environment[[start_str]]
 
-  if(is.null(parametric_start)) {
-    if(exists(start_str)) {
-      parametric_start = get(start_str)
-    } else {
-      stop(paste0("The supplied parametric start ('",start_str,"') is not implemented."))
-    }
-  }
+  msg = paste0("The supplied parametric start ('", start_str,"') is not implemented.")
+  assertthat::assert_that(!is.null(parametric_start), msg = msg)
 
   parametric_start
 
