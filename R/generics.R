@@ -78,7 +78,6 @@ logLik.kdensity = function(object, ...) {
   val
 }
 
-#' @export
 confint.kdensity = function(object, parm, level = 0.95, ...) {
   # Implement pointwise confidence intervals in some way.
 }
