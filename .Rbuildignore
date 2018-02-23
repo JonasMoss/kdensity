@@ -9,3 +9,4 @@
 ^kdensity\.Rproj$
 ^testing$
 ^\.travis\.yml$
+^appveyor\.yml$
