@@ -21,8 +21,9 @@ names(mle2) = c("shape1", "shape2")
 
 expect_equal(mle1, mlbeta(data1), tolerance = 1e-5)
 expect_equal(mle2, mlbeta(data2), tolerance = 1e-5)
-expect_equal(mlbeta(data2, type = "gradient"), mlbeta(data2), tolerance = 1e-8)
-expect_equal(mlbeta(data1, type = "gradient"), mlbeta(data1, type = "hessian"), tolerance = 1e-8)
+expect_equal(mlbeta(data2, type = "gradient"), mlbeta(data2), tolerance = 1e-5)
+expect_equal(mlbeta(data1, type = "gradient"), mlbeta(data1, type = "hessian"), tolerance = 1e-5)
+
 
 ### Checking gamma:
 

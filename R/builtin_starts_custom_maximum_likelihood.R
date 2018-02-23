@@ -27,24 +27,38 @@ mlbeta = function(x, start = NULL, type = c("none", "gradient", "hessian")) {
     start = c(1/2 + G1*denom, 1/2 + G2*denom)
   }
 
-  beta_objective = function(p) {
-    lbeta(p[1],p[2]) - p[1]*val1 - p[2]*val2
+  objective = function(p) {
+    lbeta(p[1], p[2]) - p[1]*val1 - p[2]*val2
   }
 
-  if(type == "gradient" | type == "hessian") {
-    attr(beta_objective, "gradient") = function(p) {
-      digamma_alpha_beta = digamma(p[1] + p[2])
-      c(digamma(p[1]) - digamma_alpha_beta - val1,
-        digamma(p[2]) - digamma_alpha_beta - val2)
+  gradient = function(p) {
+    digamma_alpha_beta = digamma(p[1] + p[2])
+    c(digamma(p[1]) - digamma_alpha_beta - val1,
+      digamma(p[2]) - digamma_alpha_beta - val2)
+  }
+
+  if(type == "gradient") {
+    beta_objective = function(p) {
+      result = objective(p)
+      attr(result, "gradient") = gradient(p)
+      result
     }
-  }
-
-  if(type == "hessian") {
-    attr(beta_objective, "hessian") = function(p) {
+  } else if(type == "hessian") {
+    hessian = function(p) {
       trigamma_alpha_beta = -trigamma(p[1] + p[2])
       matrix(trigamma_alpha_beta, nrow = 2, ncol = 2) +
         diag(c(trigamma(p[1]), trigamma(p[2])))
-    }}
+    }
+
+    beta_objective = function(p) {
+      result = objective(p)
+      attr(result, "gradient") = gradient(p)
+      attr(result, "hessian") = hessian(p)
+      result
+    }
+  } else {
+    beta_objective = objective
+  }
 
   parameters = stats::nlm(beta_objective, p = start, typsize = start)$estimate
   names(parameters) = c("shape1", "shape2")
