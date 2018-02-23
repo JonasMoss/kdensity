@@ -13,7 +13,6 @@
 #' is a straight forwardimplementation of maximum likelihood for beta using
 #' the sufficient statistics of the beta distribution,
 
-
 mlbeta = function(x, start = NULL, type = c("none", "gradient", "hessian")) {
   type = match.arg(type)
 
@@ -94,7 +93,6 @@ mlgamma = function(x, rel.tol = .Machine$double.eps^0.25, iterlim = 100) {
   c(shape = shape, rate = shape/mean_hat)
 
 }
-
 
 #' Estimates the parameter of a Weibull distribution by maximum likelihood
 #'
@@ -189,7 +187,6 @@ mlgumbel = function(x, scale0 = 1, rel.tol = .Machine$double.eps^0.25,
   c(loc = loc, scale = scale)
 }
 
-
 #' Estimates the parameter of a Kumaraswamy distribution by maximum likelihood
 #'
 #' Uses Newton-Raphson to estimate the parameters of the Kumaraswamy distribution.
@@ -230,4 +227,3 @@ mlkumar = function(x, a0 = 1, rel.tol = .Machine$double.eps^0.25,
   b = -1/mean(log(1 - x^a))
   c(a = a, b = b)
 }
-
