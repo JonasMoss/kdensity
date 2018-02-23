@@ -21,6 +21,8 @@ names(mle2) = c("shape1", "shape2")
 
 expect_equal(mle1, mlbeta(data1), tolerance = 1e-5)
 expect_equal(mle2, mlbeta(data2), tolerance = 1e-5)
+expect_equal(mlbeta(data2, type = "gradient"), mlbeta(data2), tolerance = 1e-8)
+expect_equal(mlbeta(data1, type = "gradient"), mlbeta(data1, type = "hessian"), tolerance = 1e-8)
 
 ### Checking gamma:
 
@@ -41,6 +43,7 @@ names(mle2) = c("shape", "rate")
 
 expect_equal(mle1, mlgamma(data1), tolerance = 1e-5)
 expect_equal(mle2, mlgamma(data2), tolerance = 1e-5)
+expect_warning(mlgamma(data2, iterlim = 1))
 
 ### Checking Weibull:
 
@@ -61,7 +64,7 @@ names(mle2) = c("shape", "scale")
 
 expect_equal(mle1, mlweibull(data1), tolerance = 1e-5)
 expect_equal(mle2, mlweibull(data2), tolerance = 1e-5)
-
+expect_warning(mlweibull(data2, iterlim = 1))
 
 ### Checking gumbel:
 
@@ -82,4 +85,5 @@ names(mle2) = c("loc", "scale")
 
 expect_equal(mle1, mlgumbel(data1), tolerance = 1e-5)
 expect_equal(mle2, mlgumbel(data2), tolerance = 1e-5)
+expect_warning(mlgumbel(data2, iterlim = 1))
 
