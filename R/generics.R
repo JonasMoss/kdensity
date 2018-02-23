@@ -70,7 +70,7 @@ coef.kdensity = function(object, ...) object$estimates
 #' @export
 logLik.kdensity = function(object, ...) {
   msg = "'logLik' only makes sense for kdensity objects with a non-uniform parametric start."
-  assertthat::assert_that(object$start != "uniform" & object$start != "constant", msg = msg)
+  assertthat::assert_that(object$start_str != "uniform" & object$start_str != "constant", msg = msg)
   val = object$logLik
   attr(val, "nobs") = length(object$n)
   attr(val, "df")   = length(stats::coef(object))
