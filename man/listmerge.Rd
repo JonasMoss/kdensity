@@ -2,22 +2,37 @@
 % Please edit documentation in R/utility_functions.R
 \name{listmerge}
 \alias{listmerge}
-\title{Puts default arguments into ellipses: ...}
+\title{Merges two lists.}
 \usage{
 listmerge(x, y, type = c("merge", "template"))
 }
 \arguments{
-\item{x}{a list of default arguments.}
+\item{x}{A list of default arguments.}
 
-\item{y}{a list of supplied arguments}
+\item{y}{A list of supplied arguments}
 
-\item{type}{should x and y be merged (with y having priority),
-or the elements x be a template filled with values from y?}
+\item{type}{If \code{merge}, the list will be merge with y
+having priority; if \code{template}, named the elements of
+y not in x will be discarded after merging.}
 }
 \value{
-a merged list where conflicts are solved in favour
-of supplied.
+A merged list where conflicts are solved in favour
+of y. Does not preserve ordering.
 }
 \description{
-Puts default arguments into ellipses: ...
+Merges two lists.
+}
+\examples{
+\dontrun{
+    x = list(a = 5,
+             b = 0,
+             c = "a",
+             d = NULL)
+
+    y = list(a = 3,
+             b = 7,
+             f = NA)
+
+   listmerge(x, y, type = "merge")
+   listmerge(x, y, type = "template")}
 }

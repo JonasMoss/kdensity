@@ -14,7 +14,7 @@
 #' it is used. If not, the variable itself is used.
 #' @details Recycles arguments so that all vectors are equally long. If a
 #' prototype is given, each vector will have the same size as the prototype.
-#' @examples
+#' @examples  \dontrun{
 #'     a = 1:3
 #'     b = letters[2:9]
 #'     c = 9:20
@@ -24,7 +24,7 @@
 #'
 #'     # Each element has the same length as c.
 #'     recycle(a, b, c, prototype = "c")
-#'     recycle(a, b, c, prototype = c)
+#'     recycle(a, b, c, prototype = c)}
 
 recycle = function(..., prototype) {
 
@@ -38,10 +38,6 @@ recycle = function(..., prototype) {
   } else {
     arg_names = utils::head(arg_names, -1)
     names(dots) = arg_names
-
-    ## The rules work as follows: If it is a name, check the supplied list
-    ## first. If itsn't there, use ordinary scoping to check. If it is a
-    ## non-negative number, use it. If it's none of these, throw an error.
 
     subst_proto = deparse(substitute(prototype))
     if(subst_proto %in% arg_names) {
@@ -63,15 +59,27 @@ recycle = function(..., prototype) {
 
 }
 
-#' Puts default arguments into ellipses: ...
+#' Merges two lists.
 #'
+#' @param x A list of default arguments.
+#' @param y A list of supplied arguments
+#' @param type If \code{merge}, the list will be merge with y
+#' having priority; if \code{template}, named the elements of
+#' y not in x will be discarded after merging.
+#' @return A merged list where conflicts are solved in favour
+#' of y. Does not preserve ordering.
+#' @examples \dontrun{
+#'     x = list(a = 5,
+#'              b = 0,
+#'              c = "a",
+#'              d = NULL)
 #'
-#' @param x a list of default arguments.
-#' @param y a list of supplied arguments
-#' @param type should x and y be merged (with y having priority),
-#' or the elements x be a template filled with values from y?
-#' @return a merged list where conflicts are solved in favour
-#' of supplied.
+#'     y = list(a = 3,
+#'              b = 7,
+#'              f = NA)
+#'
+#'    listmerge(x, y, type = "merge")
+#'    listmerge(x, y, type = "template")}
 
 listmerge = function(x, y, type = c("merge", "template")) {
 

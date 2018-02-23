@@ -21,6 +21,7 @@ Recycles arguments so that all vectors are equally long. If a
 prototype is given, each vector will have the same size as the prototype.
 }
 \examples{
+ \dontrun{
     a = 1:3
     b = letters[2:9]
     c = 9:20
@@ -30,5 +31,5 @@ prototype is given, each vector will have the same size as the prototype.
 
     # Each element has the same length as c.
     recycle(a, b, c, prototype = "c")
-    recycle(a, b, c, prototype = c)
+    recycle(a, b, c, prototype = c)}
 }
