@@ -20,17 +20,12 @@ get_kernel_start_support = function(kernel, start, support) {
   ## value equals uniform.
 
   if(!is.null(start)) {
-    if(!is.list(start)) {
-      start_str = start
-      start = get_start(start)
-    } else {
-      start_str = deparse(substitute(start))
-    }
+    start_str = start
+    start = get_start(start)
   } else {
     start_str = "uniform"
     start = get_start("uniform")
   }
-
 
   if(is.null(kernel) & is.null(support)) {
     ## No arguments will give you the stats::density behaviour by default.
@@ -70,12 +65,8 @@ get_kernel_start_support = function(kernel, start, support) {
 
   ## The next step is to fill in the kernel if it is non-NULL:
   if(!is.null(kernel)) {
-    if(!is.list(kernel)) {
-      kernel_str = kernel
-      kernel = get_kernel(kernel)
-    } else {
-      kernel_str = deparse(substitute(kernel))
-    }
+    kernel_str = kernel
+    kernel = get_kernel(kernel)
   }
 
   if(!is.null(kernel) & is.null(support)) {

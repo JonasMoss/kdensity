@@ -1,0 +1,8 @@
+context("kdensity helper (default arguments)")
+expect_equal(kdensity(precip, support = c(-Inf, Inf))$kernel_str, "gaussian")
+expect_equal(kdensity(precip, support = c(0, Inf))$kernel_str, "gamma")
+expect_message(kdensity(precip, support = c(7, 999)))
+expect_equal(kdensity(precip, support = c(7, 999))$kernel_str, "gamma")
+expect_equal(kdensity(precip, support = c(-5, 999))$kernel_str, "gaussian")
+set.seed(313)
+expect_equal(kdensity(rbeta(10, 10, 10), support = c(0.1, 0.9))$kernel_str, "gcopula")
