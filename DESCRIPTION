@@ -11,9 +11,9 @@ Encoding: UTF-8
 LazyData: true
 Suggests: extraDistr,
     SkewHyperbolic,
-    testthat
-Imports: assertthat,
     testthat,
+    covr
+Imports: assertthat,
     EQL,
     knitr,
     rmarkdown
