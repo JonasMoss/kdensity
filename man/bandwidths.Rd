@@ -14,12 +14,13 @@
 symmetric kernels.}
 }
 \description{
-Bandwidth selectors for \code{kdensity}. These are the available options
-for the option \code{bw} in \code{kdensity}.
+The available options for bandwidth selectors, passed as \code{bw}
+arguments to \code{kdensity}.
 }
 \details{
-The bandwidth functions are not exported. They can be accessed by the
-kdensity:: prefix, e.g. kdensity::JE.
+The bandwidth functions are not exported. They are members of the
+environment \code{bw_environments}, and can be accessed by
+\code{kdensity:::bw_environments}.
 }
 \section{Bandwidth selectors}{
 
@@ -28,7 +29,7 @@ kdensity:: prefix, e.g. kdensity::JE.
    "nrd0" is the standard bandwidth selector for symmetric kernels with
    constant parametric starts.
 
-   \code{"ucv"}: Unbiased cross validation. The usual standard option for
+   \code{"ucv"}: Unbiased cross validation. The standard option for
    asymmetric kernels.
 
    \code{"RHE"}: Selector for parametric starts with a symmetric kernel,
@@ -53,9 +54,9 @@ kdensity:: prefix, e.g. kdensity::JE.
 \examples{
    ## Not a serious bandwidth function.
    silly_width = function(x, kernel = NULL, start = NULL, support = NULL) {
-     kernel = get_kernel(kernel)
-     kernel$kernel(0.5)
+     rexp(1)
    }
+   kdensity(mtcars$mpg, start = "gumbel", bw = silly_width)
 }
 \references{
 Jones, M. C., and D. A. Henderson. "Kernel-type density estimation on the unit interval." Biometrika 94.4 (2007): 977-984.

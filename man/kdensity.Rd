@@ -52,11 +52,20 @@ following elements, accessible by '$':
 }
 }
 \description{
-\code{kdensity} computes a parametrically guided kernel density estimate for univariate data.
-It supports asymmetric kernels and parametric starts through the \code{kernel} and
-\code{start} arguments.
+\code{kdensity} computes a parametrically guided kernel density estimate
+for univariate data. It supports asymmetric kernels and parametric starts
+through the \code{kernel} and \code{start} arguments.
 }
 \details{
+The default values for \code{bw}, \code{kernel}, \code{start}, and
+\code{support} are interdependent, and are choosen to make sense. E.g.,
+the default value for \code{support} when \code{start = beta} is
+\code{c(0, 1)}.
+
+The \code{start} argument defaults to \code{uniform}, which corresponds
+to ordinary kernel density estimation. The typical default value for
+\code{kernel} is \code{gaussian}.
+
 If \code{normalized} is \code{FALSE} and \code{start != "uniform"}, the resulting
 density will not integrate to 1 in general.
 }

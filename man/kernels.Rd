@@ -9,6 +9,7 @@
 \alias{kernel_doc_useless}
 \alias{kernel_doc_useless}
 \alias{kernel_doc_useless}
+\alias{kernel_doc_useless}
 \title{Kernel functions}
 \description{
 Kernel functions are an important part of \code{kdensity}. This document
@@ -16,17 +17,30 @@ lists the available built-in functions and the structure of them. Any kernel
 in the list can be used in \code{kdensity} by using \code{kernel = "kernel"}
 for the intended kernel.
 }
+\details{
+Be careful combining kernels with compact support with parametric starts,
+as the normalizing integral typically fails to converge. Use \code{gaussian}
+instead.
+}
 \section{Symmetric kernels}{
 
 
 
-   \code{gaussian}: The Gaussian kernel.
+   \code{gaussian, normal}: The Gaussian kernel. The default argument when
+   \code{starts} is supported on R.
 
 
-   \code{laplace}: The Laplace kernel.
+   \code{epanechnikov, rectangular (uniform), triangular, biweight,
+   cosine, optcosine}: Standard symmetric kernels, also used in
+   \code{\link[stats]{density}}.
 
 
-   \code{epanechnikov}: The Epanechnikov kernel, defined as bla bla.
+   \code{tricube, triweight}: Standard symmetric kernels. Not supported by
+   \code{\link[stats]{density}}.
+
+
+   \code{laplace}: Uses the Laplace density, also known as the double
+   exponential density.
 }
 
 \section{Asymmetric kernels}{

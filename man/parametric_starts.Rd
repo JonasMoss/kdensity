@@ -11,7 +11,7 @@
 \alias{roxygen_useless}
 \title{Parametric starts}
 \description{
-A parametric start is a density function with associated estimator which
+A parametric start is a density function with an associated estimator which
 is used as a starting point in \code{kdensity}. Several parametric starts
 are implemented, all with maximum likelihood estimation. Custom-made
 parametric starts are possible, see the Structure section.
@@ -26,17 +26,18 @@ parametric starts are possible, see the Structure section.
 
 
    \code{gaussian, normal}: The normal distribution. A natural choice for
-   densities on the real line \eqn{\mathbb{R}}.
+   densities on the real line \eqn{R}.
 
 
-   \code{laplace, gumbel}: Distributions on  \eqn{\mathbb{R}}.
+   \code{laplace, gumbel}: Distributions on  \eqn{R}.
 
 
    \code{exponential, gamma, lognormal, inverse_gaussian, weibull}: Densities
    supported on the positive real line \eqn{(0, \infty)}.
 
 
-   \code{beta, kumaraswamy}: The beta distribution, supported on the unit interval \eqn{[0, 1]}.
+   \code{beta, kumaraswamy}: The beta and Kumaraswamy distributions,
+   supported on the unit interval \eqn{[0, 1]}.
 
 
    \code{pareto}: The Pareto distribution, supported on \eqn{[1, \infty)}.
@@ -53,22 +54,22 @@ parametric starts are possible, see the Structure section.
 }
 
 \examples{
-  start_exponential = list(
-    density = dexp,
-    estimator = function(data) {
-      c(rate = 1/mean(data))
-    },
-    support   = c(0, Inf)
-  )
+start_exponential = list(
+ density = dexp,
+ estimator = function(data) {
+   c(rate = 1/mean(data))
+ },
+ support = c(0, Inf)
+)
 
-  start_inverse_gaussian = list(
-    density = extraDistr::dwald,
-    estimator = function(data) {
-      c(mu       = mean(data),
-        lambda   = mean(1/data - 1/mean(data)))
-    },
-    support   = c(0, Inf)
- )
+start_inverse_gaussian = list(
+ density = extraDistr::dwald,
+ estimator = function(data) {
+  c(mu = mean(data),
+    lambda = mean(1/data - 1/mean(data)))
+  },
+ support = c(0, Inf)
+)
 
 }
 \seealso{

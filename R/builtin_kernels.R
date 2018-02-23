@@ -6,6 +6,11 @@ kernel_environment = new.env(hash = FALSE)
 #' lists the available built-in functions and the structure of them. Any kernel
 #' in the list can be used in \code{kdensity} by using \code{kernel = "kernel"}
 #' for the intended kernel.
+#'
+#' Be careful combining kernels with compact support with parametric starts,
+#' as the normalizing integral typically fails to converge. Use \code{gaussian}
+#' instead.
+#'
 #' @section Symmetric kernels:
 #' @section Asymmetric kernels:
 #' @usage NULL
@@ -52,7 +57,8 @@ kernel_environment = new.env(hash = FALSE)
 #' @usage NULL
 #' @format NULL
 #' @section Symmetric kernels:
-#'    \code{gaussian}: The Gaussian kernel.
+#'    \code{gaussian, normal}: The Gaussian kernel. The default argument when
+#'    \code{starts} is supported on R.
 kernel_doc_useless = NULL
 
 kernel_environment$gaussian = list(
@@ -67,23 +73,9 @@ kernel_environment$normal = kernel_environment$gaussian
 #' @usage NULL
 #' @format NULL
 #' @section Symmetric kernels:
-#'    \code{laplace}: The Laplace kernel.
-kernel_doc_useless = NULL
-
-kernel_environment$laplace = list(
-  kernel  = function(y, x, h) {
-              u = (x - y)/h
-              1/2*exp(-abs(u))
-            },
-  sd      = 1/sqrt(2),
-  support = c(-Inf, Inf)
-  )
-
-#' @rdname kernels
-#' @usage NULL
-#' @format NULL
-#' @section Symmetric kernels:
-#'    \code{epanechnikov}: The Epanechnikov kernel, defined as bla bla.
+#'    \code{epanechnikov, rectangular (uniform), triangular, biweight,
+#'    cosine, optcosine}: Standard symmetric kernels, also used in
+#'    \code{\link[stats]{density}}.
 kernel_doc_useless = NULL
 
 kernel_environment$epanechnikov = list(
@@ -121,6 +113,32 @@ kernel_environment$biweight = list(
   support = c(-Inf, Inf)
   )
 
+kernel_environment$cosine = list(
+  kernel  = function(y, x, h) {
+    u = (x - y)/h
+    (1+cos(pi*u))/2*(abs(u) <= 1)
+  },
+  sd      = 1/sqrt(1/3 - 2/pi^2),
+  support = c(-Inf, Inf)
+)
+
+kernel_environment$optcosine = list(
+  kernel  = function(y, x, h) {
+    u = (x - y)/h
+    pi/4*cos(pi/2*u)*(abs(u) <= 1)
+  },
+  sd      = 1/sqrt(1-8/pi^2),
+  support = c(-Inf, Inf)
+)
+
+#' @rdname kernels
+#' @usage NULL
+#' @format NULL
+#' @section Symmetric kernels:
+#'    \code{tricube, triweight}: Standard symmetric kernels. Not supported by
+#'    \code{\link[stats]{density}}.
+kernel_doc_useless = NULL
+
 kernel_environment$triweight = list(
   kernel  = function(y, x, h) {
               u = (x - y)/h
@@ -139,23 +157,22 @@ kernel_environment$tricube = list(
   support = c(-Inf, Inf)
   )
 
-kernel_environment$cosine = list(
-  kernel  = function(y, x, h) {
-              u = (x - y)/h
-              (1+cos(pi*u))/2*(abs(u) <= 1)
-            },
-  sd      = 1/sqrt(1/3 - 2/pi^2),
-  support = c(-Inf, Inf)
-  )
+#' @rdname kernels
+#' @usage NULL
+#' @format NULL
+#' @section Symmetric kernels:
+#'    \code{laplace}: Uses the Laplace density, also known as the double
+#'    exponential density.
+kernel_doc_useless = NULL
 
-kernel_environment$optcosine = list(
+kernel_environment$laplace = list(
   kernel  = function(y, x, h) {
-              u = (x - y)/h
-              pi/4*cos(pi/2*u)*(abs(u) <= 1)
-            },
-  sd      = 1/sqrt(1-8/pi^2),
+    u = (x - y)/h
+    1/2*exp(-abs(u))
+  },
+  sd      = 1/sqrt(2),
   support = c(-Inf, Inf)
-  )
+)
 
 #' @rdname kernels
 #' @usage NULL

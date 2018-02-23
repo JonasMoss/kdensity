@@ -2,7 +2,7 @@ starts_environment = new.env(hash = FALSE)
 
 #' Parametric starts
 #'
-#' A parametric start is a density function with associated estimator which
+#' A parametric start is a density function with an associated estimator which
 #' is used as a starting point in \code{kdensity}. Several parametric starts
 #' are implemented, all with maximum likelihood estimation. Custom-made
 #' parametric starts are possible, see the Structure section.
@@ -17,23 +17,22 @@ starts_environment = new.env(hash = FALSE)
 #'   function. The estimator function takes one argument, a numeric vector,
 #'   which is passed from \code{kdensity}.
 #'
-#' @examples
-#'   start_exponential = list(
-#'     density = dexp,
-#'     estimator = function(data) {
-#'       c(rate = 1/mean(data))
-#'     },
-#'     support   = c(0, Inf)
-#'   )
+#' @examples start_exponential = list(
+#'  density = dexp,
+#'  estimator = function(data) {
+#'    c(rate = 1/mean(data))
+#'  },
+#'  support = c(0, Inf)
+#' )
 #'
-#'   start_inverse_gaussian = list(
-#'     density = extraDistr::dwald,
-#'     estimator = function(data) {
-#'       c(mu       = mean(data),
-#'         lambda   = mean(1/data - 1/mean(data)))
-#'     },
-#'     support   = c(0, Inf)
-#'  )
+#' start_inverse_gaussian = list(
+#'  density = extraDistr::dwald,
+#'  estimator = function(data) {
+#'   c(mu = mean(data),
+#'     lambda = mean(1/data - 1/mean(data)))
+#'   },
+#'  support = c(0, Inf)
+#' )
 #'
 #' @seealso \code{\link{kdensity}}; \code{\link{kernels}}; \code{\link{bandwidths}}
 #'
@@ -62,7 +61,7 @@ starts_environment$constant = starts_environment$uniform
 #' @format NULL
 #' @section Built-in starts:
 #'    \code{gaussian, normal}: The normal distribution. A natural choice for
-#'    densities on the real line \eqn{\mathbb{R}}.
+#'    densities on the real line \eqn{R}.
 roxygen_useless = NULL
 
 starts_environment$normal = list(
@@ -80,7 +79,7 @@ starts_environment$gaussian = starts_environment$normal
 #' @usage NULL
 #' @format NULL
 #' @section Built-in starts:
-#'    \code{laplace, gumbel}: Distributions on  \eqn{\mathbb{R}}.
+#'    \code{laplace, gumbel}: Distributions on  \eqn{R}.
 roxygen_useless = NULL
 
 starts_environment$laplace = list(
@@ -165,7 +164,8 @@ starts_environment$weibull = list(
 #' @usage NULL
 #' @format NULL
 #' @section Built-in starts:
-#'    \code{beta, kumaraswamy}: The beta distribution, supported on the unit interval \eqn{[0, 1]}.
+#'    \code{beta, kumaraswamy}: The beta and Kumaraswamy distributions,
+#'    supported on the unit interval \eqn{[0, 1]}.
 roxygen_useless = NULL
 
 starts_environment$beta = list(
