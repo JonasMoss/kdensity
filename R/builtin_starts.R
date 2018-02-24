@@ -61,7 +61,7 @@ starts_environment$constant = starts_environment$uniform
 #' @format NULL
 #' @section Built-in starts:
 #'    \code{gaussian, normal}: The normal distribution. A natural choice for
-#'    densities on the real line \eqn{R}.
+#'    densities on the real line \eqn{(-\infty, \infty)}.
 roxygen_useless = NULL
 
 starts_environment$normal = list(
@@ -79,7 +79,7 @@ starts_environment$gaussian = starts_environment$normal
 #' @usage NULL
 #' @format NULL
 #' @section Built-in starts:
-#'    \code{laplace, gumbel}: Distributions on  \eqn{R}.
+#'    \code{laplace, gumbel}: Distributions on  \eqn{(-\infty, \infty)}.
 roxygen_useless = NULL
 
 starts_environment$laplace = list(
