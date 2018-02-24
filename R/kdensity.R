@@ -5,7 +5,7 @@
 #' through the \code{kernel} and \code{start} arguments.
 #'
 #' The default values for \code{bw}, \code{kernel}, \code{start}, and
-#' \code{support} are interdependent, and are choosen to make sense. E.g.,
+#' \code{support} are interdependent, and are chosen to make sense. E.g.,
 #' the default value for \code{support} when \code{start = beta} is
 #' \code{c(0, 1)}.
 #'
