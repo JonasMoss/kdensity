@@ -65,10 +65,9 @@ instead.
    element. The mandatory element '\code{kernel}' is the kernel function.
    It takes arguments \code{y, x, h}, where \code{x} is the data supplied
    to \code{kdensity} and \code{y} is the point of evaluation. \code{h} is
-   the bandwidth. The kernel function is evaluated as
-   \code{1/h*kerne(y, x, h)}, so multiply by \code{h} if that is needed. It
-   should be vectorized in \code{x}, but vectorization in \code{y} is not
-   needed.
+   the bandwidth. Internally, the kernel function is evaluated as
+   \code{1/h*kernel(y, x, h)}. It should be vectorized in \code{x}, but 
+   vectorization in \code{y} is not needed.
 
    The second mandatory element is \code{support}, stating the domain of
    definition for the kernel. This is used to distinguish kernels on the

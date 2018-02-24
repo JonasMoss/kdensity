@@ -97,8 +97,8 @@ confint.kdensity = function(object, parm, level = 0.95, ...) {
 
 #' Supplies a plotting range from a kdensity object.
 #'
-#' @param obj a kdensity object
-#' @return a vector of size 1000, used for plotting.
+#' @param obj A kdensity object.
+#' @return S vector of size 1000, used for plotting.
 
 get_range = function(obj) {
   support = obj$support

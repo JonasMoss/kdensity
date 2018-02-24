@@ -26,10 +26,10 @@ parametric starts are possible, see the Structure section.
 
 
    \code{gaussian, normal}: The normal distribution. A natural choice for
-   densities on the real line \eqn{R}.
+   densities on the real line \eqn{(-\infty, \infty)}.
 
 
-   \code{laplace, gumbel}: Distributions on  \eqn{R}.
+   \code{laplace, gumbel}: Distributions on  \eqn{(-\infty, \infty)}.
 
 
    \code{exponential, gamma, lognormal, inverse_gaussian, weibull}: Densities
