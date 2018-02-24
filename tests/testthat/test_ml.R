@@ -88,3 +88,26 @@ expect_equal(mle1, mlgumbel(data1), tolerance = 1e-5)
 expect_equal(mle2, mlgumbel(data2), tolerance = 1e-5)
 expect_warning(mlgumbel(data2, iterlim = 1))
 
+
+### Checking Kumaraswamy:
+
+set.seed(313)
+data1 = extraDistr::rkumar(100, 4, 4)
+data2 = extraDistr::rkumar(10, 3, 7)
+
+mle1 = nlm(function(p) {
+  -mean(extraDistr::dkumar(data1, p[1], p[2], log = TRUE))
+}, p = c(4, 4))$estimate
+
+mle2 = nlm(function(p) {
+  -mean(extraDistr::dkumar(data2, p[1], p[2], log = TRUE))
+}, p = c(3, 7))$estimate
+
+names(mle1) = c("a", "b")
+names(mle2) = c("a", "b")
+
+expect_equal(mle1, mlkumar(data1), tolerance = 1e-4)
+expect_equal(mle2, mlkumar(data2), tolerance = 1e-4)
+expect_warning(mlkumar(data2, iterlim = 1))
+
+

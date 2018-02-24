@@ -222,12 +222,29 @@ mlgumbel = function(x, scale0 = 1, rel.tol = .Machine$double.eps^0.25,
 mlkumar = function(x, a0 = 1, rel.tol = .Machine$double.eps^0.25,
                     iterlim = 100) {
 
-  stop("Kumaraswamy is not yet implemented.")
   rel.tol_str = deparse(substitute(rel.tol))
 
+  logs = log(x)
+
   for(i in 1:iterlim) {
-    a = a0
+
+    xa = x^a0
+    T1 = a0*mean(logs/(1-xa))
+    T2 = a0*mean(logs*(xa/(1-xa)))
+    T3 = mean(log(1-xa))
+    f = 1/a0*(1 + T1 + T2/T3)
+
+    C = mean(logs^2*(xa/(1-xa)^2))
+    D = mean(logs^2*(xa/(1-xa)))
+
+    T1diff = 1/a0*T1 + a0*C
+    T2diff = 1/a0*T2  + 1/a0*T2^2 + a0*D
+
+    fdiff = -1/a0^2*f + 1/a0*(T1diff + T2diff/T3 + 1/a0*(T2/T3)^2)
+
+    a = a0 - f/fdiff
     if(abs((a0 - a)/a0) < rel.tol) break
+    a0 = a
 
   }
 
