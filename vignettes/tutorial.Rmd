@@ -56,6 +56,26 @@ logLik(kde)
 AIC(kde)
 ```
 
+To view information about the kernel density, use the `summary` generic.
+
+```{r mpg_example_summary, echo = TRUE}
+summary(kde)
+```
+
+Access members of the kernel density with `$` or `[[`.
+
+```{r mpg_example_access, echo = TRUE}
+kde$start_str 
+kde[["x"]]
+```
+
+To make changes to the kernel density estimator, you can use the generic `update` function, replace values with `$`, or make a new one.
+
+```{r mpg_example_changes, echo = TRUE}
+kde$bw = "RHE"
+update(kde, start = "normal")
+```
+
 # Custom densities and kernels
 ## Parametric starts
 
