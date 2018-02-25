@@ -36,16 +36,21 @@ starts_environment = new.env(hash = FALSE)
 #'
 #' @seealso \code{\link{kdensity}}; \code{\link{kernels}}; \code{\link{bandwidths}}
 #'
-#' @name parametric_starts
-
-#' @rdname parametric_starts
-#' @usage NULL
-#' @format NULL
 #' @section Built-in starts:
 #'    \code{uniform, constant}: Selecting the uniform start makes \code{kdensity}
 #'    act like an ordinary kernel density estimator. The default value for any
 #'    choice of kernel or support.
-roxygen_useless = NULL
+#'    \code{gaussian, normal}: The normal distribution. A natural choice for
+#'    densities on the real line \eqn{(-\infty, \infty)}.
+#'    \code{laplace, gumbel}: Distributions on  \eqn{(-\infty, \infty)}.
+#'    \code{exponential, gamma, lognormal, inverse_gaussian, weibull}: Densities
+#'    supported on the positive real line \eqn{(0, \infty)}.
+#'    \code{beta, kumaraswamy}: The beta and Kumaraswamy distributions,
+#'    supported on the unit interval \eqn{[0, 1]}.
+#'    \code{pareto}: The Pareto distribution, supported on \eqn{[1, \infty)}.
+#'    Has heavy tails.
+#' @name parametric_starts
+NULL
 
 starts_environment$uniform = list(
   density   = function(x) rep(1, length(x)),
@@ -54,14 +59,6 @@ starts_environment$uniform = list(
 )
 
 starts_environment$constant = starts_environment$uniform
-
-#' @rdname parametric_starts
-#' @usage NULL
-#' @format NULL
-#' @section Built-in starts:
-#'    \code{gaussian, normal}: The normal distribution. A natural choice for
-#'    densities on the real line \eqn{(-\infty, \infty)}.
-roxygen_useless = NULL
 
 starts_environment$normal = list(
   density = dnorm,
@@ -73,13 +70,6 @@ starts_environment$normal = list(
 )
 
 starts_environment$gaussian = starts_environment$normal
-
-#' @rdname parametric_starts
-#' @usage NULL
-#' @format NULL
-#' @section Built-in starts:
-#'    \code{laplace, gumbel}: Distributions on  \eqn{(-\infty, \infty)}.
-roxygen_useless = NULL
 
 starts_environment$laplace = list(
   density = function(x, mu, b) {
@@ -102,14 +92,6 @@ starts_environment$gumbel = list(
   estimator = mlgumbel,
   support   = c(-Inf, Inf)
 )
-
-#' @rdname parametric_starts
-#' @usage NULL
-#' @format NULL
-#' @section Built-in starts:
-#'    \code{exponential, gamma, lognormal, inverse_gaussian, weibull}: Densities
-#'    supported on the positive real line \eqn{(0, \infty)}.
-roxygen_useless = NULL
 
 starts_environment$exponential = list(
   density = dexp,
@@ -159,14 +141,6 @@ starts_environment$weibull = list(
   support   = c(0, Inf)
   )
 
-#' @rdname parametric_starts
-#' @usage NULL
-#' @format NULL
-#' @section Built-in starts:
-#'    \code{beta, kumaraswamy}: The beta and Kumaraswamy distributions,
-#'    supported on the unit interval \eqn{[0, 1]}.
-roxygen_useless = NULL
-
 starts_environment$beta = list(
   density   = dbeta,
   estimator = mlbeta,
@@ -186,15 +160,6 @@ if(requireNamespace("extraDistr", quietly = TRUE)) {
     support   = c(0, Inf)
   )
 }
-
-
-#' @rdname parametric_starts
-#' @usage NULL
-#' @format NULL
-#' @section Built-in starts:
-#'    \code{pareto}: The Pareto distribution, supported on \eqn{[1, \infty)}.
-#'    Has heavy tails.
-roxygen_useless = NULL
 
 starts_environment$pareto = list(
   density   = function(x, alpha) alpha*x^(-alpha-1),

@@ -21,7 +21,7 @@ kernel_environment = new.env(hash = FALSE)
 #'    It takes arguments \code{y, x, h}, where \code{x} is the data supplied
 #'    to \code{kdensity} and \code{y} is the point of evaluation. \code{h} is
 #'    the bandwidth. Internally, the kernel function is evaluated as
-#'    \code{1/h*kernel(y, x, h)}. It should be vectorized in \code{x}, but 
+#'    \code{1/h*kernel(y, x, h)}. It should be vectorized in \code{x}, but
 #'    vectorization in \code{y} is not needed.
 #'
 #'    The second mandatory element is \code{support}, stating the domain of
@@ -50,15 +50,28 @@ kernel_environment = new.env(hash = FALSE)
 #' @seealso \code{\link{kdensity}}; \code{\link{parametric_starts}};
 #' \code{\link{bandwidths}}.
 #'
-#' @name kernels
-
-#' @rdname kernels
-#' @usage NULL
-#' @format NULL
 #' @section Symmetric kernels:
 #'    \code{gaussian, normal}: The Gaussian kernel. The default argument when
 #'    \code{starts} is supported on R.
-kernel_doc_useless = NULL
+#'    \code{epanechnikov, rectangular (uniform), triangular, biweight,
+#'    cosine, optcosine}: Standard symmetric kernels, also used in
+#'    \code{\link[stats]{density}}.
+#'    \code{tricube, triweight}: Standard symmetric kernels. Not supported by
+#'    \code{\link[stats]{density}}.
+#'    \code{laplace}: Uses the Laplace density, also known as the double
+#'    exponential density.
+#' @section Asymmetric kernels:
+#'    \code{gamma, gamma_biased}: The gamma kernel of Chen (2000). For use on the positive
+#'    half-line. \code{gamma} is the recommended biased-corrected kernel.
+#'    \code{gcopula}: The Gaussian copula kernel of Jones & Henderson (2007). For use
+#'    on the unit interval.
+#'    \code{beta, beta_biased}: The beta kernel of Chen (1999). For use on the unit interval.
+#'    \code{beta} is the recommended bias-corrected kernel.
+#' @references Chen, Song Xi. "Probability density function estimation using gamma kernels." Annals of the Institute of Statistical Mathematics 52.3 (2000): 471-480.
+#' Jones, M. C., and D. A. Henderson. "Kernel-type density estimation on the unit interval." Biometrika 94.4 (2007): 977-984.
+#' Chen, Song Xi. "Beta kernel estimators for density functions." Computational Statistics & Data Analysis 31.2 (1999): 131-145.
+#' @name kernels
+NULL
 
 kernel_environment$gaussian = list(
   kernel  = function(y, x, h) dnorm((y-x)/h),
@@ -67,15 +80,6 @@ kernel_environment$gaussian = list(
   )
 
 kernel_environment$normal = kernel_environment$gaussian
-
-#' @rdname kernels
-#' @usage NULL
-#' @format NULL
-#' @section Symmetric kernels:
-#'    \code{epanechnikov, rectangular (uniform), triangular, biweight,
-#'    cosine, optcosine}: Standard symmetric kernels, also used in
-#'    \code{\link[stats]{density}}.
-kernel_doc_useless = NULL
 
 kernel_environment$epanechnikov = list(
   kernel  = function(y, x, h) {
@@ -130,14 +134,6 @@ kernel_environment$optcosine = list(
   support = c(-Inf, Inf)
 )
 
-#' @rdname kernels
-#' @usage NULL
-#' @format NULL
-#' @section Symmetric kernels:
-#'    \code{tricube, triweight}: Standard symmetric kernels. Not supported by
-#'    \code{\link[stats]{density}}.
-kernel_doc_useless = NULL
-
 kernel_environment$triweight = list(
   kernel  = function(y, x, h) {
               u = (x - y)/h
@@ -156,13 +152,6 @@ kernel_environment$tricube = list(
   support = c(-Inf, Inf)
   )
 
-#' @rdname kernels
-#' @usage NULL
-#' @format NULL
-#' @section Symmetric kernels:
-#'    \code{laplace}: Uses the Laplace density, also known as the double
-#'    exponential density.
-kernel_doc_useless = NULL
 
 kernel_environment$laplace = list(
   kernel  = function(y, x, h) {
@@ -173,15 +162,6 @@ kernel_environment$laplace = list(
   support = c(-Inf, Inf)
 )
 
-#' @rdname kernels
-#' @usage NULL
-#' @format NULL
-#' @section Asymmetric kernels:
-#'    \code{gcopula}: The Gaussian copula kernel of Jones & Henderson (2007). For use
-#'    on the unit interval.
-#' @references Jones, M. C., and D. A. Henderson. "Kernel-type density estimation on the unit interval." Biometrika 94.4 (2007): 977-984.
-kernel_doc_useless = NULL
-
 kernel_environment$gcopula = list(
   kernel= function(y, x, h) {
     rho = 1 - h^2
@@ -190,15 +170,6 @@ kernel_environment$gcopula = list(
   },
   support = c(0, 1)
 )
-
-#' @rdname kernels
-#' @usage NULL
-#' @format NULL
-#' @section Asymmetric kernels:
-#'    \code{gamma, gamma_biased}: The gamma kernel of Chen (2000). For use on the positive
-#'    half-line. \code{gamma} is the recommended biased-corrected kernel.
-#' @references Chen, Song Xi. "Probability density function estimation using gamma kernels." Annals of the Institute of Statistical Mathematics 52.3 (2000): 471-480.
-kernel_doc_useless = NULL
 
 kernel_environment$gamma = list(
   kernel  = function(y, x, h) {
@@ -213,15 +184,6 @@ kernel_environment$gamma_biased = list(
   kernel = function(y, x, h) h*dgamma(x, y/h + 1, scale = h),
   support = c(0, Inf)
 )
-
-#' @rdname kernels
-#' @usage NULL
-#' @format NULL
-#' @section Asymmetric kernels:
-#'    \code{beta, beta_biased}: The beta kernel of Chen (1999). For use on the unit interval.
-#'    \code{beta} is the recommended bias-corrected kernel.
-#' @references Chen, Song Xi. "Beta kernel estimators for density functions." Computational Statistics & Data Analysis 31.2 (1999): 131-145.
-kernel_doc_useless = NULL
 
 kernel_environment$beta = list(
   kernel  = function(y, x, h) {
