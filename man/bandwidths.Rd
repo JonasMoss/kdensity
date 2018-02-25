@@ -10,7 +10,7 @@
 
 \item{start_str}{A string specifying the parametric start, e.g. "normal".}
 
-\item{support}{The domain of definiton for the kernel. (-Inf, Inf) for
+\item{support}{The domain of definition for the kernel. (-Inf, Inf) for
 symmetric kernels.}
 }
 \description{

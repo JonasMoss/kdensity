@@ -9,9 +9,9 @@
 #' numeric vector of length two.
 #'
 #' @keywords internal
-#' @param kernel supplied kernel; string or list.
-#' @param start supplied parametric start; string or list.
-#' @param support binary vector.
+#' @param kernel Supplied kernel; string or list.
+#' @param start Supplied parametric start; string or list.
+#' @param support Binary vector.
 #' @return a list with members kernel, kernel_str, start, start_str,
 #' and support.
 

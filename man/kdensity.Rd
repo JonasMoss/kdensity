@@ -8,14 +8,14 @@ kdensity(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
   support = NULL, na.rm = FALSE, normalized = TRUE)
 }
 \arguments{
-\item{x}{Numeric vector containg the data.}
+\item{x}{Numeric vector containing the data.}
 
 \item{bw}{A bandwidth function. Can be either a string, a custom-made
-function, or a double. The supported bandwith functions are documented
+function, or a double. The supported bandwidth functions are documented
 in \code{\link{bandwidths}}.}
 
 \item{adjust}{An adjustment constant, so that \code{h = adjust*bw*sd}, where \code{sd}
-varies acccording to the chosen kernel.}
+varies with the chosen kernel.}
 
 \item{kernel}{The kernel function. Can be chosen from the list of built-in
 kernels or be custom-made. See \code{\link{kernels}} for details.}

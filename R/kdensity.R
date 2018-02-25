@@ -15,14 +15,14 @@
 #'
 #' @export
 #'
-#' @param x Numeric vector containg the data.
+#' @param x Numeric vector containing the data.
 #'
 #' @param bw A bandwidth function. Can be either a string, a custom-made
-#' function, or a double. The supported bandwith functions are documented
+#' function, or a double. The supported bandwidth functions are documented
 #' in \code{\link{bandwidths}}.
 #'
 #' @param adjust An adjustment constant, so that \code{h = adjust*bw*sd}, where \code{sd}
-#' varies acccording to the chosen kernel.
+#' varies with the chosen kernel.
 #'
 #' @param kernel The kernel function. Can be chosen from the list of built-in
 #' kernels or be custom-made. See \code{\link{kernels}} for details.

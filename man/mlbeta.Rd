@@ -23,8 +23,6 @@ A named numeric vector with maximum likelihood estimates for
 Uses \code{stat::nlm} to estimate the parameters of the Beta distribution.
 }
 \details{
-For \code{type}, the option \code{none} is fastest. The algorithm
-is a straight forwardimplementation of maximum likelihood for beta using
-the sufficient statistics of the beta distribution,
+For \code{type}, the option \code{none} is fastest.
 }
 \keyword{internal}

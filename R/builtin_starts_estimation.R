@@ -10,9 +10,7 @@
 #' passed to \code{stats::nlm}.
 #' @return A named numeric vector with maximum likelihood estimates for
 #' \code{shape1} and \code{shap2}.
-#' @details For \code{type}, the option \code{none} is fastest. The algorithm
-#' is a straight forwardimplementation of maximum likelihood for beta using
-#' the sufficient statistics of the beta distribution,
+#' @details For \code{type}, the option \code{none} is fastest.
 
 mlbeta = function(x, start = NULL, type = c("none", "gradient", "hessian")) {
   type = match.arg(type)

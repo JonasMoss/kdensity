@@ -12,7 +12,7 @@ bw_environment = new.env(hash = FALSE)
 #' @param x The input data.
 #' @param kernel_str A string specifying the kernel, e.g. "gaussian."
 #' @param start_str A string specifying the parametric start, e.g. "normal".
-#' @param support The domain of definiton for the kernel. (-Inf, Inf) for
+#' @param support The domain of definition for the kernel. (-Inf, Inf) for
 #' symmetric kernels.
 #'
 #' @section Bandwidth selectors:
