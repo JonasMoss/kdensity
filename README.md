@@ -7,9 +7,9 @@
 Status](https://travis-ci.org/JonasMoss/kdensity.svg?branch=master)](https://travis-ci.org/JonasMoss/kdensity)
 [![AppVeyor Build
 Status](https://ci.appveyor.com/api/projects/status/github/JonasMoss/kdensity?branch=master&svg=true)](https://ci.appveyor.com/project/JonasMoss/kdensity)
+[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/kdensity)](http://cran.r-project.org/package=kdensity)
 [![Coverage
 Status](https://codecov.io/gh/JonasMoss/kdensity/branch/master/graph/badge.svg)](https://codecov.io/gh/JonasMoss/kdensity?branch=master)
-[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/kdensity)](http://cran.r-project.org/package=kdensity)
 
 An `R` package for univariate kernel density estimation with parametric
 starts and asymmetric kernels.
@@ -18,14 +18,14 @@ starts and asymmetric kernels.
 
 kdensity is an implementation of univariate kernel density estimation
 with support for parametric starts and asymmetric kernels. Its main
-function is `kdensity`, which has approximately the same syntax as
+function is `kdensity`, which is has approximately the same syntax as
 `stats::density`. Its new functionality is:
 
   - `kdensity` has built-in support for many *parametric starts*, such
     as `normal` and `gamma`, but you can also supply your own.
-  - It supports several asymmetric kernels, such as `gcopula` and
+  - It supports several asymmetric kernels ones such as `gcopula` and
     `gamma` kernels, but also the common symmetric ones. In addition,
-    you can supply your own kernels.
+    you can also supply your own kernels.
   - A selection of choices for the bandwidth function `bw`, again
     including an option to specify your own.
   - The returned value is callable: The density estimator returns a
@@ -104,7 +104,7 @@ The function `kdensity` takes some `data`, a kernel `kernel` and a
 parametric start `start`. You can optionally specify the `support`
 parameter, which is used to find the normalizing constant.
 
-The following example plots both a gamma-kernel
+The following example uses the  data set plots both a gamma-kernel
 density estimate with a gamma start (black) and the the fully parametric
 gamma density. The underlying parameter estimates are always maximum
 likelood.
@@ -117,7 +117,7 @@ lines(kde, plot_start = TRUE, col = "red")
 rug(airquality$Wind)
 ```
 
-<img src="README_files/figure-gfm/example-1.png" width="750px" />
+<img src="man/figures/README-example-1.png" width="750px" />
 
 Since the return value of `kdensity` is a function, it is callable, as
 in:
