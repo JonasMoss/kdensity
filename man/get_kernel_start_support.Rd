@@ -27,3 +27,4 @@ The \code{kernel} and \code{start} parameters are either strings or
 adhering to the kernel/start list structure. \code{support} is a
 numeric vector of length two.
 }
+\keyword{internal}

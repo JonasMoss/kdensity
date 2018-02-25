@@ -16,3 +16,4 @@ None.
 The supplied support must never be larger than the support of
 the parametric start / kernel.
 }
+\keyword{internal}

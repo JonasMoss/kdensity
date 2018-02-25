@@ -2,6 +2,7 @@
 #'
 #' Uses \code{stat::nlm} to estimate the parameters of the Beta distribution.
 #'
+#' @keywords internal
 #' @param x The data from which the estimate is to be computed.
 #' @param start Optional starting parameter values for the minimization.
 #' Passed to the \code{stats::nlm} function.
@@ -70,6 +71,7 @@ mlbeta = function(x, start = NULL, type = c("none", "gradient", "hessian")) {
 #'
 #' Uses Newton-Raphson to estimate the parameters of the Gamma distribution.
 #'
+#' @keywords internal
 #' @param x The data from which the estimate is to be computed.
 #' @param rel.tol Relative accuracy requested.
 #' @param iterlim A positive integer specifying the maximum number of
@@ -112,6 +114,7 @@ mlgamma = function(x, rel.tol = .Machine$double.eps^0.25, iterlim = 100) {
 #'
 #' Uses Newton-Raphson to estimate the parameters of the Weibull distribution.
 #'
+#' @keywords internal
 #' @param x The data from which the estimate is to be computed.
 #' @param shape0 An optional starting value for the \code{shape} parameter.
 #' @param rel.tol Relative accuracy requested.
@@ -159,6 +162,7 @@ mlweibull = function(x, shape0 = 2, rel.tol = .Machine$double.eps^0.25,
 #'
 #' Uses Newton-Raphson to estimate the parameters of the Gumbel distribution.
 #'
+#' @keywords internal
 #' @param x The data from which the estimate is to be computed.
 #' @param scale0 An optional starting value for the \code{scale} parameter.
 #' @param rel.tol Relative accuracy requested.
@@ -205,6 +209,7 @@ mlgumbel = function(x, scale0 = 1, rel.tol = .Machine$double.eps^0.25,
 #'
 #' Uses Newton-Raphson to estimate the parameters of the Kumaraswamy distribution.
 #'
+#' @keywords internal
 #' @param x The data from which the estimate is to be computed.
 #' @param a0 An optional starting value for the \code{a} parameter.
 #' @param rel.tol Relative accuracy requested.

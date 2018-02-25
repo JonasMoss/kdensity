@@ -8,6 +8,7 @@
 #' adhering to the kernel/start list structure. \code{support} is a
 #' numeric vector of length two.
 #'
+#' @keywords internal
 #' @param kernel supplied kernel; string or list.
 #' @param start supplied parametric start; string or list.
 #' @param support binary vector.
@@ -95,6 +96,7 @@ get_kernel_start_support = function(kernel, start, support) {
 #'
 #' The supplied support must never be larger than the support of
 #' the parametric start / kernel.
+#' @keywords internal
 #' @param kernel,start,support The kernel, start and support to check.
 #' @return None.
 support_compatible = function(kernel, start, support) {

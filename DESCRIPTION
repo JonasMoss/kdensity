@@ -4,7 +4,7 @@ Title: Kernel Density Estimation with Parametric Starts and Asymmetric Kernels
 Version: 1.0.0
 Author: Jonas Moss, Martin Tveten
 Maintainer: Jonas Moss <jonas.gjertsen@gmail.com>
-Description: Deal with univariate non-parametric density estimation with 
+Description: Handles univariate non-parametric density estimation with 
     parametric starts and asymmetric kernels in a simple and flexible way. 
 License: MIT + file LICENSE
 Encoding: UTF-8
@@ -19,16 +19,3 @@ Imports: assertthat,
     rmarkdown
 RoxygenNote: 6.0.1
 VignetteBuilder: knitr
-Collate:
-    'builtin_bandwidths.R'
-    'builtin_bandwidths_get_bw.R'
-    'builtin_bandwidths_ucv_helpers.R'
-    'builtin_kernels.R'
-    'builtin_kernels_get_kernel.R'
-    'builtin_starts_custom_maximum_likelihood.R'
-    'builtin_starts.R'
-    'builtin_starts_get_start.R'
-    'generics.R'
-    'kdensity.R'
-    'kdensity_helpers.R'
-    'utility_functions.R'

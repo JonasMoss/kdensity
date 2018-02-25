@@ -36,3 +36,4 @@ Merges two lists.
    listmerge(x, y, type = "merge")
    listmerge(x, y, type = "template")}
 }
+\keyword{internal}

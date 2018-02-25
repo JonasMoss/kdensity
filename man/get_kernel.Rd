@@ -16,3 +16,4 @@ to 1.
 \description{
 Helper function that gets a kernel function for kdensity.
 }
+\keyword{internal}

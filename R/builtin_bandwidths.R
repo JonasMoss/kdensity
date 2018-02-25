@@ -2,8 +2,8 @@ bw_environment = new.env(hash = FALSE)
 
 #' Bandwidth Selectors
 #'
-#' The available options for bandwidth selectors, passed as \code{bw}
-#' arguments to \code{kdensity}.
+#' The available options for bandwidth selectors, passed as the \code{bw}
+#' argument to \code{kdensity}.
 #'
 #' The bandwidth functions are not exported. They are members of the
 #' environment \code{bw_environments}, and can be accessed by

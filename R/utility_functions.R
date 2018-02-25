@@ -8,6 +8,7 @@
 
 #' Recycles arguments.
 #'
+#' @keywords internal
 #' @param ... A list of arguments to be recycled.
 #' @param prototype an optional argument. If given, repeats all arguments
 #' up to the length of the prototype. If an element of the list has the name,
@@ -65,6 +66,7 @@ recycle = function(..., prototype) {
 
 #' Merges two lists.
 #'
+#' @keywords internal
 #' @param x A list of default arguments.
 #' @param y A list of supplied arguments
 #' @param type If \code{merge}, the list will be merge with y

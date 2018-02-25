@@ -17,3 +17,4 @@ None.
 \description{
 Add a new kernel to \code{kernels_environment}.
 }
+\keyword{internal}

@@ -1,5 +1,6 @@
 #' Helper function that gets a kernel function for kdensity.
 #'
+#' @keywords internal
 #' @param kernel_str a string specifying which kernel to use.
 #' @return a kernel function of the format k(u) with integral normalized
 #' to 1.
@@ -18,6 +19,7 @@ get_kernel = function(kernel_str) {
 
 #' Add a new kernel to \code{kernels_environment}.
 #'
+#' @keywords internal
 #' @param kernel_str A string giving the name of the density.
 #' @param kernel The kernel function.
 #' @return None.

@@ -14,8 +14,8 @@
 symmetric kernels.}
 }
 \description{
-The available options for bandwidth selectors, passed as \code{bw}
-arguments to \code{kdensity}.
+The available options for bandwidth selectors, passed as the \code{bw}
+argument to \code{kdensity}.
 }
 \details{
 The bandwidth functions are not exported. They are members of the

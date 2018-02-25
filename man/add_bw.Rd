@@ -17,3 +17,4 @@ None.
 \description{
 Add a new bw to \code{bw_environment}.
 }
+\keyword{internal}

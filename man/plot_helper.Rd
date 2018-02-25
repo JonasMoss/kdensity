@@ -27,3 +27,4 @@ None.
 A helper function for the plot methods that does most of the work under
 the hood.
 }
+\keyword{internal}

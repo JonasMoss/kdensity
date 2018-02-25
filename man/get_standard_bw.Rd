@@ -19,3 +19,4 @@ a bandwidth string.
 \description{
 Get a bandwidth string when 'bw' is unspecified.
 }
+\keyword{internal}

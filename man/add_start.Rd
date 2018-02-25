@@ -17,3 +17,4 @@ None.
 \description{
 Add a new parametric start to \code{starts_environment}.
 }
+\keyword{internal}

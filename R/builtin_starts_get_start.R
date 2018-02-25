@@ -1,5 +1,6 @@
 #' Get densities and estimators from strings.
 #'
+#' @keywords internal
 #' @param start_str A string specifying the density of interest.
 #' @return A list of two functions.
 
@@ -18,6 +19,7 @@ get_start = function(start_str) {
 
 #' Add a new parametric start to \code{starts_environment}.
 #'
+#' @keywords internal
 #' @param start_str A string giving the name of the density.
 #' @param start The parametric start function.
 #' @return None.

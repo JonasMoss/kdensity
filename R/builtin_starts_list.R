@@ -39,7 +39,6 @@ starts_environment = new.env(hash = FALSE)
 #' @name parametric_starts
 
 #' @rdname parametric_starts
-#' @include builtin_starts_custom_maximum_likelihood.R
 #' @usage NULL
 #' @format NULL
 #' @section Built-in starts:

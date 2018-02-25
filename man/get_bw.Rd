@@ -15,3 +15,4 @@ a bandwidth function.
 \description{
 Get bandwidth functions from string.
 }
+\keyword{internal}

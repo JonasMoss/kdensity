@@ -98,6 +98,7 @@ confint.kdensity = function(object, parm, level = 0.95, ...) {
 #' Supplies a plotting range from a kdensity object.
 #'
 #' @param obj A kdensity object.
+#' @keywords internal
 #' @return S vector of size 1000, used for plotting.
 
 get_range = function(obj) {
@@ -160,6 +161,7 @@ points.kdensity = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE
 #' @param zero_line Logical; if \code{TRUE}, adds a line at \code{y = 0}.
 #' @param ptype The kind of plot to make
 #' @param ... Passed to plot.default.
+#' @keywords internal
 #' @return None.
 
 plot_helper = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ptype = c("plot", "lines", "points"), ...) {

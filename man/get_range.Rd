@@ -15,3 +15,4 @@ S vector of size 1000, used for plotting.
 \description{
 Supplies a plotting range from a kdensity object.
 }
+\keyword{internal}

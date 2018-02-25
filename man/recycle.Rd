@@ -33,3 +33,4 @@ prototype is given, each vector will have the same size as the prototype.
     recycle(a, b, c, prototype = "c")
     recycle(a, b, c, prototype = c)}
 }
+\keyword{internal}

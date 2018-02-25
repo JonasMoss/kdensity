@@ -1,5 +1,6 @@
 #' Get bandwidth functions from string.
 #'
+#' @keywords internal
 #' @param bw_str a string specifying the density of interest.
 #' @return a bandwidth function.
 get_bw = function(bw_str) {
@@ -18,6 +19,7 @@ get_bw = function(bw_str) {
 
 #' Add a new bw to \code{bw_environment}.
 #'
+#' @keywords internal
 #' @param bw_str A string giving the name of the density.
 #' @param bw The bw function.
 #' @return None.
@@ -40,6 +42,7 @@ add_bw = function(bw_str, bw) {
 
 #' Get a bandwidth string when 'bw' is unspecified.
 #'
+#' @keywords internal
 #' @param kernel_str a kernel string
 #' @param start_str a parametric start string.
 #' @param support the support.

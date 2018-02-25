@@ -15,3 +15,4 @@ A list of two functions.
 \description{
 Get densities and estimators from strings.
 }
+\keyword{internal}
