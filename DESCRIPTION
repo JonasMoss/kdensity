@@ -16,6 +16,7 @@ Suggests: extraDistr,
 Imports: assertthat,
     EQL,
     knitr,
-    rmarkdown
+    rmarkdown,
+    rlang
 RoxygenNote: 6.0.1
 VignetteBuilder: knitr
