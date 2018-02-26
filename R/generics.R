@@ -58,14 +58,15 @@ update.kdensity = function(object, ...) {
   obj_name = deparse(substitute(object))
 
   ## The call of the resulting object should be update. This function modifies
-  ## the call properly.
+  ## the call properly: It removes the reference to .kdensity and arguments
+  ## that are thrown away.
 
   old_call = obj$call
   new_args_full = lapply(rlang::quos(...), function(elem) rlang::get_expr(elem))
   matches  = match(names(current), names(new_args_full))
   new_args = new_args_full[matches[!is.na(matches)]]
-  new_call = rlang::lang("update", rlang::sym(obj_name),
-                         rlang::splice(new_args))
+  new_call = rlang::call2("update", rlang::sym(obj_name),
+                         !!! new_args)
 
   ## Here the actual work is done.
   passed = list(...)
