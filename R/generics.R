@@ -14,12 +14,10 @@
 `[[<-.kdensity` = function(x, i, value) {
   allowed_arg = c("x", "bw", "adjust", "kernel", "start", "support",
                    "na.rm", "normalized")
-
   i = match.arg(i, allowed_arg)
-  environment(x)$obj_name = "x"
-  args = list(object = x)
-  args[[i]] = value
-  do.call(update.kdensity, args)
+  args = list(object = rlang::enquo(x))
+  args[[i]] = rlang::enquo(value)
+  do.call(vupdate.kdensity, args)
   x
 }
 
@@ -36,44 +34,46 @@
   x[[name]]
 }
 
+#' Update a \code{kdensity} object.
+#'
+#' Updats a \code{kdensity} object. Takes the same arguements as
+#' \code{kdensity}, other arguments are ignored.
+#'
+#' @param object The \code{kdensity} object to update.
+#' @param ... The values to update.
+#' @return A \code{kdensity} object.
 #' @export
+
 update.kdensity = function(object, ...) {
 
-
-  current = list(x = object$x,
-                 bw = object$bw_str,
-                 adjust = object$adjust,
-                 kernel = object$kernel_str,
-                 start = object$start_str,
-                 support = object$support,
-                 na.rm = object$na.rm,
+  current = list(x          = object$x,
+                 bw         = object$bw_str,
+                 adjust     = object$adjust,
+                 kernel     = object$kernel_str,
+                 start      = object$start_str,
+                 support    = object$support,
+                 na.rm      = object$na.rm,
                  normalized = object$normalized)
 
+  obj_name = deparse(substitute(object))
+
+  ## The call of the resulting object should be update. This function modifies
+  ## the call properly.
+
+  old_call = obj$call
+  new_args_full = lapply(rlang::quos(...), function(elem) rlang::get_expr(elem))
+  matches  = match(names(current), names(new_args_full))
+  new_args = new_args_full[matches[!is.na(matches)]]
+  new_call = rlang::lang("update", rlang::sym(obj_name),
+                         rlang::splice(new_args))
+
+  ## Here the actual work is done.
   passed = list(...)
-
-  ## Part of a hack to make $<- and [[<- work.
-  if(!is.null(environment(object)$obj_name)) {
-    obj_name = environment(object)$obj_name
-  } else {
-    obj_name = deparse(substitute(object))
-  }
-
-  arg_names = lapply(match.call(expand.dots=TRUE)[-1], deparse)
   args = listmerge(current, passed, type = "template")
-  new_object = do.call(kdensity, args)
+  new_object_call = rlang::lang("kdensity", rlang::splice(new_args))
+  new_object = rlang::eval_tidy(new_object_call)
+  environment(new_object)$call = new_call
 
-  if("x" %in% names(arg_names)) {
-    data.name = arg_names$x
-  } else {
-    data.name = object$data.name
-  }
-
-  call = call("kdensity", x = data.name, adjust = args$adjust,
-                kernel = args$kernel, start = args$start, support = args$support)
-
-  environment(new_object)$call = call
-
-  environment(new_object)$data.name = data.name
   assign(obj_name, new_object, envir = parent.frame())
 }
 
