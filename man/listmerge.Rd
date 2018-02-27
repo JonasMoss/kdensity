@@ -22,18 +22,4 @@ of y. Does not preserve ordering.
 \description{
 Merges two lists.
 }
-\examples{
-\dontrun{
-    x = list(a = 5,
-             b = 0,
-             c = "a",
-             d = NULL)
-
-    y = list(a = 3,
-             b = 7,
-             f = NA)
-
-   listmerge(x, y, type = "merge")
-   listmerge(x, y, type = "template")}
-}
 \keyword{internal}

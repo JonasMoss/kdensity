@@ -15,17 +15,19 @@
 #' it is used. If not, the variable itself is used.
 #' @details Recycles arguments so that all vectors are equally long. If a
 #' prototype is given, each vector will have the same size as the prototype.
-#' @examples  \dontrun{
-#'     a = 1:3
-#'     b = letters[2:9]
-#'     c = 9:20
-#'
-#'     # Returns a list where each element has length 5.
-#'     recycle(a, b, c, prototype = 5)
-#'
-#'     # Each element has the same length as c.
-#'     recycle(a, b, c, prototype = "c")
-#'     recycle(a, b, c, prototype = c)}
+
+
+# examples  \dontrun{
+#     a = 1:3
+#     b = letters[2:9]
+#     c = 9:20
+#
+#     # Returns a list where each element has length 5.
+#     recycle(a, b, c, prototype = 5)
+#
+#     # Each element has the same length as c.
+#     recycle(a, b, c, prototype = "c")
+#     recycle(a, b, c, prototype = c)}
 
 recycle = function(..., prototype) {
 
@@ -74,18 +76,19 @@ recycle = function(..., prototype) {
 #' y not in x will be discarded after merging.
 #' @return A merged list where conflicts are solved in favour
 #' of y. Does not preserve ordering.
-#' @examples \dontrun{
-#'     x = list(a = 5,
-#'              b = 0,
-#'              c = "a",
-#'              d = NULL)
-#'
-#'     y = list(a = 3,
-#'              b = 7,
-#'              f = NA)
-#'
-#'    listmerge(x, y, type = "merge")
-#'    listmerge(x, y, type = "template")}
+
+# examples \dontrun{
+#     x = list(a = 5,
+#              b = 0,
+#              c = "a",
+#              d = NULL)
+#
+#     y = list(a = 3,
+#              b = 7,
+#              f = NA)
+#
+#    listmerge(x, y, type = "merge")
+#    listmerge(x, y, type = "template")}
 
 listmerge = function(x, y, type = c("merge", "template")) {
 
