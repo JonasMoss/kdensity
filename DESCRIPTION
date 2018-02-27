@@ -6,6 +6,15 @@ Author: Jonas Moss, Martin Tveten
 Maintainer: Jonas Moss <jonas.gjertsen@gmail.com>
 Description: Handles univariate non-parametric density estimation with 
     parametric starts and asymmetric kernels in a simple and flexible way. 
+    Kernel density estimation with parametric starts involves fitting a
+    parametric density to the data before making a correction with kernel 
+    density estimation, see Hjort & Glad (1995) <doi:10.1214/aos/1176324627>.
+    Asymmetric kernels make kernel density estimation more efficient on bounded
+    intervals such as (0, 1) and the positive half-line. Supported asymmetric 
+    kernels are the gamma kernel of Chen (2000) <doi:10.1023/A:1004165218295>,
+    the beta kernel of Chen (1999) <doi:10.1016/S0167-9473(99)00010-9>, and the
+    copula kernel of Jones & Henderson (2007) <doi:10.1093/biomet/asm068>.
+    User-supplied kernels, parametric starts, and bandwidths are supported.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
