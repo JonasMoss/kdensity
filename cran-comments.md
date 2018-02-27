@@ -1,3 +1,10 @@
+## Resubmission
+This is a resubmission. In this version I have:
+
+* Added appropriate references to the Description section of DESCRIPTION
+
+* Removed examples from non-exported functions.
+
 ## Test environments
 * local Windows 10, R version 3.4.3.
 * Ubuntu 14.04 (on Travis-CI), R version 3.4.3, R-oldrel, R-devel.
