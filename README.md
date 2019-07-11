@@ -111,15 +111,16 @@ parametric start `start`. You can optionally specify the `support`
 parameter, which is used to find the normalizing constant.
 
 The following example uses the  data set plots both a gamma-kernel
-density estimate with a gamma start (black) and the the fully parametric
-gamma density. The underlying parameter estimates are always maximum
-likelood.
+density estimate with a gamma start (black), the fully parametric gamma
+density (red), and an ordinary `density` estimate. The underlying
+parameter estimates are always maximum likelilood.
 
 ``` r
 library("kdensity")
 kde = kdensity(airquality$Wind, start = "gamma", kernel = "gamma")
 plot(kde, main = "Wind speed (mph)")
 lines(kde, plot_start = TRUE, col = "red")
+lines(density(airquality$Wind, adjust = 2), col = "blue")
 rug(airquality$Wind)
 ```
 
