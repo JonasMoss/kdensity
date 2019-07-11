@@ -21,10 +21,10 @@ LazyData: true
 Suggests: extraDistr,
     SkewHyperbolic,
     testthat,
-    covr
-Imports: assertthat,
+    covr,
     EQL,
     knitr,
     rmarkdown
+Imports: assertthat
 RoxygenNote: 6.1.1
 VignetteBuilder: knitr
