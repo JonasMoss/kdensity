@@ -4,7 +4,8 @@
 \alias{mlgumbel}
 \title{Estimates the parameter of a Gumbel distribution by maximum likelihood}
 \usage{
-mlgumbel(x, scale0 = 1, rel.tol = .Machine$double.eps^0.25, iterlim = 100)
+mlgumbel(x, scale0 = 1, rel.tol = .Machine$double.eps^0.25,
+  iterlim = 100)
 }
 \arguments{
 \item{x}{The data from which the estimate is to be computed.}

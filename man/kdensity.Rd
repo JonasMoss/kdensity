@@ -5,7 +5,8 @@
 \title{Parametrically guided kernel density estimation}
 \usage{
 kdensity(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
-  support = NULL, na.rm = FALSE, normalized = TRUE)
+  support = NULL, na.rm = FALSE, normalized = TRUE,
+  tolerance = 0.01)
 }
 \arguments{
 \item{x}{Numeric vector containing the data.}
@@ -31,6 +32,8 @@ normalization constant, see \code{normalized}.}
 \item{na.rm}{Logical; if \code{TRUE}, \code{NA}s will be removed from \code{x}.}
 
 \item{normalized}{Logical; if \code{TRUE}, the density is normalized.}
+
+\item{tolerance}{Numeric; the relative error to tolerate in normalization.}
 }
 \value{
 \code{kdensity} returns an S3 function object of
