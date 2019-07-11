@@ -1,3 +1,7 @@
+## Resubmission
+
+Changed http to https in readme.
+
 ## Update
 This is an update of kdensity to version 1.0.1.
 
