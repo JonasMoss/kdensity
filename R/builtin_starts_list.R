@@ -77,8 +77,12 @@ starts_environment$laplace = list(
   },
 
   estimator = function(data) {
-    c(mu = median(data),
-      b  = mean(abs(data - mu)))
+
+    mu = median(data)
+    b = mean(abs(data - mu))
+
+    c(mu = mu,
+      b  = b)
   },
 
   support   = c(-Inf, Inf)

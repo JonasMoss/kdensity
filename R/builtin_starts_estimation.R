@@ -13,6 +13,10 @@
 #' @details For \code{type}, the option \code{none} is fastest.
 
 mlbeta = function(x, start = NULL, type = c("none", "gradient", "hessian")) {
+
+  assertthat::assert_that(min(x) > 0)
+  assertthat::assert_that(max(x) < 1)
+
   type = match.arg(type)
 
   val1 = mean(log(x))
@@ -80,6 +84,8 @@ mlbeta = function(x, start = NULL, type = c("none", "gradient", "hessian")) {
 
 mlgamma = function(x, rel.tol = .Machine$double.eps^0.25, iterlim = 100) {
 
+  assertthat::assert_that(min(x) > 0)
+
   rel.tol_str = deparse(substitute(rel.tol))
 
   mean_hat = mean(x)
@@ -124,6 +130,8 @@ mlgamma = function(x, rel.tol = .Machine$double.eps^0.25, iterlim = 100) {
 
 mlweibull = function(x, shape0 = 2, rel.tol = .Machine$double.eps^0.25,
                      iterlim = 100) {
+
+  assertthat::assert_that(min(x) > 0)
 
   rel.tol_str = deparse(substitute(rel.tol))
   log_x = log(x)
@@ -226,6 +234,9 @@ mlkumar = function(x, a0 = 1, rel.tol = .Machine$double.eps^0.25,
                     iterlim = 100) {
 
   rel.tol_str = deparse(substitute(rel.tol))
+
+  assertthat::assert_that(min(x) > 0)
+  assertthat::assert_that(max(x) < 1)
 
   logs = log(x)
 

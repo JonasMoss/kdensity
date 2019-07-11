@@ -35,9 +35,11 @@
 #' \code{x} and the supplied \code{start} and \code{kernel}. Is used to find the
 #' normalization constant, see \code{normalized}.
 #'
+#' @param na.rm Logical; if \code{TRUE}, \code{NA}s will be removed from \code{x}.
+#'
 #' @param normalized Logical; if \code{TRUE}, the density is normalized.
 #'
-#' @param na.rm Logical; if \code{TRUE}, \code{NA}s will be removed from \code{x}.
+#' @param tolerance Numeric; the relative error to tolerate in normalization.
 #'
 #' @return \code{kdensity} returns an S3 function object of
 #' \code{\link[base]{class}} "kdensity". This is a callable function with the
@@ -107,7 +109,8 @@
 #'
 
 kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
-                    support = NULL, na.rm = FALSE, normalized = TRUE)
+                    support = NULL, na.rm = FALSE, normalized = TRUE,
+                    tolerance = 0.01)
  {
 
   ## These tests are based purely on the data, and should be run no matter what.
@@ -222,10 +225,10 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
                                      parametric_start_vector(y))
     }
 
-    normalization = tryCatch(
+    integral = tryCatch(
       stats::integrate(integrand,
                        lower = support[1],
-                       upper = support[2])$value,
+                       upper = support[2]),
 
       error = function(e) {
         stop(paste0("Normalization error: The function will not integrate.",
@@ -234,6 +237,17 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
                     "support is incorrect."))
       })
 
+    msg = "The normalization constant has too large relative error.
+   1.) try to normalize the data, or
+   2.) change kernel, or
+   3.) increase the 'tolerance' parameter for kdensity"
+
+    assertthat::assert_that(!is.nan(integral$abs.error/integral$value),
+                            msg = msg)
+    assertthat::assert_that(integral$abs.error/integral$value < tolerance,
+              msg = msg)
+
+    normalization = integral$value
   }
 
 

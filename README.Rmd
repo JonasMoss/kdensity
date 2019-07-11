@@ -19,6 +19,7 @@ knitr::opts_chunk$set(
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/JonasMoss/kdensity?branch=master&svg=true)](https://ci.appveyor.com/project/JonasMoss/kdensity)
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/kdensity)](http://cran.r-project.org/package=kdensity)
 [![Coverage Status](https://codecov.io/gh/JonasMoss/kdensity/branch/master/graph/badge.svg)](https://codecov.io/gh/JonasMoss/kdensity?branch=master)
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![DOI](https://zenodo.org/badge/120678148.svg)](https://zenodo.org/badge/latestdoi/120678148)
 
 
@@ -56,7 +57,7 @@ plot(kdensity(mtcars$mpg, start = "normal"))
 
 ## Description
 
-Kernel density estimation with a *parametric start* was introduced by Hjort and Glad in [Nonparametric Density Estimation with a Parametric Start (1995)](https://projecteuclid.org/euclid.aos/1176324627). The idea is to start out with a parametric density before you do your kernel density estimation, so that your actual kernel density estimation will be a correction to the original parametric estimate. This is a good idea because the resulting estimator will be better than an ordinary kernel density estimator whenever the true density is close to your suggestion; and the estimator can be superior to the ordinary kernal density estimator even when the suggestion is pretty far off.
+Kernel density estimation with a *parametric start* was introduced by Hjort and Glad in [Nonparametric Density Estimation with a Parametric Start (1995)](https://projecteuclid.org/euclid.aos/1176324627). The idea is to start out with a parametric density before you do your kernel density estimation, so that your actual kernel density estimation will be a correction to the original parametric estimate. This is a good idea because the resulting estimator will be better than an ordinary kernel density estimator whenever the true density is close to your suggestion; and the estimator can be superior to the ordinary kernel density estimator even when the suggestion is pretty far off.
 
 In addition to parametric starts, the package implements some *asymmetric kernels*. These kernels are useful when modelling data with sharp boundaries, such as data supported on the positive half-line or the unit interval. Currently we support the following asymmetric kernels:
 
