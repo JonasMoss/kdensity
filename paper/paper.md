@@ -13,7 +13,7 @@ authors:
     orcid: 0000-0002-6876-6964
     affiliation: 1
   - name: Martin Tveten
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0002-4236-633X
     affiliation: 1
 affiliations:
  - name: University of Oslo
@@ -56,7 +56,8 @@ R package `datasets`. Since the data is positive we use Chen's gamma kernel.
 As the data is likely to be better approximated by a gamma distribution than a 
 uniform distribution, we use the gamma parametric start. The plotted density is
 in figure 1, where the gamma distribution with parameters estimated by maximum 
-likelihood is in red and the ordinary kernel density estimate in blue.
+likelihood is in red and the ordinary kernel density estimate in blue. 
+Notice the boundary bias of the ordinary kernel density estimator. 
 
 ```r
 # install.packages("kdensity")
