@@ -1,7 +1,7 @@
 Package: kdensity
 Type: Package
 Title: Kernel Density Estimation with Parametric Starts and Asymmetric Kernels
-Version: 1.1.0
+Version: 1.0.1
 Author: Jonas Moss, Martin Tveten
 Maintainer: Jonas Moss <jonas.gjertsen@gmail.com>
 Description: Handles univariate non-parametric density estimation with 
