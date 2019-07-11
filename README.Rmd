@@ -56,7 +56,7 @@ plot(kdensity(mtcars$mpg, start = "normal"))
 
 ## Description
 
-Kernel density estimation with a *parametric start* was introduced by Hjort and Glad in [Nonparametric Density Estimation with a Parametric Start (1995)](https://projecteuclid.org/euclid.aos/1176324627). The idea is to start out with a parametric density before you do your kernel density estimation, so that your actual kernel density estimation will be a correction to the original parametric estimate. This is a good idea because the resulting estimator will be better than an ordinary kernel density estimator whenever the true density is close to your suggestion; and the estimator can be superior to the ordinary kernal density estimator even when the suggestion is pretty far off.
+Kernel density estimation with a *parametric start* was introduced by Hjort and Glad in [Nonparametric Density Estimation with a Parametric Start (1995)](https://projecteuclid.org/euclid.aos/1176324627). The idea is to start out with a parametric density before you do your kernel density estimation, so that your actual kernel density estimation will be a correction to the original parametric estimate. This is a good idea because the resulting estimator will be better than an ordinary kernel density estimator whenever the true density is close to your suggestion; and the estimator can be superior to the ordinary kernel density estimator even when the suggestion is pretty far off.
 
 In addition to parametric starts, the package implements some *asymmetric kernels*. These kernels are useful when modelling data with sharp boundaries, such as data supported on the positive half-line or the unit interval. Currently we support the following asymmetric kernels:
 
