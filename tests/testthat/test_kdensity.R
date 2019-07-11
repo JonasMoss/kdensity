@@ -1,5 +1,9 @@
 context("kdensity")
 
+# Normalization errors.
+x = c(170,172, 142,199,180,184)
+expect_error(kdensity(x, start = "normal"))
+
 expect_error(kdensity(c(precip , NA)), "x contains NAs and na.rm = FALSE.")
 expect_equal(kdensity(c(precip , NA), na.rm = TRUE)(10:20),kdensity(precip)(10:20))
 normal2 = list(
