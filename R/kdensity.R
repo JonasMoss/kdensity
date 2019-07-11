@@ -237,10 +237,15 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
                     "support is incorrect."))
       })
 
-    assertthat::assert_that(integral$abs.error/integral$value < tolerance,
-              msg = "The normalization constant has too large relative error.
+    msg = "The normalization constant has too large relative error.
    1.) try to normalize the data, or
-   2.) increase the 'tolerance' parameter for kdensity.")
+   2.) change kernel, or
+   3.) increase the 'tolerance' parameter for kdensity"
+
+    assertthat::assert_that(!is.nan(integral$abs.error/integral$value),
+                            msg = msg)
+    assertthat::assert_that(integral$abs.error/integral$value < tolerance,
+              msg = msg)
 
     normalization = integral$value
   }
