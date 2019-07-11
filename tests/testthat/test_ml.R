@@ -7,6 +7,8 @@ context("maximum likelihood")
 set.seed(313)
 data1 = runif(100)
 data2 = rbeta(10, 2, 7)
+data3 = c(0, data2)
+data4 = c(data2, 1)
 
 mle1 = nlm(function(p) {
   -mean(dbeta(data1, p[1], p[2], log = TRUE))
@@ -23,13 +25,15 @@ expect_equal(mle1, mlbeta(data1), tolerance = 1e-5)
 expect_equal(mle2, mlbeta(data2), tolerance = 1e-5)
 expect_equal(mlbeta(data2, type = "gradient"), mlbeta(data2), tolerance = 1e-5)
 expect_equal(mlbeta(data1, type = "gradient"), mlbeta(data1, type = "hessian"), tolerance = 1e-5)
-
+expect_error(mlbeta(data3))
+expect_error(mlbeta(data4))
 
 ### Checking gamma:
 
 set.seed(313)
 data1 = rgamma(100, 1, 1)
 data2 = rgamma(10, 3, 7)
+data3 = c(0, data2)
 
 mle1 = nlm(function(p) {
   -mean(dgamma(data1, p[1], p[2], log = TRUE))
@@ -45,12 +49,14 @@ names(mle2) = c("shape", "rate")
 expect_equal(mle1, mlgamma(data1), tolerance = 1e-5)
 expect_equal(mle2, mlgamma(data2), tolerance = 1e-5)
 expect_warning(mlgamma(data2, iterlim = 1))
+expect_error(mlgamma(data3))
 
 ### Checking Weibull:
 
 set.seed(313)
 data1 = rweibull(100, 1, 1)
 data2 = rweibull(10, 3, 7)
+data3 = c(0, data2)
 
 mle1 = nlm(function(p) {
   -mean(dweibull(data1, p[1], p[2], log = TRUE))
@@ -66,6 +72,7 @@ names(mle2) = c("shape", "scale")
 expect_equal(mle1, mlweibull(data1), tolerance = 1e-5)
 expect_equal(mle2, mlweibull(data2), tolerance = 1e-5)
 expect_warning(mlweibull(data2, iterlim = 1))
+expect_error(mlweibull(data3))
 
 ### Checking gumbel:
 
@@ -94,6 +101,8 @@ expect_warning(mlgumbel(data2, iterlim = 1))
 set.seed(313)
 data1 = extraDistr::rkumar(100, 4, 4)
 data2 = extraDistr::rkumar(10, 3, 7)
+data3 = c(0, data2)
+data3 = c(data2, 1)
 
 mle1 = nlm(function(p) {
   -mean(extraDistr::dkumar(data1, p[1], p[2], log = TRUE))
@@ -109,5 +118,6 @@ names(mle2) = c("a", "b")
 expect_equal(mle1, mlkumar(data1), tolerance = 1e-4)
 expect_equal(mle2, mlkumar(data2), tolerance = 1e-4)
 expect_warning(mlkumar(data2, iterlim = 1))
-
+expect_error(mlkumar(data3))
+expect_error(mlkumar(data4))
 
