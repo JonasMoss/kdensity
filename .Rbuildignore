@@ -12,4 +12,4 @@
 ^appveyor\.yml$
 ^cran-comments\.md$
 ^CRAN-RELEASE$
-\paper
+^paper$
