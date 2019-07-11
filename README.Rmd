@@ -74,7 +74,8 @@ These features can be combined to make asymmetric kernel densities estimators wi
 The function `kdensity` takes some `data`, a kernel `kernel` and a parametric start `start`. You can optionally specify the `support` parameter, which is used to find the normalizing constant.
 
 The following example uses the \code{airquality} data set plots both a gamma-kernel density estimate with a gamma start (black), the fully parametric gamma density (red), 
-and an ordinary `density` estimate. The underlying parameter estimates are always maximum likelilood.
+and an ordinary `density` estimate (blue). Notice the boundary bias of the ordinary 
+`density` estimator. The underlying parameter estimates are always maximum likelilood.
 
 ```{r example, echo = TRUE}
 library("kdensity")

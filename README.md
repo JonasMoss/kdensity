@@ -112,7 +112,8 @@ parameter, which is used to find the normalizing constant.
 
 The following example uses the  data set plots both a gamma-kernel
 density estimate with a gamma start (black), the fully parametric gamma
-density (red), and an ordinary `density` estimate. The underlying
+density (red), and an ordinary `density` estimate (blue). Notice the
+boundary bias of the ordinary `density` estimator. The underlying
 parameter estimates are always maximum likelilood.
 
 ``` r
