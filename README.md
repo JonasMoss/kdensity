@@ -10,6 +10,9 @@ Status](https://ci.appveyor.com/api/projects/status/github/JonasMoss/kdensity?br
 [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/kdensity)](http://cran.r-project.org/package=kdensity)
 [![Coverage
 Status](https://codecov.io/gh/JonasMoss/kdensity/branch/master/graph/badge.svg)](https://codecov.io/gh/JonasMoss/kdensity?branch=master)
+[![Project Status: Active – The project has reached a stable, usable
+state and is being actively
+developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![DOI](https://zenodo.org/badge/120678148.svg)](https://zenodo.org/badge/latestdoi/120678148)
 
 An `R` package for univariate kernel density estimation with parametric
