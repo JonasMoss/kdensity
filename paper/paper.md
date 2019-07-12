@@ -51,7 +51,7 @@ from @hjort_glad_1995, and the tailored bandwidth selector for the Gaussian
 copula method of @jones2007miscellanea. User defined parametric starts, 
 kernels and bandwidth selectors are also supported. 
 
-The following example uses the \code{airquality} data set from the built-in
+The following example uses the `airquality` data set from the built-in
 R package `datasets`. Since the data is positive we use Chen's gamma kernel. 
 As the data is likely to be better approximated by a gamma distribution than a 
 uniform distribution, we use the gamma parametric start. The plotted density is

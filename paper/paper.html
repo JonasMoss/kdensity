@@ -385,7 +385,7 @@ $(document).ready(function () {
 <p>Kernel density estimation <span class="citation">(Silverman 2018)</span> is a popular method for non-parametric density estimation based on placing kernels on each data point. <span class="citation">Hjort and Glad (1995)</span> extended kernel density estimation with <em>parametric starts</em>. The parametric start is a parametric density that is multiplied with the kernel estimate. When the data-generating density is reasonably close to the parametric start density, kernel density estimation with that parametric start will outperform ordinary kernel density estimation.</p>
 <p>Asymmetric kernels are useful for estimating densities on the half-open interval <span class="math inline">\(\left[0,\infty\right)\)</span> and bounded intervals such as <span class="math inline">\(\left[0, 1\right]\)</span>. On such intervals symmetric kernels are prone to serious boundary bias that should be corrected <span class="citation">(Marron and Ruppert 1994)</span>. Asymmetric kernels are designed to avoid boundary bias.</p>
 <p><code>kdensity</code> is an R package <span class="citation">(R Core Team 2019)</span> to calculate and display kernel density estimates using non-parametric starts and potentially asymmetric kernels. In addition to the classical symmetric kernels, <code>kdensity</code> supports the following asymmetric kernels: For the unit interval, the Gaussian copula kernel of <span class="citation">Jones and Henderson (2007)</span> and the beta kernels of <span class="citation">Chen (1999)</span> are supported. On the half-open interval the gamma kernel of <span class="citation">Chen (2000)</span> is supported. The supported non-parametric starts include the normal, Laplace, Gumbel, exponential, gamma, log-normal, inverse Gaussian, Weibull, Beta, and Kumaraswamy densities. The parameters of all parametric starts are estimated using maximum likelihood. The implemented bandwidth selectors are the classical bandwidth selectors from <code>stats</code>, unbiased cross-validation, the Hermite polynomial method from <span class="citation">Hjort and Glad (1995)</span>, and the tailored bandwidth selector for the Gaussian copula method of <span class="citation">Jones and Henderson (2007)</span>. User defined parametric starts, kernels and bandwidth selectors are also supported.</p>
-<p>The following example uses the  data set from the built-in R package <code>datasets</code>. Since the data is positive we use Chen’s gamma kernel. As the data is likely to be better approximated by a gamma distribution than a uniform distribution, we use the gamma parametric start. The plotted density is in figure 1, where the gamma distribution with parameters estimated by maximum likelihood is in red and the ordinary kernel density estimate in blue. Notice the boundary bias of the ordinary kernel density estimator.</p>
+<p>The following example uses the <code>airquality</code> data set from the built-in R package <code>datasets</code>. Since the data is positive we use Chen’s gamma kernel. As the data is likely to be better approximated by a gamma distribution than a uniform distribution, we use the gamma parametric start. The plotted density is in figure 1, where the gamma distribution with parameters estimated by maximum likelihood is in red and the ordinary kernel density estimate in blue. Notice the boundary bias of the ordinary kernel density estimator.</p>
 <pre class="r"><code># install.packages(&quot;kdensity&quot;)
 library(&quot;kdensity&quot;)
 kde = kdensity(airquality$Wind, start = &quot;gamma&quot;, kernel = &quot;gamma&quot;)
@@ -402,25 +402,25 @@ rug(airquality$Wind)</code></pre>
 <h1>References</h1>
 <div id="refs" class="references">
 <div id="ref-chen1999beta">
-<p>Chen, Song Xi. 1999. “Beta Kernel Estimators for Density Functions.” <em>Computational Statistics &amp; Data Analysis</em> 31 (2): 131–45.</p>
+<p>Chen, Song Xi. 1999. “Beta Kernel Estimators for Density Functions.” <em>Computational Statistics &amp; Data Analysis</em> 31 (2): 131–45. <a href="https://doi.org/doi:10.1016/S0167-9473(99)00010-9">https://doi.org/doi:10.1016/S0167-9473(99)00010-9</a>.</p>
 </div>
 <div id="ref-chen2000probability">
-<p>———. 2000. “Probability Density Function Estimation Using Gamma Kernels.” <em>Annals of the Institute of Statistical Mathematics</em> 52 (3): 471–80.</p>
+<p>———. 2000. “Probability Density Function Estimation Using Gamma Kernels.” <em>Annals of the Institute of Statistical Mathematics</em> 52 (3): 471–80. <a href="https://doi.org/doi:10.1023/A:1004165218295">https://doi.org/doi:10.1023/A:1004165218295</a>.</p>
 </div>
 <div id="ref-hjort_glad_1995">
-<p>Hjort, Nils Lid, and Ingrid K Glad. 1995. “Nonparametric Density Estimation with a Parametric Start.” <em>The Annals of Statistics</em>, 882–904.</p>
+<p>Hjort, Nils Lid, and Ingrid K Glad. 1995. “Nonparametric Density Estimation with a Parametric Start.” <em>The Annals of Statistics</em>, 882–904. <a href="https://doi.org/doi:10.1214/aos/1176324627">https://doi.org/doi:10.1214/aos/1176324627</a>.</p>
 </div>
 <div id="ref-jones2007miscellanea">
-<p>Jones, MC, and DA Henderson. 2007. “Kernel-Type Density Estimation on the Unit Interval.” <em>Biometrika</em> 94 (4): 977–84.</p>
+<p>Jones, MC, and DA Henderson. 2007. “Kernel-Type Density Estimation on the Unit Interval.” <em>Biometrika</em> 94 (4): 977–84. <a href="https://doi.org/doi:10.1093/biomet/asm068">https://doi.org/doi:10.1093/biomet/asm068</a>.</p>
 </div>
 <div id="ref-marron1994transformations">
-<p>Marron, James Stephen, and David Ruppert. 1994. “Transformations to Reduce Boundary Bias in Kernel Density Estimation.” <em>Journal of the Royal Statistical Society: Series B (Methodological)</em> 56 (4): 653–71.</p>
+<p>Marron, James Stephen, and David Ruppert. 1994. “Transformations to Reduce Boundary Bias in Kernel Density Estimation.” <em>Journal of the Royal Statistical Society: Series B (Methodological)</em> 56 (4): 653–71. <a href="https://doi.org/doi:10.2307/2346189">https://doi.org/doi:10.2307/2346189</a>.</p>
 </div>
 <div id="ref-r">
 <p>R Core Team. 2019. <em>R: A Language and Environment for Statistical Computing</em>. Vienna, Austria: R Foundation for Statistical Computing. <a href="https://www.R-project.org/">https://www.R-project.org/</a>.</p>
 </div>
 <div id="ref-silverman2018density">
-<p>Silverman, Bernard W. 2018. <em>Density Estimation for Statistics and Data Analysis</em>. Routledge.</p>
+<p>Silverman, Bernard W. 2018. <em>Density Estimation for Statistics and Data Analysis</em>. Routledge. <a href="https://doi.org/doi:10.1201/9781315140919">https://doi.org/doi:10.1201/9781315140919</a>.</p>
 </div>
 </div>
 </div>
