@@ -228,7 +228,7 @@ mlgumbel = function(x, scale0 = 1, rel.tol = .Machine$double.eps^0.25,
 #' @references Jones, M. C. "Kumaraswamy's distribution: A beta-type distribution with some tractability advantages." Statistical Methodology 6.1 (2009): 70-81.
 #'
 #'      Kumaraswamy, Ponnambalam. "A generalized probability density function for double-bounded random processes." Journal of Hydrology 46.1-2 (1980): 79-88.
-#'
+
 
 mlkumar = function(x, a0 = 1, rel.tol = .Machine$double.eps^0.25,
                     iterlim = 100) {

@@ -33,7 +33,7 @@ kernel_environment = new.env(hash = FALSE)
 #'    kernel when calculating bandwidths.
 #' @examples
 #' gaussian = list(
-#'   kernel  = function(y, x, h) dnorm((y-x)/h),
+#'   kernel  = function(y, x, h) stats::dnorm((y-x)/h),
 #'   sd = 1,
 #'   support = c(-Inf, Inf)
 #' )
@@ -74,7 +74,7 @@ kernel_environment = new.env(hash = FALSE)
 NULL
 
 kernel_environment$gaussian = list(
-  kernel  = function(y, x, h) dnorm((y-x)/h),
+  kernel  = function(y, x, h) stats::dnorm((y-x)/h),
   sd      = 1,
   support = c(-Inf, Inf)
   )

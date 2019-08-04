@@ -40,17 +40,22 @@ normalization constant, see \code{normalized}.}
 \code{\link[base]{class}} "kdensity". This is a callable function with the
 following elements, accessible by '$':
 \describe{
+  \item{\code{x}}{The data supplied in \code{x}.}
   \item{\code{bw_str, bw, adjust, h}}{The bandwidth function, the resulting
               bandwidth, the \code{adjust} argument, and the adjusted
               bandwidth.}
-  \item{\code{kernel, start, support }}{Name of the kernel, name of the
-              parametric start, and the support of the density.}
-  \item{\code{data.name, n, range, has.na}}{Name of the data, number of
-              observations, the range of the data, and whether the data
-              \code{x} contained \code{NA} values.}
+  \item{\code{kernel_str, kernel, start, start_str, support}}{Name of the kernel,
+              the kernel object, name of the parametric start, the start object,
+              and the support of the density.}
+  \item{\code{data.name, n, range, has.na, na.rm, normalized}}{Name of the data, number of
+              observations, the range of the data, whether the data
+              \code{x} contained \code{NA} values, whether na.rm is \code{TRUE}
+              or not, and whether the density is normalized.}
   \item{\code{call}}{The \code{call} to \code{kdensity}.}
   \item{\code{estimates}}{Named numeric vector containing the parameter
               estimates from the parametric start.}
+  \item{\code{logLik}}{The log-likelihood of the parametric starts. Is \code{NA}
+              for the uniform start.}
 
 }
 }

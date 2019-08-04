@@ -7,13 +7,18 @@
 
 #' @export
 `[[.kdensity` = function(x, i) {
+  allowed_arg = c("x", "bw_str", "bw", "adjust", "h", "kernel_str", "kernel",
+                  "start", "start_str", "support", "data.name", "n", "range",
+                  "has.na", "na.rm", "normalized", "call", "estimates", "logLik")
+
+  i = match.arg(i, allowed_arg)
   environment(x)[[i]]
 }
 
 #' @export
 `[[<-.kdensity` = function(x, i, value) {
-  allowed_arg = c("x", "bw", "adjust", "kernel", "start", "support",
-                   "na.rm", "normalized")
+  allowed_arg = c("x", "bw", "adjust", "kernel", "start", "support", "na.rm",
+                  "normalized")
 
   i = match.arg(i, allowed_arg)
   environment(x)$obj_name = "x"
@@ -112,7 +117,7 @@ get_range = function(obj) {
   seq(xmin, xmax, length.out = 1000)
 }
 
-#' Plot Method for Kernel Density Estimation
+#' Plot, Lines and Points Methods for Kernel Density Estimation
 #'
 #' The \code{plot} method for \code{kdensity} objects.
 #'
@@ -135,16 +140,17 @@ get_range = function(obj) {
 #' lines(kde, lty = 3)
 #' rug(precip)
 
-
 plot.kdensity = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ...) {
   plot_helper(x, range, plot_start, zero_line, ptype = "plot", ...)
 }
 
+#' @rdname plot.kdensity
 #' @export
 lines.kdensity = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ...) {
   plot_helper(x, range, plot_start, zero_line, ptype = "lines", type = "l", ...)
 }
 
+#' @rdname plot.kdensity
 #' @export
 points.kdensity = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ...) {
   plot_helper(x, range, plot_start, zero_line, ptype = "points", type = "p", ...)
