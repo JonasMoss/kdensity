@@ -165,6 +165,15 @@ AIC(kde)
 #> [1] -20.67574
 ```
 
+## How to Contribute or Get Help
+
+If you encounter a bug, have a feature request or need some help, don’t
+hesitate to open an
+[issue](https://github.com/JonasMoss/kdensity/issues). If you want to
+contribute, make a pull request. This project follows a [Contributor
+Code of
+Conduct](https://www.contributor-covenant.org/version/1/4/code-of-conduct.md).
+
 ## References
 
   - [Hjort, Nils Lid, and Ingrid K. Glad. “Nonparametric density
