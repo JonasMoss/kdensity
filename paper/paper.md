@@ -51,6 +51,16 @@ from @hjort_glad_1995, and the tailored bandwidth selector for the Gaussian
 copula method of @jones2007miscellanea. User defined parametric starts, 
 kernels and bandwidth selectors are also supported. 
 
+Several `R` packages deal with kernel estimation, see @deng2011 for an overview. 
+While no other `R` package handles density estimation with parametric starts, 
+several packages supports methods that handle boundary bias. @evmix provides a 
+variety of boundary bias correction methods in the `bckden` functions. @kde1d 
+corrects for boundary bias using probit or logarithmically transformed 
+univariate local polynomial kernel density estimation. @logKDE corrects for 
+boundary bias on the half line using a logarithmic transform. @ks supports 
+boundary correction through the `kde.boundary` function, while @Ake corrects 
+for boundary bias using asymmetric kernels.
+
 The following example uses the `airquality` data set from the built-in
 R package `datasets`. Since the data is positive we use Chen's gamma kernel. 
 As the data is likely to be better approximated by a gamma distribution than a 
