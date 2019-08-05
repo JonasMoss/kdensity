@@ -38,7 +38,7 @@ parametric starts are possible, see the Structure section.
 
 \examples{
 start_exponential = list(
- density = dexp,
+ density = stats::dexp,
  estimator = function(data) {
    c(rate = 1/mean(data))
  },

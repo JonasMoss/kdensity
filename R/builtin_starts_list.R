@@ -18,7 +18,7 @@ starts_environment = new.env(hash = FALSE)
 #'   which is passed from \code{kdensity}.
 #'
 #' @examples start_exponential = list(
-#'  density = dexp,
+#'  density = stats::dexp,
 #'  estimator = function(data) {
 #'    c(rate = 1/mean(data))
 #'  },
@@ -61,7 +61,7 @@ starts_environment$uniform = list(
 starts_environment$constant = starts_environment$uniform
 
 starts_environment$normal = list(
-  density = dnorm,
+  density = stats::dnorm,
   estimator = function(data) {
     c(mean = mean(data),
       sd   = sd(data))
@@ -98,7 +98,7 @@ starts_environment$gumbel = list(
 )
 
 starts_environment$exponential = list(
-  density = dexp,
+  density = stats::dexp,
   estimator = function(data) {
     c(rate = 1/mean(data))
   },
@@ -106,7 +106,7 @@ starts_environment$exponential = list(
 )
 
 starts_environment$lognormal = list(
-  density = dlnorm,
+  density = stats::dlnorm,
   estimator = function(data) {
     c(meanlog = mean(log(data)),
       sdlog   = sd(log(data)))
@@ -134,19 +134,19 @@ if(requireNamespace("extraDistr", quietly = TRUE)) {
 starts_environment$wald = starts_environment$inverse_gaussian
 
 starts_environment$gamma = list(
-  density   = dgamma,
+  density   = stats::dgamma,
   estimator = mlgamma,
   support   = c(0, Inf)
 )
 
 starts_environment$weibull = list(
-  density   = dweibull,
+  density   = stats::dweibull,
   estimator = mlweibull,
   support   = c(0, Inf)
   )
 
 starts_environment$beta = list(
-  density   = dbeta,
+  density   = stats::dbeta,
   estimator = mlbeta,
   support   = c(0, 1)
 )

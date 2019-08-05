@@ -41,6 +41,22 @@ kernels such as `gamma` and `gcopula` are designed for this purpose. The
 support for parametric starts allows you to easily use a method that is
 often superior to ordinary kernel density estimation.
 
+Several `R` packages deal with kernel estimation. For an overview see
+[Deng & Hadley Wickham
+(2011)](https://vita.had.co.nz/papers/density-estimation.pdf%5D). While
+no other `R` package handles density estimation with parametric starts,
+several packages supports methods that handle boundary bias.
+[`evmix`](http://www.math.canterbury.ac.nz/~c.scarrott/evmix/) provides
+a variety of boundary bias correction methods in the `bckden` function.
+[`kde1d`](https://github.com/tnagler/kde1d) corrects for boundary bias
+using transformed univariate local polynomial kernel density estimation.
+[`logKDE`](https://github.com/andrewthomasjones/logKDE) corrects for
+boundary bias on the half line using a logarithmic transform.
+[`ks`](http://www.mvstat.net/mvksa/) supports boundary correction
+through the `kde.boundary` function, while
+[`Ake`](https://cran.r-project.org/web/packages/Ake/index.html) corrects
+for boundary bias using tailored kernel functions.
+
 ## Installation
 
 From inside `R`, use one of the following commands:
@@ -148,6 +164,15 @@ logLik(kde)
 AIC(kde)
 #> [1] -20.67574
 ```
+
+## How to Contribute or Get Help
+
+If you encounter a bug, have a feature request or need some help, don’t
+hesitate to open an
+[issue](https://github.com/JonasMoss/kdensity/issues). If you want to
+contribute, make a pull request. This project follows a [Contributor
+Code of
+Conduct](https://www.contributor-covenant.org/version/1/4/code-of-conduct.md).
 
 ## References
 

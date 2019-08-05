@@ -2,9 +2,17 @@
 % Please edit documentation in R/generics.R
 \name{plot.kdensity}
 \alias{plot.kdensity}
-\title{Plot Method for Kernel Density Estimation}
+\alias{lines.kdensity}
+\alias{points.kdensity}
+\title{Plot, Lines and Points Methods for Kernel Density Estimation}
 \usage{
 \method{plot}{kdensity}(x, range = NULL, plot_start = FALSE,
+  zero_line = TRUE, ...)
+
+\method{lines}{kdensity}(x, range = NULL, plot_start = FALSE,
+  zero_line = TRUE, ...)
+
+\method{points}{kdensity}(x, range = NULL, plot_start = FALSE,
   zero_line = TRUE, ...)
 }
 \arguments{

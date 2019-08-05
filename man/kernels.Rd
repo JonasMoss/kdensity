@@ -62,7 +62,7 @@ instead.
 
 \examples{
 gaussian = list(
-  kernel  = function(y, x, h) dnorm((y-x)/h),
+  kernel  = function(y, x, h) stats::dnorm((y-x)/h),
   sd = 1,
   support = c(-Inf, Inf)
 )

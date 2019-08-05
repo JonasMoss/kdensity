@@ -134,7 +134,10 @@ lines(kde_skewhyp, plot_start = TRUE, lty = 2, lwd = 2)
 rug(LH)
 ```
 
-Since all the curves are in agreement, we are justified in using the skew hyperbolic t-distribution for further analysis.
+Since all the curves are in agreement, kernel density estimation appears to add
+unneccessary complexity without sufficient compensation in fit. We are justified 
+in using the skew hyperbolic t-distribution if this simplifies our analysis down
+the line.
 
 ## Kernels
 
