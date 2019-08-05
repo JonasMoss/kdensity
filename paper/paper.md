@@ -56,7 +56,7 @@ While no other `R` package handles density estimation with parametric starts,
 several packages supports methods that handle boundary bias. @evmix provides a 
 variety of boundary bias correction methods in the `bckden` functions. @kde1d 
 corrects for boundary bias using probit or logarithmically transformed 
-univariate local polynomial kernel density estimation. @logKDE corrects for 
+local polynomial kernel density estimation. @logKDE corrects for 
 boundary bias on the half line using a logarithmic transform. @ks supports 
 boundary correction through the `kde.boundary` function, while @Ake corrects 
 for boundary bias using asymmetric kernels.
