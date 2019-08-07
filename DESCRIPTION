@@ -22,9 +22,9 @@ Suggests: extraDistr,
     SkewHyperbolic,
     testthat,
     covr,
-    EQL,
     knitr,
     rmarkdown
-Imports: assertthat
+Imports: assertthat,
+    EQL
 RoxygenNote: 6.1.1
 VignetteBuilder: knitr
