@@ -16,6 +16,8 @@ Description: Handles univariate non-parametric density estimation with
     copula kernel of Jones & Henderson (2007) <doi:10.1093/biomet/asm068>.
     User-supplied kernels, parametric starts, and bandwidths are supported.
 License: MIT + file LICENSE
+URL: https://github.com/JonasMoss/kdensity
+BugReports: https://github.com/JonasMoss/kdensity/issues
 Encoding: UTF-8
 LazyData: true
 Suggests: extraDistr,
