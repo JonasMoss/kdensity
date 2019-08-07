@@ -32,10 +32,12 @@ knitr::opts_chunk$set(out.width='750px', dpi=200)
 ## Overview
 kdensity is an implementation of univariate kernel density estimation with support for parametric starts and asymmetric kernels. Its main function is `kdensity`, which is has approximately the same syntax as `stats::density`. Its new functionality is:
 
-* `kdensity` has built-in support for many *parametric starts*, such as `normal` and `gamma`, but you can also supply your own. 
-*  It supports several asymmetric kernels ones such as `gcopula` and `gamma` kernels, but also the common symmetric ones. In addition, you can also supply your own kernels. 
-* A selection of choices for the bandwidth function `bw`, again including an option to specify your own.
-* The returned value is callable: The density estimator returns a density function when called.
+* `kdensity` has built-in support for many *parametric starts*, such as `normal` 
+  and `gamma`,   but you can also supply your own. 
+* It supports several asymmetric kernels ones such as `gcopula` and `gamma` kernels, but also     the common symmetric ones. In addition, you can also supply your own kernels. 
+* A selection of choices for the bandwidth function `bw`, again including an option to specify    your own.
+* The returned value is density function. This can be used for e.g. numerical 
+  integration, numerical differentiation, and point evaluations. 
 
 A reason to use `kdensity` is to avoid *boundary bias* when estimating densities on the unit interval or the positive half-line. Asymmetric kernels such as `gamma` and `gcopula` are designed for this purpose. The support for parametric starts allows you to easily use a method that is often superior to ordinary kernel density estimation.
 
@@ -61,7 +63,8 @@ install.packages("kdensity")
 devtools::install_github("JonasMoss/kdensity")
 ```
 
-Call the `library` function and use it just like `stats:density`, but with optional additional arguments.
+## Usage Example
+Call the `library` function and use it just like `stats::density`, but with optional additional arguments.
 ```{r simpleuse, echo = TRUE, eval = FALSE}
 library("kdensity")
 plot(kdensity(mtcars$mpg, start = "normal"))
@@ -69,7 +72,8 @@ plot(kdensity(mtcars$mpg, start = "normal"))
 
 ## Description
 
-Kernel density estimation with a *parametric start* was introduced by Hjort and Glad in [Nonparametric Density Estimation with a Parametric Start (1995)](https://projecteuclid.org/euclid.aos/1176324627). The idea is to start out with a parametric density before you do your kernel density estimation, so that your actual kernel density estimation will be a correction to the original parametric estimate. This is a good idea because the resulting estimator will be better than an ordinary kernel density estimator whenever the true density is close to your suggestion; and the estimator can be superior to the ordinary kernel density estimator even when the suggestion is pretty far off.
+Kernel density estimation with a *parametric start* was introduced by Hjort and Glad in [Nonparametric Density Estimation with a Parametric Start (1995)](https://projecteuclid.org/euclid.aos/1176324627). The idea is to start out with a parametric density before you do your kernel density estimation, so that your actual kernel density estimation will be a correction to the original parametric estimate. The resulting estimator will outperform the ordinary kernel density estimator in terms of asymptotic 
+integrated mean squared error whenever the true density is close to your suggestion; and the estimator can be superior to the ordinary kernel density estimator even when the suggestion is pretty far off.
 
 In addition to parametric starts, the package implements some *asymmetric kernels*. These kernels are useful when modelling data with sharp boundaries, such as data supported on the positive half-line or the unit interval. Currently we support the following asymmetric kernels:
 
@@ -85,8 +89,8 @@ These features can be combined to make asymmetric kernel densities estimators wi
 
 The function `kdensity` takes some `data`, a kernel `kernel` and a parametric start `start`. You can optionally specify the `support` parameter, which is used to find the normalizing constant.
 
-The following example uses the \code{airquality} data set plots both a gamma-kernel density estimate with a gamma start (black), the fully parametric gamma density (red), 
-and an ordinary `density` estimate (blue). Notice the boundary bias of the ordinary 
+The following example uses the \code{datasets::airquality} data set. The black curve is a gamma-kernel density estimate with a gamma start, the red curve a fully parametric gamma density
+and and the blue curve an ordinary `density` estimate. Notice the boundary bias of the ordinary 
 `density` estimator. The underlying parameter estimates are always maximum likelilood.
 
 ```{r example, echo = TRUE}
@@ -98,10 +102,13 @@ lines(density(airquality$Wind, adjust = 2), col = "blue")
 rug(airquality$Wind)
 ```
 
-Since the return value of `kdensity` is a function, it is callable, as in:
+Since the return value of `kdensity` is a function, `kde` is callable and can be
+used as any density functon in `R` (such as `stats::dnorm`). For example, you can
+do:
 
 ```{r callable, echo = TRUE}
 kde(10)
+integrate(kde, lower = 0, upper = 1) # The cumulative distribution up to 1.
 ```
 
 You can access the parameter estimates by using `coef`. You can also access the log likelihood (`logLik`), AIC and BIC of the parametric start distribution.
@@ -112,10 +119,8 @@ logLik(kde)
 AIC(kde)
 ```
 ## How to Contribute or Get Help
-If you encounter a bug, have a feature request or need some help, don't hesitate
-to open an [issue](https://github.com/JonasMoss/kdensity/issues). If you want to
-contribute, make a pull request. This project follows a 
-[Contributor Code of Conduct](https://www.contributor-covenant.org/version/1/4/code-of-conduct.md).
+If you encounter a bug, have a feature request or need some help, open a [Github issue](https://github.com/JonasMoss/kdensity/issues). Create a pull requests
+to contribute. This project follows a [Contributor Code of Conduct](https://www.contributor-covenant.org/version/1/4/code-of-conduct.md).
 
 ## References
 

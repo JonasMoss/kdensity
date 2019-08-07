@@ -32,8 +32,9 @@ function is `kdensity`, which is has approximately the same syntax as
     you can also supply your own kernels.
   - A selection of choices for the bandwidth function `bw`, again
     including an option to specify your own.
-  - The returned value is callable: The density estimator returns a
-    density function when called.
+  - The returned value is density function. This can be used for
+    e.g. numerical integration, numerical differentiation, and point
+    evaluations.
 
 A reason to use `kdensity` is to avoid *boundary bias* when estimating
 densities on the unit interval or the positive half-line. Asymmetric
@@ -69,7 +70,9 @@ install.packages("kdensity")
 devtools::install_github("JonasMoss/kdensity")
 ```
 
-Call the `library` function and use it just like `stats:density`, but
+## Usage Example
+
+Call the `library` function and use it just like `stats::density`, but
 with optional additional arguments.
 
 ``` r
@@ -84,11 +87,12 @@ Hjort and Glad in [Nonparametric Density Estimation with a Parametric
 Start (1995)](https://projecteuclid.org/euclid.aos/1176324627). The idea
 is to start out with a parametric density before you do your kernel
 density estimation, so that your actual kernel density estimation will
-be a correction to the original parametric estimate. This is a good idea
-because the resulting estimator will be better than an ordinary kernel
-density estimator whenever the true density is close to your suggestion;
-and the estimator can be superior to the ordinary kernel density
-estimator even when the suggestion is pretty far off.
+be a correction to the original parametric estimate. The resulting
+estimator will outperform the ordinary kernel density estimator in terms
+of asymptotic integrated mean squared error whenever the true density is
+close to your suggestion; and the estimator can be superior to the
+ordinary kernel density estimator even when the suggestion is pretty far
+off.
 
 In addition to parametric starts, the package implements some
 *asymmetric kernels*. These kernels are useful when modelling data with
@@ -126,11 +130,11 @@ The function `kdensity` takes some `data`, a kernel `kernel` and a
 parametric start `start`. You can optionally specify the `support`
 parameter, which is used to find the normalizing constant.
 
-The following example uses the  data set plots both a gamma-kernel
-density estimate with a gamma start (black), the fully parametric gamma
-density (red), and an ordinary `density` estimate (blue). Notice the
-boundary bias of the ordinary `density` estimator. The underlying
-parameter estimates are always maximum likelilood.
+The following example uses the  data set. The black curve is a
+gamma-kernel density estimate with a gamma start, the red curve a fully
+parametric gamma density and and the blue curve an ordinary `density`
+estimate. Notice the boundary bias of the ordinary `density` estimator.
+The underlying parameter estimates are always maximum likelilood.
 
 ``` r
 library("kdensity")
@@ -143,12 +147,15 @@ rug(airquality$Wind)
 
 <img src="man/figures/README-example-1.png" width="750px" />
 
-Since the return value of `kdensity` is a function, it is callable, as
-in:
+Since the return value of `kdensity` is a function, `kde` is callable
+and can be used as any density functon in `R` (such as `stats::dnorm`).
+For example, you can do:
 
 ``` r
 kde(10)
 #> [1] 0.09980471
+integrate(kde, lower = 0, upper = 1) # The cumulative distribution up to 1.
+#> 1.27532e-05 with absolute error < 2.2e-19
 ```
 
 You can access the parameter estimates by using `coef`. You can also
@@ -167,11 +174,9 @@ AIC(kde)
 
 ## How to Contribute or Get Help
 
-If you encounter a bug, have a feature request or need some help, don’t
-hesitate to open an
-[issue](https://github.com/JonasMoss/kdensity/issues). If you want to
-contribute, make a pull request. This project follows a [Contributor
-Code of
+If you encounter a bug, have a feature request or need some help, open a
+[Github issue](https://github.com/JonasMoss/kdensity/issues). Create a
+pull requests to contribute. This project follows a [Contributor Code of
 Conduct](https://www.contributor-covenant.org/version/1/4/code-of-conduct.md).
 
 ## References
