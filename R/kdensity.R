@@ -122,10 +122,10 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
   data.name = deparse(substitute(x))
   has.na = anyNA(x)
 
-  if(has.na) {
-    if(!na.rm) stop("x contains NAs and na.rm = FALSE.")
-    x = x[!is.na(x)]
-  }
+  assertthat::assert_that(!(has.na & !na.rm),
+                          msg = "x contains NAs and na.rm = FALSE.")
+
+  x = x[!is.na(x)] # This line is reached only if (has.na & !na.rm) is FALSE.
 
   ## 'kernel', 'start' and 'bw' can be custom made: In this case, they must
   ## be added to their environments.
