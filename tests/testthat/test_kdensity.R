@@ -39,3 +39,5 @@ expect_error(kdensity(precip, bw = Inf))
 expect_equal(kdensity(precip, bw = Inf, start = "normal")(10), dnorm(10, mean = mean(precip), sd = sd(precip)))
 expect_equal(kdensity(precip, bw = 1)(10), kdensity(precip, bw = silly_width)(10))
 expect_error(kdensity(precip)())
+expect_error(kdensity(precip, start = "gumbel", kernel = "rectangular",
+                      bw = "ucv"))

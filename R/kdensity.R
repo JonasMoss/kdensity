@@ -122,10 +122,10 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
   data.name = deparse(substitute(x))
   has.na = anyNA(x)
 
-  if(has.na) {
-    if(!na.rm) stop("x contains NAs and na.rm = FALSE.")
-    x = x[!is.na(x)]
-  }
+  assertthat::assert_that(!(has.na & !na.rm),
+                          msg = "x contains NAs and na.rm = FALSE.")
+
+  x = x[!is.na(x)] # This line is reached only if (has.na & !na.rm) is FALSE.
 
   ## 'kernel', 'start' and 'bw' can be custom made: In this case, they must
   ## be added to their environments.
@@ -149,7 +149,7 @@ kdensity = function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
   ## The case of bw == Inf is special! In this case, we return the parametric
   ## start itself.
 
-  ## Now we massage and handle the combinations of kernel, start and support.
+  ## Now we handle the combinations of kernel, start and support.
   ## This is fancy defaults management.
   kss_list = get_kernel_start_support(kernel, start, support)
 
