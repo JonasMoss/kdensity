@@ -103,7 +103,7 @@ rug(airquality$Wind)
 ```
 
 Since the return value of `kdensity` is a function, `kde` is callable and can be
-used as any density functon in `R` (such as `stats::dnorm`). For example, you can
+used as any density function in `R` (such as `stats::dnorm`). For example, you can
 do:
 
 ```{r callable, echo = TRUE}

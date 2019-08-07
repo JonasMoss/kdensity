@@ -135,7 +135,7 @@ rug(LH)
 ```
 
 Since all the curves are in agreement, kernel density estimation appears to add
-unneccessary complexity without sufficient compensation in fit. We are justified 
+unnecessary complexity without sufficient compensation in fit. We are justified 
 in using the skew hyperbolic t-distribution if this simplifies our analysis down
 the line.
 
