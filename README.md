@@ -43,8 +43,8 @@ often superior to ordinary kernel density estimation.
 
 Several `R` packages deal with kernel estimation. For an overview see
 [Deng & Hadley Wickham
-(2011)](https://vita.had.co.nz/papers/density-estimation.pdf%5D). While
-no other `R` package handles density estimation with parametric starts,
+(2011)](https://vita.had.co.nz/papers/density-estimation.pdf). While no
+other `R` package handles density estimation with parametric starts,
 several packages supports methods that handle boundary bias.
 [`evmix`](http://www.math.canterbury.ac.nz/~c.scarrott/evmix/) provides
 a variety of boundary bias correction methods in the `bckden` function.

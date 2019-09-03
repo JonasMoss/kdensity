@@ -40,7 +40,7 @@ kdensity is an implementation of univariate kernel density estimation with suppo
 A reason to use `kdensity` is to avoid *boundary bias* when estimating densities on the unit interval or the positive half-line. Asymmetric kernels such as `gamma` and `gcopula` are designed for this purpose. The support for parametric starts allows you to easily use a method that is often superior to ordinary kernel density estimation.
 
 Several `R` packages deal with kernel estimation. For an overview see 
-[Deng & Hadley Wickham (2011)](https://vita.had.co.nz/papers/density-estimation.pdf]).
+[Deng & Hadley Wickham (2011)](https://vita.had.co.nz/papers/density-estimation.pdf).
 While no other `R` package handles density estimation with parametric starts, 
 several packages supports methods that handle boundary bias.  [`evmix`](http://www.math.canterbury.ac.nz/~c.scarrott/evmix/) provides a 
 variety of boundary bias correction methods in the `bckden` function. 
