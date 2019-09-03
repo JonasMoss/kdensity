@@ -69,8 +69,6 @@ bw_environment$JH = function(x, kernel = NULL, start = NULL, support = NULL) {
 }
 
 bw_environment$RHE = function(x, kernel = NULL, start = NULL, support = NULL) {
-  assertthat::assert_that("EQL" %in% rownames(utils::installed.packages()), msg =
-                            "The bandwidth function 'RHE' requires the package 'EQL' to work.")
 
   max_degree = 5  # The maximum degree of the Hermite polynomials.
   n <- length(x)
