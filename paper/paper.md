@@ -25,7 +25,7 @@ bibliography: paper.bib
 # Summary
 It is often necessary to estimate a probability density non-parametrically, that is, without 
 making strong parametric assumptions such as normality. 
-This [@r] package provides a non-parametric density estimator that can take advantage of some of the knowledge the user has about the probability density.
+This R [@r] package provides a non-parametric density estimator that can take advantage of some of the knowledge the user has about the probability density.
 
 Kernel density estimation [@silverman2018density] is a popular method for non-parametric density estimation based on placing kernels on each data point. @hjort_glad_1995 extended kernel density estimation with *parametric starts*.
 The parametric start is a parametric density that is multiplied with the kernel
