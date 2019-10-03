@@ -14,6 +14,7 @@ Status](https://codecov.io/gh/JonasMoss/kdensity/branch/master/graph/badge.svg)]
 state and is being actively
 developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![DOI](https://zenodo.org/badge/120678148.svg)](https://zenodo.org/badge/latestdoi/120678148)
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.01566/status.svg)](https://doi.org/10.21105/joss.01566)
 
 An `R` package for univariate kernel density estimation with parametric
 starts and asymmetric kernels.
