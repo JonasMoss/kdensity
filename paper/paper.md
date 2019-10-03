@@ -23,16 +23,11 @@ bibliography: paper.bib
 ---
 
 # Summary
-Estimating probability densities is an important task in many data science problems.
-The R package [@r] `kdensity` is an alternative --- and in some cases, more correct ---
-way of performing non-parametric density estimation than the standard `density` function
-in R.
-A primary reason for this is that `kdensity` allows one to 
-specify the support of the density estimate through an initial parametric density estimate.
+It is often necessary to estimate a probability density non-parametrically, that is, without 
+making strong parametric assumptions such as normality. 
+This [@r] package provides a non-parametric density estimator that can take advantage of some of the knowledge the user has about the probability density.
 
-The `density` function is based on classical kernel density estimation [@silverman2018density],
-where symmetric kernels are placed on each data point. 
-@hjort_glad_1995 extended kernel density estimation with *parametric starts*.
+Kernel density estimation [@silverman2018density] is a popular method for non-parametric density estimation based on placing kernels on each data point. @hjort_glad_1995 extended kernel density estimation with *parametric starts*.
 The parametric start is a parametric density that is multiplied with the kernel
 estimate. When the data-generating density is reasonably close to the parametric
 start density, kernel density estimation with that parametric start will outperform
