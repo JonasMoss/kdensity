@@ -1,0 +1,16 @@
+citHeader("To cite kdensity in publications, please use:")
+
+citEntry{entry = "Article",
+  title="kdensity: An R package for kernel density estimation with parametric starts and asymmetric kernels", 
+  volume="4", 
+  url="http://dx.doi.org/10.21105/joss.01566", 
+  DOI="10.21105/joss.01566", 
+  number="42", 
+  journal="Journal of Open Source Software", 
+  publisher="The Open Journal", 
+  author="Moss, Jonas and Tveten, Martin", 
+  year="2019", 
+  month="Oct", 
+  pages="1566",
+  textVersion = "Moss, J., & Tveten, M. (2019). kdensity: An R package for kernel density estimation with parametric starts and asymmetric kernels. Journal of Open Source Software, 4(42), 1566. https://doi.org/10.21105/joss.01566"
+}
