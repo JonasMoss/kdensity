@@ -24,31 +24,31 @@ environment \code{bw_environments}, and can be accessed by
 }
 \section{Bandwidth selectors}{
 
-   \code{"nrd0", "nrd", "bcv", "SJ"}: Bandwidth selectors from \code{stats}.
-   They are documented in \code{\link[stats]{bandwidth} stats:bandwidth}.
-   "nrd0" is the standard bandwidth selector for symmetric kernels with
-   constant parametric starts.
+\verb{"nrd0", "nrd", "bcv", "SJ"}: Bandwidth selectors from \code{stats}.
+They are documented in \verb{[bandwidth][stats::bandwidth] stats:bandwidth}.
+"nrd0" is the standard bandwidth selector for symmetric kernels with
+constant parametric starts.
 
-   \code{"ucv"}: Unbiased cross validation. The standard option for
-   asymmetric kernels.
+\code{"ucv"}: Unbiased cross validation. The standard option for
+asymmetric kernels.
 
-   \code{"RHE"}: Selector for parametric starts with a symmetric kernel,
-   based on a reference rule with Hermite polynomials.
-   Described in Hjort & Glad (1995). The default method in \code{kdensity} when a parametric
-   start is supplied and the kernel is symmetric.
+\code{"RHE"}: Selector for parametric starts with a symmetric kernel,
+based on a reference rule with Hermite polynomials.
+Described in Hjort & Glad (1995). The default method in \code{kdensity} when a parametric
+start is supplied and the kernel is symmetric.
 
-   \code{"JH"}: Selector for the Gaussian copula kernel, based on
-   normal reference rule. Described in Jones & Henderson. The default method when
-   the \code{gcopula} kernel is used in \code{kdensity}.
+\code{"JH"}: Selector for the Gaussian copula kernel, based on
+normal reference rule. Described in Jones & Henderson. The default method when
+the \code{gcopula} kernel is used in \code{kdensity}.
 }
 
 \section{Structure}{
 
-   The bandwidth selector is a function of four arguments: The data
-   \code{x}, a kernel string \code{kernel}, a start string \code{start},
-   and a support vector \code{support}. To obtain the functions associated
-   with these strings, use \code{get_kernel} and \code{get_start}. The
-   function should return a double.
+The bandwidth selector is a function of four arguments: The data
+\code{x}, a kernel string \code{kernel}, a start string \code{start},
+and a support vector \code{support}. To obtain the functions associated
+with these strings, use \code{get_kernel} and \code{get_start}. The
+function should return a double.
 }
 
 \examples{
@@ -63,7 +63,7 @@ Jones, M. C., and D. A. Henderson. "Kernel-type density estimation on the unit i
 Hjort, Nils Lid, and Ingrid K. Glad. "Nonparametric density estimation with a parametric start." The Annals of Statistics (1995): 882-904.
 }
 \seealso{
-\code{\link{kdensity}}, \code{\link[stats]{bandwidth}} for the
-   bandwidth selectors of \code{\link[stats]{density}}. In addition,
-   \code{\link{kernels}}; \code{\link{parametric_starts}}
+\code{\link[=kdensity]{kdensity()}}, \code{\link[stats:bandwidth]{stats::bandwidth()}} for the
+bandwidth selectors of \code{\link[stats:density]{stats::density()}}. In addition,
+\code{\link[=kernels]{kernels()}}; \code{\link[=parametric_starts]{parametric_starts()}}
 }

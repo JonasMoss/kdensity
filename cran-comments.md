@@ -1,9 +1,6 @@
-## Resubmission
-
-Changed http to https in readme.
-
 ## Update
-This is an update of kdensity to version 1.0.1.
+
+* Now supports all starts from univariteML natively.
 
 ## Test environments
 * local Windows 10, R version R version 3.6.1

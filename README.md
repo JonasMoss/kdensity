@@ -14,10 +14,14 @@ Status](https://codecov.io/gh/JonasMoss/kdensity/branch/master/graph/badge.svg)]
 state and is being actively
 developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![DOI](https://zenodo.org/badge/120678148.svg)](https://zenodo.org/badge/latestdoi/120678148)
-[![DOI](https://joss.theoj.org/papers/10.21105/joss.01566/status.svg)](https://doi.org/10.21105/joss.01566)
 
 An `R` package for univariate kernel density estimation with parametric
 starts and asymmetric kernels.
+
+## News
+
+`kdensity` is now linked to `univariateML`, meaning it supports the
+approximately 30+ parametric starts from that package\!
 
 ## Overview
 
@@ -27,7 +31,9 @@ function is `kdensity`, which is has approximately the same syntax as
 `stats::density`. Its new functionality is:
 
   - `kdensity` has built-in support for many *parametric starts*, such
-    as `normal` and `gamma`, but you can also supply your own.
+    as `normal` and `gamma`, but you can also supply your own. For a
+    list of supported parametric starts, see the readme of
+    [`univariateML`](https://github.com/JonasMoss/univariateML).
   - It supports several asymmetric kernels ones such as `gcopula` and
     `gamma` kernels, but also the common symmetric ones. In addition,
     you can also supply your own kernels.

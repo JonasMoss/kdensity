@@ -17,7 +17,7 @@ get_start = function(start_str) {
 
 }
 
-#' Add a new parametric start to \code{starts_environment}.
+#' Add a new parametric start to `starts_environment`.
 #'
 #' @keywords internal
 #' @param start_str A string giving the name of the density.

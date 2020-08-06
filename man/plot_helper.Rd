@@ -4,8 +4,14 @@
 \alias{plot_helper}
 \title{Helper function for the plot methods.}
 \usage{
-plot_helper(x, range = NULL, plot_start = FALSE, zero_line = TRUE,
-  ptype = c("plot", "lines", "points"), ...)
+plot_helper(
+  x,
+  range = NULL,
+  plot_start = FALSE,
+  zero_line = TRUE,
+  ptype = c("plot", "lines", "points"),
+  ...
+)
 }
 \arguments{
 \item{x}{A \code{kdensity} object.}

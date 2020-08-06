@@ -4,25 +4,33 @@
 \alias{kdensity}
 \title{Parametrically guided kernel density estimation}
 \usage{
-kdensity(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
-  support = NULL, na.rm = FALSE, normalized = TRUE,
-  tolerance = 0.01)
+kdensity(
+  x,
+  bw = NULL,
+  adjust = 1,
+  kernel = NULL,
+  start = NULL,
+  support = NULL,
+  na.rm = FALSE,
+  normalized = TRUE,
+  tolerance = 0.01
+)
 }
 \arguments{
 \item{x}{Numeric vector containing the data.}
 
 \item{bw}{A bandwidth function. Can be either a string, a custom-made
 function, or a double. The supported bandwidth functions are documented
-in \code{\link{bandwidths}}.}
+in \code{\link[=bandwidths]{bandwidths()}}.}
 
 \item{adjust}{An adjustment constant, so that \code{h = adjust*bw*sd}, where \code{sd}
 varies with the chosen kernel.}
 
 \item{kernel}{The kernel function. Can be chosen from the list of built-in
-kernels or be custom-made. See \code{\link{kernels}} for details.}
+kernels or be custom-made. See \code{\link[=kernels]{kernels()}} for details.}
 
 \item{start}{Parametric start. Can be chosen from the list of built-in
-parametric starts or be custom-made. See \code{\link{parametric_starts}} for
+parametric starts or be custom-made. See \code{\link[=parametric_starts]{parametric_starts()}} for
 details.}
 
 \item{support}{The support of the data. Must be compatible with the supplied
@@ -37,25 +45,25 @@ normalization constant, see \code{normalized}.}
 }
 \value{
 \code{kdensity} returns an S3 function object of
-\code{\link[base]{class}} "kdensity". This is a callable function with the
+\code{\link[base:class]{base::class()}} "kdensity". This is a callable function with the
 following elements, accessible by '$':
 \describe{
-  \item{\code{x}}{The data supplied in \code{x}.}
-  \item{\code{bw_str, bw, adjust, h}}{The bandwidth function, the resulting
-              bandwidth, the \code{adjust} argument, and the adjusted
-              bandwidth.}
-  \item{\code{kernel_str, kernel, start, start_str, support}}{Name of the kernel,
-              the kernel object, name of the parametric start, the start object,
-              and the support of the density.}
-  \item{\code{data.name, n, range, has.na, na.rm, normalized}}{Name of the data, number of
-              observations, the range of the data, whether the data
-              \code{x} contained \code{NA} values, whether na.rm is \code{TRUE}
-              or not, and whether the density is normalized.}
-  \item{\code{call}}{The \code{call} to \code{kdensity}.}
-  \item{\code{estimates}}{Named numeric vector containing the parameter
-              estimates from the parametric start.}
-  \item{\code{logLik}}{The log-likelihood of the parametric starts. Is \code{NA}
-              for the uniform start.}
+\item{\code{x}}{The data supplied in \code{x}.}
+\item{\verb{bw_str, bw, adjust, h}}{The bandwidth function, the resulting
+bandwidth, the \code{adjust} argument, and the adjusted
+bandwidth.}
+\item{\verb{kernel_str, kernel, start, start_str, support}}{Name of the kernel,
+the kernel object, name of the parametric start, the start object,
+and the support of the density.}
+\item{\verb{data.name, n, range, has.na, na.rm, normalized}}{Name of the data, number of
+observations, the range of the data, whether the data
+\code{x} contained \code{NA} values, whether na.rm is \code{TRUE}
+or not, and whether the density is normalized.}
+\item{\code{call}}{The \code{call} to \code{kdensity}.}
+\item{\code{estimates}}{Named numeric vector containing the parameter
+estimates from the parametric start.}
+\item{\code{logLik}}{The log-likelihood of the parametric starts. Is \code{NA}
+for the uniform start.}
 
 }
 }
@@ -115,12 +123,12 @@ kde$estimates # Also: coef(kde)
 \references{
 Hjort, Nils Lid, and Ingrid K. Glad. "Nonparametric density estimation with a parametric start." The Annals of Statistics (1995): 882-904.
 
-  Jones, M. C., and D. A. Henderson. "Miscellanea kernel-type density estimation on the unit interval." Biometrika 94.4 (2007): 977-984.
+Jones, M. C., and D. A. Henderson. "Miscellanea kernel-type density estimation on the unit interval." Biometrika 94.4 (2007): 977-984.
 
-  Chen, Song Xi. "Probability density function estimation using gamma kernels." Annals of the Institute of Statistical Mathematics 52.3 (2000): 471-480.
+Chen, Song Xi. "Probability density function estimation using gamma kernels." Annals of the Institute of Statistical Mathematics 52.3 (2000): 471-480.
 
-  Silverman, Bernard W. Density estimation for statistics and data analysis. Vol. 26. CRC press, 1986.
+Silverman, Bernard W. Density estimation for statistics and data analysis. Vol. 26. CRC press, 1986.
 }
 \seealso{
-The \code{stats} package function \code{\link[stats]{density}}.
+The \code{stats} package function \code{\link[stats:density]{stats::density()}}.
 }

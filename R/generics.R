@@ -119,16 +119,16 @@ get_range = function(obj) {
 
 #' Plot, Lines and Points Methods for Kernel Density Estimation
 #'
-#' The \code{plot} method for \code{kdensity} objects.
+#' The `plot` method for `kdensity` objects.
 #'
 #' @export
-#' @param x a \code{kdensity} object.
+#' @param x a `kdensity` object.
 #' @param range range of x values.
-#' @param plot_start logical; if \code{TRUE}, plots the parametric start instead of the kernel density estimate.
-#' @param zero_line logical; if \code{TRUE}, add a base line at \code{y = 0}.
+#' @param plot_start logical; if `TRUE`, plots the parametric start instead of the kernel density estimate.
+#' @param zero_line logical; if `TRUE`, add a base line at `y = 0`.
 #' @param ... further plotting parameters.
 #' @return None.
-#' @seealso \code{\link{kdensity}}
+#' @seealso [kdensity()]
 #' @examples
 #' ## Using the data set "precip" to eye-ball the similarity between
 #' ## a kernel fit, a parametric fit, and a kernel with parametric start fit.
@@ -161,10 +161,10 @@ points.kdensity = function(x, range = NULL, plot_start = FALSE, zero_line = TRUE
 #' A helper function for the plot methods that does most of the work under
 #' the hood.
 #'
-#' @param x A \code{kdensity} object.
-#' @param range An optional range vector; like \code{x} in \code{plot.default}.
-#' @param plot_start Logical; if \code{TRUE}, plots the parametric start only.
-#' @param zero_line Logical; if \code{TRUE}, adds a line at \code{y = 0}.
+#' @param x A `kdensity` object.
+#' @param range An optional range vector; like `x` in `plot.default`.
+#' @param plot_start Logical; if `TRUE`, plots the parametric start only.
+#' @param zero_line Logical; if `TRUE`, adds a line at `y = 0`.
 #' @param ptype The kind of plot to make
 #' @param ... Passed to plot.default.
 #' @keywords internal

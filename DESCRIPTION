@@ -29,5 +29,6 @@ Suggests: extraDistr,
 Imports: assertthat,
     univariateML,
     EQL
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.1
 VignetteBuilder: knitr
+Roxygen: list(markdown = TRUE)

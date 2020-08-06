@@ -2,12 +2,12 @@ bw_environment = new.env(hash = FALSE)
 
 #' Bandwidth Selectors
 #'
-#' The available options for bandwidth selectors, passed as the \code{bw}
-#' argument to \code{kdensity}.
+#' The available options for bandwidth selectors, passed as the `bw`
+#' argument to `kdensity`.
 #'
 #' The bandwidth functions are not exported. They are members of the
-#' environment \code{bw_environments}, and can be accessed by
-#' \code{kdensity:::bw_environments}.
+#' environment `bw_environments`, and can be accessed by
+#' `kdensity:::bw_environments`.
 #'
 #' @param x The input data.
 #' @param kernel_str A string specifying the kernel, e.g. "gaussian."
@@ -16,34 +16,34 @@ bw_environment = new.env(hash = FALSE)
 #' symmetric kernels.
 #'
 #' @section Bandwidth selectors:
-#'    \code{"nrd0", "nrd", "bcv", "SJ"}: Bandwidth selectors from \code{stats}.
-#'    They are documented in \code{\link[stats]{bandwidth} stats:bandwidth}.
+#'    `"nrd0", "nrd", "bcv", "SJ"`: Bandwidth selectors from `stats`.
+#'    They are documented in `[bandwidth][stats::bandwidth] stats:bandwidth`.
 #'    "nrd0" is the standard bandwidth selector for symmetric kernels with
 #'    constant parametric starts.
 #'
-#'    \code{"ucv"}: Unbiased cross validation. The standard option for
+#'    `"ucv"`: Unbiased cross validation. The standard option for
 #'    asymmetric kernels.
 #'
-#'    \code{"RHE"}: Selector for parametric starts with a symmetric kernel,
+#'    `"RHE"`: Selector for parametric starts with a symmetric kernel,
 #'    based on a reference rule with Hermite polynomials.
-#'    Described in Hjort & Glad (1995). The default method in \code{kdensity} when a parametric
+#'    Described in Hjort & Glad (1995). The default method in `kdensity` when a parametric
 #'    start is supplied and the kernel is symmetric.
 #'
-#'    \code{"JH"}: Selector for the Gaussian copula kernel, based on
+#'    `"JH"`: Selector for the Gaussian copula kernel, based on
 #'    normal reference rule. Described in Jones & Henderson. The default method when
-#'    the \code{gcopula} kernel is used in \code{kdensity}.
+#'    the `gcopula` kernel is used in `kdensity`.
 #'
 #'
 #' @section Structure:
 #'    The bandwidth selector is a function of four arguments: The data
-#'    \code{x}, a kernel string \code{kernel}, a start string \code{start},
-#'    and a support vector \code{support}. To obtain the functions associated
-#'    with these strings, use \code{get_kernel} and \code{get_start}. The
+#'    `x`, a kernel string `kernel`, a start string `start`,
+#'    and a support vector `support`. To obtain the functions associated
+#'    with these strings, use `get_kernel` and `get_start`. The
 #'    function should return a double.
 #'
-#' @seealso \code{\link{kdensity}}, \code{\link[stats]{bandwidth}} for the
-#'    bandwidth selectors of \code{\link[stats]{density}}. In addition,
-#'    \code{\link{kernels}}; \code{\link{parametric_starts}}
+#' @seealso [kdensity()], [stats::bandwidth()] for the
+#'    bandwidth selectors of [stats::density()]. In addition,
+#'    [kernels()]; [parametric_starts()]
 #'
 #' @examples
 #'    ## Not a serious bandwidth function.

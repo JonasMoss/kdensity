@@ -11,29 +11,15 @@ parametric starts are possible, see the Structure section.
 }
 \section{Built-in starts}{
 
-
-
-   \code{uniform, constant}: Selecting the uniform start makes \code{kdensity}
-   act like an ordinary kernel density estimator. The default value for any
-   choice of kernel or support.
-   \code{gaussian, normal}: The normal distribution. A natural choice for
-   densities on the real line \eqn{(-\infty, \infty)}.
-   \code{laplace, gumbel}: Distributions on  \eqn{(-\infty, \infty)}.
-   \code{exponential, gamma, lognormal, inverse_gaussian, weibull}: Densities
-   supported on the positive real line \eqn{(0, \infty)}.
-   \code{beta, kumaraswamy}: The beta and Kumaraswamy distributions,
-   supported on the unit interval \eqn{[0, 1]}.
-   \code{pareto}: The Pareto distribution, supported on \eqn{[1, \infty)}.
-   Has heavy tails.
 }
 
 \section{Structure}{
 
-  The parametric start contains three elements: The density function, an
-  estimation function, and the support of the density. The parameters of
-  the density function must partially match the parameters of the estimator
-  function. The estimator function takes one argument, a numeric vector,
-  which is passed from \code{kdensity}.
+The parametric start contains three elements: The density function, an
+estimation function, and the support of the density. The parameters of
+the density function must partially match the parameters of the estimator
+function. The estimator function takes one argument, a numeric vector,
+which is passed from \code{kdensity}.
 }
 
 \examples{
@@ -56,5 +42,5 @@ start_inverse_gaussian = list(
 
 }
 \seealso{
-\code{\link{kdensity}}; \code{\link{kernels}}; \code{\link{bandwidths}}
+\code{\link[=kdensity]{kdensity()}}; \code{\link[=kernels]{kernels()}}; \code{\link[=bandwidths]{bandwidths()}}
 }

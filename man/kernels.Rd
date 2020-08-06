@@ -18,46 +18,45 @@ instead.
 
 
 
-   \code{gaussian, normal}: The Gaussian kernel. The default argument when
-   \code{starts} is supported on R.
-   \code{epanechnikov, rectangular (uniform), triangular, biweight,
-   cosine, optcosine}: Standard symmetric kernels, also used in
-   \code{\link[stats]{density}}.
-   \code{tricube, triweight}: Standard symmetric kernels. Not supported by
-   \code{\link[stats]{density}}.
-   \code{laplace}: Uses the Laplace density, also known as the double
-   exponential density.
+\verb{gaussian, normal}: The Gaussian kernel. The default argument when
+\code{starts} is supported on R.
+\verb{epanechnikov, rectangular (uniform), triangular, biweight, cosine, optcosine}: Standard symmetric kernels, also used in
+\code{\link[stats:density]{stats::density()}}.
+\verb{tricube, triweight}: Standard symmetric kernels. Not supported by
+\code{\link[stats:density]{stats::density()}}.
+\code{laplace}: Uses the Laplace density, also known as the double
+exponential density.
 }
 
 \section{Asymmetric kernels}{
 
 
 
-   \code{gamma, gamma_biased}: The gamma kernel of Chen (2000). For use on the positive
-   half-line. \code{gamma} is the recommended biased-corrected kernel.
-   \code{gcopula}: The Gaussian copula kernel of Jones & Henderson (2007). For use
-   on the unit interval.
-   \code{beta, beta_biased}: The beta kernel of Chen (1999). For use on the unit interval.
-   \code{beta} is the recommended bias-corrected kernel.
+\verb{gamma, gamma_biased}: The gamma kernel of Chen (2000). For use on the positive
+half-line. \code{gamma} is the recommended biased-corrected kernel.
+\code{gcopula}: The Gaussian copula kernel of Jones & Henderson (2007). For use
+on the unit interval.
+\verb{beta, beta_biased}: The beta kernel of Chen (1999). For use on the unit interval.
+\code{beta} is the recommended bias-corrected kernel.
 }
 
 \section{Structure}{
 
-   A kernel is a list containing two mandatory elements and one optional
-   element. The mandatory element '\code{kernel}' is the kernel function.
-   It takes arguments \code{y, x, h}, where \code{x} is the data supplied
-   to \code{kdensity} and \code{y} is the point of evaluation. \code{h} is
-   the bandwidth. Internally, the kernel function is evaluated as
-   \code{1/h*kernel(y, x, h)}. It should be vectorized in \code{x}, but
-   vectorization in \code{y} is not needed.
+A kernel is a list containing two mandatory elements and one optional
+element. The mandatory element '\code{kernel}' is the kernel function.
+It takes arguments \verb{y, x, h}, where \code{x} is the data supplied
+to \code{kdensity} and \code{y} is the point of evaluation. \code{h} is
+the bandwidth. Internally, the kernel function is evaluated as
+\code{1/h*kernel(y, x, h)}. It should be vectorized in \code{x}, but
+vectorization in \code{y} is not needed.
 
-   The second mandatory element is \code{support}, stating the domain of
-   definition for the kernel. This is used to distinguish kernels on the
-   unit interval / positive half-line from kernels on R.
+The second mandatory element is \code{support}, stating the domain of
+definition for the kernel. This is used to distinguish kernels on the
+unit interval / positive half-line from kernels on R.
 
-   \code{sd} is used for symmetric kernels, and states the standard error
-   of the kernel. This is used to make kernels comparable to the Gaussian
-   kernel when calculating bandwidths.
+\code{sd} is used for symmetric kernels, and states the standard error
+of the kernel. This is used to make kernels comparable to the Gaussian
+kernel when calculating bandwidths.
 }
 
 \examples{
@@ -83,6 +82,6 @@ Jones, M. C., and D. A. Henderson. "Kernel-type density estimation on the unit i
 Chen, Song Xi. "Beta kernel estimators for density functions." Computational Statistics & Data Analysis 31.2 (1999): 131-145.
 }
 \seealso{
-\code{\link{kdensity}}; \code{\link{parametric_starts}};
-\code{\link{bandwidths}}.
+\code{\link[=kdensity]{kdensity()}}; \code{\link[=parametric_starts]{parametric_starts()}};
+\code{\link[=bandwidths]{bandwidths()}}.
 }

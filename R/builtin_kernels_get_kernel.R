@@ -17,7 +17,7 @@ get_kernel = function(kernel_str) {
   kernel
 }
 
-#' Add a new kernel to \code{kernels_environment}.
+#' Add a new kernel to `kernels_environment`.
 #'
 #' @keywords internal
 #' @param kernel_str A string giving the name of the density.

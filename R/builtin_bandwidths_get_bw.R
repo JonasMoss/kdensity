@@ -17,7 +17,7 @@ get_bw = function(bw_str) {
 }
 
 
-#' Add a new bw to \code{bw_environment}.
+#' Add a new bw to `bw_environment`.
 #'
 #' @keywords internal
 #' @param bw_str A string giving the name of the density.

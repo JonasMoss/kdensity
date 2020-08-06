@@ -29,11 +29,16 @@ knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(out.width='750px', dpi=200)
 ```
 
+## News 
+`kdensity` is now linked to `univariateML`, meaning it supports the 
+approximately 30+ parametric starts from that package!
+
 ## Overview
 kdensity is an implementation of univariate kernel density estimation with support for parametric starts and asymmetric kernels. Its main function is `kdensity`, which is has approximately the same syntax as `stats::density`. Its new functionality is:
 
 * `kdensity` has built-in support for many *parametric starts*, such as `normal` 
-  and `gamma`,   but you can also supply your own. 
+  and `gamma`, but you can also supply your own. For a list of supported parametric 
+  starts, see the readme of [`univariateML`](https://github.com/JonasMoss/univariateML).
 * It supports several asymmetric kernels ones such as `gcopula` and `gamma` kernels, but also     the common symmetric ones. In addition, you can also supply your own kernels. 
 * A selection of choices for the bandwidth function `bw`, again including an option to specify    your own.
 * The returned value is density function. This can be used for e.g. numerical 

@@ -71,8 +71,8 @@ recycle = function(..., prototype) {
 #' @keywords internal
 #' @param x A list of default arguments.
 #' @param y A list of supplied arguments
-#' @param type If \code{merge}, the list will be merge with y
-#' having priority; if \code{template}, named the elements of
+#' @param type If `merge`, the list will be merge with y
+#' having priority; if `template`, named the elements of
 #' y not in x will be discarded after merging.
 #' @return A merged list where conflicts are solved in favour
 #' of y. Does not preserve ordering.
