@@ -27,6 +27,7 @@ Suggests: extraDistr,
     knitr,
     rmarkdown
 Imports: assertthat,
+    univariateML,
     EQL
 RoxygenNote: 6.1.1
 VignetteBuilder: knitr

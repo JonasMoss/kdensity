@@ -1,5 +1,3 @@
-starts_environment = new.env(hash = FALSE)
-
 #' Parametric starts
 #'
 #' A parametric start is a density function with an associated estimator which
@@ -52,122 +50,182 @@ starts_environment = new.env(hash = FALSE)
 #' @name parametric_starts
 NULL
 
-starts_environment$uniform = list(
+parser = function(str) parse(text = str)[[1]]
+
+get_density_and_support = function(fun) {
+  for(i in seq(length(body(fun)))) {
+
+    if(length(body(fun)[[i]]) > 1) {
+      if(body(fun)[[i]][[2]] == 'attr(object, "density")') {
+        density = body(fun)[[i]][[3]]
+      } else if (body(fun)[[i]][[2]] == 'attr(object, "support")') {
+        support = body(fun)[[i]][[3]]
+      }
+    }
+  }
+  list(density = eval(parser(density)), support = support)
+}
+
+starts = new.env(hash = FALSE)
+
+starts = lapply(univariateML::univariateML_models, function(name) {
+  fun = eval(parser(paste0("univariateML::ml", name)))
+  c(estimator = eval(parser(paste0("univariateML::ml",name))),
+    get_density_and_support(fun))
+})
+
+names(starts) = univariateML::univariateML_models
+
+## Some densities have variable supports, which is not supported yet.
+starts$pareto = list(
+  density   = function(x, alpha) alpha*x^(-alpha-1),
+  estimator = function(x) 1/mean(log(x)),
+  support   = c(1, Inf)
+)
+
+starts$power = NULL
+
+## The uniform distribution is interpreted as uniform over the real line.
+starts$unif= list(
   density   = function(x) rep(1, length(x)),
   estimator = function(data) NULL,
   support   = c(-Inf, Inf)
 )
 
-starts_environment$constant = starts_environment$uniform
+starts$constant = starts$unif
+starts$uniform = starts$unif
 
-starts_environment$normal = list(
-  density = stats::dnorm,
-  estimator = function(data) {
-    c(mean = mean(data),
-      sd   = sd(data))
-  },
-  support   = c(-Inf, Inf)
-)
+## Aliases for densities.
 
-starts_environment$gaussian = starts_environment$normal
+starts$gaussian = starts$norm
+starts$normal = starts$norm
+starts$exponential = starts$exp
+starts$lognormal = starts$lnorm
+starts$inverse_gaussian = starts$invgauss
+starts$wald = starts$invgauss
 
-starts_environment$laplace = list(
-  density = function(x, mu, b) {
-    1/(2*b)*exp(-1/b*abs(x-mu))
-  },
-
-  estimator = function(data) {
-
-    mu = median(data)
-    b = mean(abs(data - mu))
-
-    c(mu = mu,
-      b  = b)
-  },
-
-  support   = c(-Inf, Inf)
-)
-
-starts_environment$gumbel = list(
-  density = function(x, loc, scale) {
-      z = 1/scale*(x - loc)
-      1/scale*exp(-(z + exp(-z)))
-  },
-  estimator = mlgumbel,
-  support   = c(-Inf, Inf)
-)
-
-starts_environment$exponential = list(
-  density = stats::dexp,
-  estimator = function(data) {
-    c(rate = 1/mean(data))
-  },
-  support   = c(0, Inf)
-)
-
-starts_environment$lognormal = list(
-  density = stats::dlnorm,
-  estimator = function(data) {
-    c(meanlog = mean(log(data)),
-      sdlog   = sd(log(data)))
-  },
-  support   = c(0, Inf)
-)
-
-if(requireNamespace("extraDistr", quietly = TRUE)) {
-  starts_environment$inverse_gaussian = list(
-    density = extraDistr::dwald,
-    estimator = function(data) {
-      c(mu       = mean(data),
-        lambda   = mean(1/data - 1/mean(data)))
-    },
-    support   = c(0, Inf)
-  )
-} else {
-  starts_environment$inverse_gaussian = list(
-    density   = function(x) stop("Package 'extraDistr' required for option 'inverse_gaussian'."),
-    estimator = function(x) stop("Package 'extraDistr' required for option 'inverse_gaussian'."),
-    support   = c(0, Inf)
-  )
+## Make starts_environments with evaled support.
+for(i in seq_along(starts)) {
+  starts[[i]]$support = eval(starts[[i]]$support)
 }
+starts_environment = as.environment(starts)
 
-starts_environment$wald = starts_environment$inverse_gaussian
-
-starts_environment$gamma = list(
-  density   = stats::dgamma,
-  estimator = mlgamma,
-  support   = c(0, Inf)
-)
-
-starts_environment$weibull = list(
-  density   = stats::dweibull,
-  estimator = mlweibull,
-  support   = c(0, Inf)
-  )
-
-starts_environment$beta = list(
-  density   = stats::dbeta,
-  estimator = mlbeta,
-  support   = c(0, 1)
-)
-
-if(requireNamespace("extraDistr", quietly = TRUE)) {
-  starts_environment$kumar = list(
-    density   = extraDistr::dkumar,
-    estimator = mlkumar,
-    support   = c(0, 1)
-  )
-} else {
-  starts_environment$kumar = list(
-    density   = function(x) stop("Package 'extraDistr' required for option 'kumaraswsamy'."),
-    estimator = function(x) stop("Package 'extraDistr' required for option 'kumaraswsamy'."),
-    support   = c(0, Inf)
-  )
-}
-
-starts_environment$pareto = list(
-  density   = function(x, alpha) alpha*x^(-alpha-1),
-  estimator = function(x) 1/mean(log(x)),
-  support   = c(1, Inf)
-)
+# starts_environment$uniform = list(
+#   density   = function(x) rep(1, length(x)),
+#   estimator = function(data) NULL,
+#   support   = c(-Inf, Inf)
+# )
+#
+# starts_environment$constant = starts_environment$uniform
+#
+# starts_environment$normal = list(
+#   density = stats::dnorm,
+#   estimator = function(data) {
+#     c(mean = mean(data),
+#       sd   = sd(data))
+#   },
+#   support   = c(-Inf, Inf)
+# )
+#
+# starts_environment$gaussian = starts_environment$normal
+#
+# starts_environment$laplace = list(
+#   density = function(x, mu, b) {
+#     1/(2*b)*exp(-1/b*abs(x-mu))
+#   },
+#
+#   estimator = function(data) {
+#
+#     mu = median(data)
+#     b = mean(abs(data - mu))
+#
+#     c(mu = mu,
+#       b  = b)
+#   },
+#
+#   support   = c(-Inf, Inf)
+# )
+#
+# starts_environment$gumbel = list(
+#   density = function(x, loc, scale) {
+#       z = 1/scale*(x - loc)
+#       1/scale*exp(-(z + exp(-z)))
+#   },
+#   estimator = mlgumbel,
+#   support   = c(-Inf, Inf)
+# )
+#
+# starts_environment$exponential = list(
+#   density = stats::dexp,
+#   estimator = function(data) {
+#     c(rate = 1/mean(data))
+#   },
+#   support   = c(0, Inf)
+# )
+#
+# starts_environment$lognormal = list(
+#   density = stats::dlnorm,
+#   estimator = function(data) {
+#     c(meanlog = mean(log(data)),
+#       sdlog   = sd(log(data)))
+#   },
+#   support   = c(0, Inf)
+# )
+#
+# if(requireNamespace("extraDistr", quietly = TRUE)) {
+#   starts_environment$inverse_gaussian = list(
+#     density = extraDistr::dwald,
+#     estimator = function(data) {
+#       c(mu       = mean(data),
+#         lambda   = mean(1/data - 1/mean(data)))
+#     },
+#     support   = c(0, Inf)
+#   )
+# } else {
+#   starts_environment$inverse_gaussian = list(
+#     density   = function(x) stop("Package 'extraDistr' required for option 'inverse_gaussian'."),
+#     estimator = function(x) stop("Package 'extraDistr' required for option 'inverse_gaussian'."),
+#     support   = c(0, Inf)
+#   )
+# }
+#
+# starts_environment$wald = starts_environment$inverse_gaussian
+#
+# starts_environment$gamma = list(
+#   density   = stats::dgamma,
+#   estimator = mlgamma,
+#   support   = c(0, Inf)
+# )
+#
+# starts_environment$weibull = list(
+#   density   = stats::dweibull,
+#   estimator = mlweibull,
+#   support   = c(0, Inf)
+#   )
+#
+# starts_environment$beta = list(
+#   density   = stats::dbeta,
+#   estimator = mlbeta,
+#   support   = c(0, 1)
+# )
+#
+# if(requireNamespace("extraDistr", quietly = TRUE)) {
+#   starts_environment$kumar = list(
+#     density   = extraDistr::dkumar,
+#     estimator = mlkumar,
+#     support   = c(0, 1)
+#   )
+# } else {
+#   starts_environment$kumar = list(
+#     density   = function(x) stop("Package 'extraDistr' required for option 'kumaraswsamy'."),
+#     estimator = function(x) stop("Package 'extraDistr' required for option 'kumaraswsamy'."),
+#     support   = c(0, Inf)
+#   )
+# }
+#
+# starts_environment$pareto = list(
+#   density   = function(x, alpha) alpha*x^(-alpha-1),
+#   estimator = function(x) 1/mean(log(x)),
+#   support   = c(1, Inf)
+# )
 

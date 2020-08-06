@@ -14,7 +14,7 @@ normal2 = list(
   density = dnorm,
   estimator = function(data) {
     c(mean = mean(data),
-      sd   = sd(data))
+      sd   = sqrt(stats::var(data) * (length(data) - 1) / length(data)))
   },
   support   = c(-Inf, Inf)
 )
@@ -30,14 +30,18 @@ silly_width = function(x, kernel = NULL, start = NULL, support = NULL) {
   1
 }
 
-expect_equal(kdensity(precip, start = "normal")(10), kdensity(precip, start = normal2)(10))
+expect_equal(kdensity(precip, start = "normal")(10),
+             kdensity(precip, start = normal2)(10))
 expect_equal(kdensity(precip, start = "normal", kernel = "gaussian")(10),
              kdensity(precip, start = normal2, kernel = gaussian2)(10))
 expect_error(kdensity(precip, kernel = "beta"))
 expect_error(kdensity(precip, support = c(0, 1)))
 expect_error(kdensity(precip, bw = Inf))
-expect_equal(kdensity(precip, bw = Inf, start = "normal")(10), dnorm(10, mean = mean(precip), sd = sd(precip)))
-expect_equal(kdensity(precip, bw = 1)(10), kdensity(precip, bw = silly_width)(10))
+expect_equal(kdensity(precip, bw = Inf, start = "normal")(10),
+             dnorm(10, mean = mean(precip),
+                   sd = sqrt(stats::var(precip) * (length(precip) - 1) / length(precip))))
+expect_equal(kdensity(precip, bw = 1)(10),
+             kdensity(precip, bw = silly_width)(10))
 expect_error(kdensity(precip)())
 expect_error(kdensity(precip, start = "gumbel", kernel = "rectangular",
-                      bw = "ucv"))
+                      bw = "RHE"))
