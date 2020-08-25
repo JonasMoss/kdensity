@@ -41,7 +41,7 @@ bw_environment = new.env(hash = FALSE)
 #'    with these strings, use `get_kernel` and `get_start`. The
 #'    function should return a double.
 #'
-#' @seealso [kdensity()], [stats::bandwidth()] for the
+#' @seealso [kdensity()], [stats::bandwidth.kernel()] for the
 #'    bandwidth selectors of [stats::density()]. In addition,
 #'    [kernels()]; [parametric_starts()]
 #'

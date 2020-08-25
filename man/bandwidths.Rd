@@ -63,7 +63,7 @@ Jones, M. C., and D. A. Henderson. "Kernel-type density estimation on the unit i
 Hjort, Nils Lid, and Ingrid K. Glad. "Nonparametric density estimation with a parametric start." The Annals of Statistics (1995): 882-904.
 }
 \seealso{
-\code{\link[=kdensity]{kdensity()}}, \code{\link[stats:bandwidth]{stats::bandwidth()}} for the
+\code{\link[=kdensity]{kdensity()}}, \code{\link[stats:kernel]{stats::bandwidth.kernel()}} for the
 bandwidth selectors of \code{\link[stats:density]{stats::density()}}. In addition,
 \code{\link[=kernels]{kernels()}}; \code{\link[=parametric_starts]{parametric_starts()}}
 }

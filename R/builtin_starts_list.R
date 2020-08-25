@@ -5,7 +5,6 @@
 #' are implemented, all with maximum likelihood estimation. Custom-made
 #' parametric starts are possible, see the Structure section.
 #'
-#' @section Built-in starts:
 #' @usage NULL
 #' @format NULL
 #' @section Structure:
@@ -15,6 +14,13 @@
 #'   function. The estimator function takes one argument, a numeric vector,
 #'   which is passed from `kdensity`.
 #'
+#' @section Supported parametric starts: `kdensity` supports more than
+#'    20 built-in starts from the [univariateML] package, see
+#'    `univariateML::univariateML_models` for a list. Densities with variable
+#'    support, `power`, are not supported. The `pareto` density has its
+#'    support fixed to `(1,Inf)`. The
+#'    options `uniform, constant` makes `kdensity` estimate a kernel
+#'    density without parametric starts.
 #' @examples start_exponential = list(
 #'  density = stats::dexp,
 #'  estimator = function(data) {
@@ -33,21 +39,6 @@
 #' )
 #'
 #' @seealso [kdensity()]; [kernels()]; [bandwidths()]
-#'
-#' @section `kdensity` supports more than 20 built-in starts from the
-#'    [univariateML]
-#'    `uniform, constant`: Selecting the uniform start makes `kdensity`
-#'    act like an ordinary kernel density estimator. The default value for any
-#'    choice of kernel or support.
-#'    `gaussian, normal`: The normal distribution. A natural choice for
-#'    densities on the real line \eqn{(-\infty, \infty)}.
-#'    `laplace, gumbel`: Distributions on  \eqn{(-\infty, \infty)}.
-#'    `exponential, gamma, lognormal, inverse_gaussian, weibull`: Densities
-#'    supported on the positive real line \eqn{(0, \infty)}.
-#'    `beta, kumaraswamy`: The beta and Kumaraswamy distributions,
-#'    supported on the unit interval \eqn{[0, 1]}.
-#'    `pareto`: The Pareto distribution, supported on \eqn{[1, \infty)}.
-#'    Has heavy tails.
 #' @name parametric_starts
 NULL
 

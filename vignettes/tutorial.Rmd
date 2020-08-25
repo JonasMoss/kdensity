@@ -76,6 +76,10 @@ kde$bw = "RHE"
 update(kde, start = "normal")
 ```
 
+`kdensity` supports all parametric starts implemented by the package 
+`univariateML`. See [its Github page](https://github.com/JonasMoss/univariateML)
+for a complete list, or take a look at `univariateML::univariateML_models`.
+
 # Custom densities and kernels
 ## Parametric starts
 
