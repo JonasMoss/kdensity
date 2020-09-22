@@ -3,10 +3,8 @@
 
 # kdensity <img src="man/figures/logo.png" align="right" width="247" height="70" />
 
-[![Build
-Status](https://travis-ci.org/JonasMoss/kdensity.svg?branch=master)](https://travis-ci.org/JonasMoss/kdensity)
-[![AppVeyor Build
-Status](https://ci.appveyor.com/api/projects/status/github/JonasMoss/kdensity?branch=master&svg=true)](https://ci.appveyor.com/project/JonasMoss/kdensity)
+[![R build
+status](https://github.com/JonasMoss/kdensity/workflows/R-CMD-check/badge.svg)](https://github.com/JonasMoss/kdensity/actions)
 [![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version/kdensity)](https://cran.r-project.org/package=kdensity)
 [![Coverage
 Status](https://codecov.io/gh/JonasMoss/kdensity/branch/master/graph/badge.svg)](https://codecov.io/gh/JonasMoss/kdensity?branch=master)
@@ -171,8 +169,9 @@ start distribution.
 
 ``` r
 coef(kde)
-#>     shape      rate 
-#> 7.1872898 0.7217954
+#> Maximum likelihood estimates for the Gamma model 
+#>  shape    rate  
+#> 7.1873  0.7218
 logLik(kde)
 #> 'log Lik.' 12.33787 (df=2)
 AIC(kde)
