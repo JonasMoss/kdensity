@@ -1,5 +1,6 @@
-## Update
+## Resubmission / update
 
+* Fixed links in readme.
 * Now supports all starts from univariteML natively.
 
 ## Test environments
