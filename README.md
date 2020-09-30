@@ -58,10 +58,10 @@ a variety of boundary bias correction methods in the `bckden` function.
 using transformed univariate local polynomial kernel density estimation.
 [`logKDE`](https://github.com/andrewthomasjones/logKDE) corrects for
 boundary bias on the half line using a logarithmic transform.
-[`ks`](http://www.mvstat.net/mvksa/) supports boundary correction
-through the `kde.boundary` function, while
-[`Ake`](https://cran.r-project.org/web/packages/Ake/index.html) corrects
-for boundary bias using tailored kernel functions.
+[`ks`](https://CRAN.R-project.org/package=ks) supports boundary
+correction through the `kde.boundary` function, while
+[`Ake`](https://CRAN.R-project.org/package=Ake) corrects for boundary
+bias using tailored kernel functions.
 
 ## Installation
 
@@ -183,7 +183,7 @@ AIC(kde)
 If you encounter a bug, have a feature request or need some help, open a
 [Github issue](https://github.com/JonasMoss/kdensity/issues). Create a
 pull requests to contribute. This project follows a [Contributor Code of
-Conduct](https://www.contributor-covenant.org/version/1/4/code-of-conduct.md).
+Conduct](https://www.contributor-covenant.org/version/1/4/code-of-conduct/).
 
 ## References
 
