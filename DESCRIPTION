@@ -1,7 +1,7 @@
 Package: kdensity
 Type: Package
 Title: Kernel Density Estimation with Parametric Starts and Asymmetric Kernels
-Version: 1.1.0
+Version: 1.1.1
 Author: Jonas Moss, Martin Tveten
 Maintainer: Jonas Moss <jonas.gjertsen@gmail.com>
 Description: Handles univariate non-parametric density estimation with 
@@ -29,6 +29,6 @@ Suggests: extraDistr,
 Imports: assertthat,
     univariateML,
     EQL
-RoxygenNote: 7.1.1
+RoxygenNote: 7.3.2
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)

@@ -29,41 +29,44 @@
 #     recycle(a, b, c, prototype = "c")
 #     recycle(a, b, c, prototype = c)}
 
-recycle = function(..., prototype) {
+recycle <- function(..., prototype) {
+  dots <- list(...)
+  arg_names <- utils::tail(sapply(
+    as.list(match.call()),
+    function(x) as.character(x)
+  ), -1)
 
-  dots = list(...)
-  arg_names = utils::tail(sapply(as.list(match.call()),
-                                 function(x) as.character(x)), -1)
-
-  if(missing(prototype)) {
-    names(dots) = names(arg_names)
-    max_length = max(sapply(dots, length))
+  if (missing(prototype)) {
+    names(dots) <- names(arg_names)
+    max_length <- max(sapply(dots, length))
   } else {
-    arg_names = utils::head(arg_names, -1)
-    names(dots) = arg_names
+    arg_names <- utils::head(arg_names, -1)
+    names(dots) <- arg_names
 
-    subst_proto = deparse(substitute(prototype))
-    if(subst_proto %in% arg_names) {
-      max_length = length(dots[[subst_proto]])
+    subst_proto <- deparse(substitute(prototype))
+    if (subst_proto %in% arg_names) {
+      max_length <- length(dots[[subst_proto]])
     } else if (length(prototype) > 1) {
-        max_length = length(prototype)
-    } else if (is.numeric(prototype)){
-        if(prototype >= 0) max_length = ceiling(prototype)
-        else stop("supply a valid type. prototype is numeric and negative.")
+      max_length <- length(prototype)
+    } else if (is.numeric(prototype)) {
+      if (prototype >= 0) {
+        max_length <- ceiling(prototype)
+      } else {
+        stop("supply a valid type. prototype is numeric and negative.")
+      }
     } else if (is.character(prototype)) {
-        if(prototype %in% arg_names) {
-          max_length = length(dots[[prototype]])
-        } else {
-          stop("The supplied prototype does not match any element of the supplied list.")
-        }
+      if (prototype %in% arg_names) {
+        max_length <- length(dots[[prototype]])
+      } else {
+        stop("The supplied prototype does not match any element of the supplied list.")
+      }
     } else {
-        stop("supply a valid type for the prototype argument.")
+      stop("supply a valid type for the prototype argument.")
     }
   }
 
-  names(dots) = arg_names
+  names(dots) <- arg_names
   lapply(dots, rep, length.out = max_length, USE.NAMES = TRUE)
-
 }
 
 #' Merges two lists.
@@ -90,30 +93,28 @@ recycle = function(..., prototype) {
 #    listmerge(x, y, type = "merge")
 #    listmerge(x, y, type = "template")}
 
-listmerge = function(x, y, type = c("merge", "template")) {
+listmerge <- function(x, y, type = c("merge", "template")) {
+  type <- match.arg(type)
 
-  type = match.arg(type)
-
-  if(length(y) == 0) {
+  if (length(y) == 0) {
     return(x)
   }
 
   ## Keep and not-keep are quite different.
-  if(type == "merge") {
-    matches = match(names(y), names(x))
-    elements_to_discard = matches[!is.na(matches)]
-    if(length(elements_to_discard) == 0)  {
-      combined = c(y, x)
-    } else{
-      combined = c(y, x[-elements_to_discard])
+  if (type == "merge") {
+    matches <- match(names(y), names(x))
+    elements_to_discard <- matches[!is.na(matches)]
+    if (length(elements_to_discard) == 0) {
+      combined <- c(y, x)
+    } else {
+      combined <- c(y, x[-elements_to_discard])
     }
     return(combined)
   }
 
-  if(type == "template") {
-    matches = match(names(x), names(y))
-    x[!is.na(matches)] = y[matches[!is.na(matches)]]
+  if (type == "template") {
+    matches <- match(names(x), names(y))
+    x[!is.na(matches)] <- y[matches[!is.na(matches)]]
     return(x)
   }
-
 }

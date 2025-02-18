@@ -25,7 +25,7 @@ knitr::opts_chunk$set(
 An `R` package for univariate kernel density estimation with parametric starts and asymmetric kernels.
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_chunk$set(out.width='750px', dpi=200)
+knitr::opts_chunk$set(out.width = "750px", dpi = 200)
 ```
 
 ## News 
@@ -99,7 +99,7 @@ and and the blue curve an ordinary `density` estimate. Notice the boundary bias 
 
 ```{r example, echo = TRUE}
 library("kdensity")
-kde = kdensity(airquality$Wind, start = "gamma", kernel = "gamma")
+kde <- kdensity(airquality$Wind, start = "gamma", kernel = "gamma")
 plot(kde, main = "Wind speed (mph)")
 lines(kde, plot_start = TRUE, col = "red")
 lines(density(airquality$Wind, adjust = 2), col = "blue")

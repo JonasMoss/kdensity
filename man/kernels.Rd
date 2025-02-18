@@ -60,17 +60,17 @@ kernel when calculating bandwidths.
 }
 
 \examples{
-gaussian = list(
-  kernel  = function(y, x, h) stats::dnorm((y-x)/h),
+gaussian <- list(
+  kernel = function(y, x, h) stats::dnorm((y - x) / h),
   sd = 1,
   support = c(-Inf, Inf)
 )
 
-gcopula = list(
-  kernel  = function(y, x, h) {
-    rho = 1 - h^2
-    inside = rho^2*(qnorm(y)^2 + qnorm(x)^2)-2*rho*qnorm(y)*qnorm(x)
-    exp(-inside/(2*(1-rho^2)))
+gcopula <- list(
+  kernel = function(y, x, h) {
+    rho <- 1 - h^2
+    inside <- rho^2 * (qnorm(y)^2 + qnorm(x)^2) - 2 * rho * qnorm(y) * qnorm(x)
+    exp(-inside / (2 * (1 - rho^2)))
   },
   support = c(0, 1)
 )

@@ -1,21 +1,21 @@
 context("parametric starts")
 
-t_without_estim = list(
+t_without_estim <- list(
   density = dt,
   support = c(-Inf, Inf)
 )
 
-t_without_support = list(
+t_without_support <- list(
   density = dt,
   estimator = function(x) NULL
 )
 
-t_without_density= list(
+t_without_density <- list(
   estimator = function(x) NULL,
   support = c(-Inf, Inf)
 )
 
-t = list(
+t <- list(
   density = dt,
   estimator = function(x) NULL,
   support = c(-Inf, Inf)

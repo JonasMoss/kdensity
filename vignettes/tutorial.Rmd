@@ -22,13 +22,13 @@ knitr::opts_chunk$set(
 
 ```{r mpg_example_start, echo = TRUE}
 library("kdensity")
-kde = kdensity(mtcars$mpg, start = "gumbel", kernel = "gaussian")
+kde <- kdensity(mtcars$mpg, start = "gumbel", kernel = "gaussian")
 kde(20)
 ```
 Hence it can be used to calculate functionals, such as the expectation.
 
 ```{r mpg_example_expectation, echo = TRUE}
-integrate(function(x) x*kde(x), lower = -Inf, upper = Inf)$value 
+integrate(function(x) x * kde(x), lower = -Inf, upper = Inf)$value
 ```
 
 Plotting works as with `stats::density`. If `kdensity` was called with a parametric start, use `plot_start = TRUE` inside a plotting function in order to plot the estimated parametric start density instead of the kernel density.
@@ -65,14 +65,14 @@ summary(kde)
 Access members of the kernel density with `$` or `[[`.
 
 ```{r mpg_example_access, echo = TRUE}
-kde$start_str 
+kde$start_str
 kde[["x"]]
 ```
 
 To make changes to the kernel density estimator, you can use the generic `update` function, replace values with `$`, or make a new one.
 
 ```{r mpg_example_changes, echo = TRUE}
-kde$bw = "RHE"
+kde$bw <- "RHE"
 update(kde, start = "normal")
 ```
 
@@ -86,15 +86,15 @@ for a complete list, or take a look at `univariateML::univariateML_models`.
 You must supply two functions and one vector to `kdensity` in order to use a custom parametric start. The first is a `density` function, the second is a function that estimates the named parameters of the density, and the third is the support of the density. 
 
 ```{r}
-normal = list(
+normal <- list(
   density = dnorm,
-  
   estimator = function(data) {
-    c(mean  = mean(data),
-      sd    = sd(data))
+    c(
+      mean = mean(data),
+      sd = sd(data)
+    )
   },
-  
-  support   = c(-Inf, Inf)
+  support = c(-Inf, Inf)
 )
 ```
 
@@ -107,32 +107,34 @@ The estimator function doesn't need to be simple, as the next example shows.
 The built-in data set `LakeHuron` contains annual measurements of the water level of Lake Huron from 1875 to 1972, measured in feet. We will take a look at the distribution of differences in water level across two consecutive years. Since the data are supported on the real line and there is no good reason to assume anything else, we will use a normal start.
 
 ```{r, fig2, fig.height = 5, fig.width = 5, fig.align = "center"}
-LH = diff(LakeHuron)
-kde_normal = kdensity(LH, start = "normal")
-plot(kde_normal, lwd = 2, col = "black",
-     main = "Lake Huron differences")
+LH <- diff(LakeHuron)
+kde_normal <- kdensity(LH, start = "normal")
+plot(kde_normal,
+  lwd = 2, col = "black",
+  main = "Lake Huron differences"
+)
 ```
 
 The density is clearly non-normal. Still, it looks fairly regular, and it should be possible to model it parametrically with some success. One of many parametric families of distributions more flexible than the normal family is the *skew hyperbolic t-distribution*, which is implemented in the `R` package `SkewHyperbolic`. This package contains the density function `dskewhyp` and a maximum likelihood estimating function in `skewhypFit`. Using these functions, we make the following list: 
 
 ```{r}
-skew_hyperbolic = list(
-  density   = SkewHyperbolic::dskewhyp,
-  
+skew_hyperbolic <- list(
+  density = SkewHyperbolic::dskewhyp,
   estimator = function(x) {
     SkewHyperbolic::skewhypFit(x, printOut = FALSE)$param
   },
-  
-  support   = c(-Inf, Inf)
+  support = c(-Inf, Inf)
 )
 ```
 
 Now we are ready to run `kdensity` and do some plotting. Note the `plot` option `plot_start = TRUE`. With this option on, the estimated parametric density is plotted without any non-parametric correction.
 
 ```{r, fig.height = 5, fig.width = 5, fig.align = "center"}
-kde_skewhyp = kdensity(LH, start = skew_hyperbolic)
-plot(kde_skewhyp, lwd = 2, col = "blue",
-     main = "Lake Huron differences")
+kde_skewhyp <- kdensity(LH, start = skew_hyperbolic)
+plot(kde_skewhyp,
+  lwd = 2, col = "blue",
+  main = "Lake Huron differences"
+)
 lines(kde_normal)
 lines(kde_skewhyp, plot_start = TRUE, lty = 2, lwd = 2)
 rug(LH)
@@ -148,10 +150,11 @@ the line.
 If you want to make custom kernel, you will need to supply the kernel function, with arguments `y, x, h`. Here `x` is the random data you put into `kdensity`, `h` is the final bandwidth, and `y` is the point you want to evaluate at. The kernel is called as `1/h*kernel(y, x, h)`, and should be able to take vector inputs `x` and `y`. In addition to the kernel function, you must supply a `support` argument, which states the domain of definition of the kernel. For instance, the `gcopula` kernel is defined on `c(0, 1)`. In addition, you can optionally supply the standard deviation of the kernel. This is only used for symmetric kernels, and is useful since it makes them comparable. For example, the implementation of the `gaussian` kernel is
 
 ```{r}
-gaussian = list(
-  kernel  = function(y, x, h) dnorm((y-x)/h),
+gaussian <- list(
+  kernel  = function(y, x, h) dnorm((y - x) / h),
   sd      = 1,
-  support = c(-Inf, Inf))
+  support = c(-Inf, Inf)
+)
 ```
 
 Custom kernels can be complicated, and do not have to be symmetric.

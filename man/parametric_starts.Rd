@@ -29,21 +29,23 @@ density without parametric starts.
 }
 
 \examples{
-start_exponential = list(
- density = stats::dexp,
- estimator = function(data) {
-   c(rate = 1/mean(data))
- },
- support = c(0, Inf)
+start_exponential <- list(
+  density = stats::dexp,
+  estimator = function(data) {
+    c(rate = 1 / mean(data))
+  },
+  support = c(0, Inf)
 )
 
-start_inverse_gaussian = list(
- density = extraDistr::dwald,
- estimator = function(data) {
-  c(mu = mean(data),
-    lambda = mean(1/data - 1/mean(data)))
+start_inverse_gaussian <- list(
+  density = extraDistr::dwald,
+  estimator = function(data) {
+    c(
+      mu = mean(data),
+      lambda = mean(1 / data - 1 / mean(data))
+    )
   },
- support = c(0, Inf)
+  support = c(0, Inf)
 )
 
 }

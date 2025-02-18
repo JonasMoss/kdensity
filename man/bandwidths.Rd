@@ -52,11 +52,11 @@ function should return a double.
 }
 
 \examples{
-   ## Not a serious bandwidth function.
-   silly_width = function(x, kernel = NULL, start = NULL, support = NULL) {
-     rexp(1)
-   }
-   kdensity(mtcars$mpg, start = "gumbel", bw = silly_width)
+## Not a serious bandwidth function.
+silly_width <- function(x, kernel = NULL, start = NULL, support = NULL) {
+  rexp(1)
+}
+kdensity(mtcars$mpg, start = "gumbel", bw = silly_width)
 }
 \references{
 Jones, M. C., and D. A. Henderson. "Kernel-type density estimation on the unit interval." Biometrika 94.4 (2007): 977-984.

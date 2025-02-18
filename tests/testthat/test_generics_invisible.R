@@ -1,5 +1,5 @@
 context("return value of generics")
-obj = kdensity(precip, start = "gaussian")
+obj <- kdensity(precip, start = "gaussian")
 expect_identical(print(obj), obj)
 expect_identical(summary(obj), obj)
 expect_identical(plot(obj), obj)

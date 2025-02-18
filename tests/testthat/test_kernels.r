@@ -1,14 +1,14 @@
 context("kernels")
 
-t_without_kernel = list(
+t_without_kernel <- list(
   support = c(-Inf, Inf)
 )
 
-t_without_support = list(
+t_without_support <- list(
   kernel = dt
 )
 
-t = list(
+t <- list(
   kernel = dt,
   support = c(-Inf, Inf)
 )
