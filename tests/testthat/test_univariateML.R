@@ -25,10 +25,6 @@ set.seed(10)
 n <- 50
 
 for (name in univariateML_densities) {
-  univariateML::univariateML_metadata[[paste0("ml", name)]]
-}
-
-for (name in univariateML_densities) {
   support <- deparse(get_density_and_support(name)$support)
   rands <- generate_random(n, support)
   kde <- kdensity(rands, start = name)
