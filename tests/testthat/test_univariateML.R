@@ -1,18 +1,8 @@
-univariateML_densities <- intersect(
-  names(starts),
-  univariateML::univariateML_models
-)
-
 univariateML_densities <- c("norm", "lnorm", "weibull", "invgauss", "beta")
 
 # There are some exceptions we won't test.
 
 exceptions <- c("pareto", "unif", "lomax")
-
-univariateML_densities <- setdiff(
-  univariateML_densities,
-  exceptions
-)
 
 generate_random <- function(n, support) {
   if (support == "c(-Inf, Inf)") {
