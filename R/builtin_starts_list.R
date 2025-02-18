@@ -70,8 +70,12 @@ get_density_and_support <- function(fun) {
 
 starts <- new.env(hash = FALSE)
 
-densities <- names(Filter(\(x) x$support@type == "R", univariateML::univariateML_metadata))
-densities <- unname(sapply(densities, \(x) substring(x, 3)))
+if (utils::packageVersion("univariateML") >= "1.5") {
+  densities <- names(Filter(\(x) x$support@type == "R", univariateML::univariateML_metadata))
+  densities <- unname(sapply(densities, \(x) substring(x, 3)))
+} else {
+  densities <- univariateML::univariateML_models
+}
 
 starts <- lapply(densities, function(name) {
   c(

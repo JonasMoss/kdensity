@@ -1,12 +1,15 @@
 ## Resubmission / update
 
-* Fixed links in readme.
-* Now supports all starts from univariteML natively.
+* Added support for update of univariateML to version 1.5.
+* There are breaking changes in the new version univariateML, but only for this package.
+* The new package update is designed to work with univariateML less than 1.5 as well.
 
 ## Test environments
-* local Windows 10, R version R version 3.6.1
-* Ubuntu 16.04 (on Travis-CI), R version 3.6.1, R-oldrel, R-devel.
-* macOS 10.13 (on Travis-CI), R version 3.6.1
+* macos-latest (release)
+* windows-latest (release)
+* ubuntu-latest (devel)
+* ubuntu-latest (release)
+* ubuntu-latest (oldrel-1)
 
 ## R CMD check results
 There were no ERRORs, WARNINGs or NOTES.
