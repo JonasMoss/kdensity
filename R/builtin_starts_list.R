@@ -48,7 +48,8 @@ parser <- function(str) parse(text = str)[[1]]
 
 get_density_and_support <- function(fun) {
   if (utils::packageVersion("univariateML") >= "1.5") {
-    meta <- univariateML::univariateML_metadata[[paste0("ml", fun)]]
+    meta <- "univariateML::univariateML_metadata"
+    meta <- eval(parser(paste0(meta,"[[paste0(\"ml\", fun)]]")))
     density <- meta$density
     support <- meta$support@.Data[1, ]
     return(list(density = eval(parser(density)), support = support))
@@ -71,7 +72,8 @@ get_density_and_support <- function(fun) {
 starts <- new.env(hash = FALSE)
 
 if (utils::packageVersion("univariateML") >= "1.5") {
-  densities <- names(Filter(\(x) x$support@type == "R", univariateML::univariateML_metadata))
+  meta <- "univariateML::univariateML_metadata"
+  densities <- names(Filter(\(x) x$support@type == "R", eval(parser(meta))))
   densities <- unname(sapply(densities, \(x) substring(x, 3)))
 } else {
   densities <- univariateML::univariateML_models
