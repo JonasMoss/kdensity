@@ -1,3 +1,9 @@
+## kdensity 1.1.1 (2025-02-18)
+
+* Added support for update of univariateML to version 1.5.
+* There are breaking changes in the new version univariateML, but only for this package.
+* The new package update is designed to work with univariateML less than 1.5 as well.
+
 ## kdensity 1.1.0 (2019-01-10)
 
 * Journal of Open Source Software Release.
