@@ -102,10 +102,6 @@ logLik.kdensity <- function(object, ...) {
   val
 }
 
-confint.kdensity <- function(object, parm, level = 0.95, ...) {
-  # Implement pointwise confidence intervals in some way.
-}
-
 #' Supplies a plotting range from a kdensity object.
 #'
 #' @param obj A kdensity object.
