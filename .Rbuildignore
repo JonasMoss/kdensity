@@ -14,7 +14,6 @@
 ^cran-comments\.md$
 ^CRAN-RELEASE$
 ^CRAN-SUBMISSION$
-^NEWS\.md$
 ^coverage\.html$
 ^coverage\.xml$
 ^cobertura\.xml$
