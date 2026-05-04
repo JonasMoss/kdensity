@@ -1,5 +1,8 @@
 univariateML_densities <- c("norm", "lnorm", "weibull", "invgauss", "beta")
 
+expect_true(density_namespace_available("stats::dnorm"))
+expect_false(density_namespace_available("definitelymissingpkg::dfoo"))
+
 # There are some exceptions we won't test.
 
 exceptions <- c("pareto", "unif", "lomax")

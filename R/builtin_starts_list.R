@@ -62,6 +62,15 @@ get_univariate_ml_support <- function(meta) {
   )
 }
 
+density_namespace_available <- function(density) {
+  if (!grepl("::", density, fixed = TRUE)) {
+    return(TRUE)
+  }
+
+  package_name <- sub("::.*", "", density)
+  requireNamespace(package_name, quietly = TRUE)
+}
+
 get_density_and_support <- function(fun) {
   if (utils::packageVersion("univariateML") >= "1.5") {
     meta <- "univariateML::univariateML_metadata"
@@ -89,7 +98,10 @@ starts <- new.env(hash = FALSE)
 
 if (utils::packageVersion("univariateML") >= "1.5") {
   meta <- "univariateML::univariateML_metadata"
-  densities <- names(Filter(\(x) get_univariate_ml_support(x)$type == "R", eval(parser(meta))))
+  densities <- names(Filter(\(x) {
+    get_univariate_ml_support(x)$type == "R" &&
+      density_namespace_available(x$density)
+  }, eval(parser(meta))))
   densities <- unname(sapply(densities, \(x) substring(x, 3)))
 } else {
   densities <- univariateML::univariateML_models

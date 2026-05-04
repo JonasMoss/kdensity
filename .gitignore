@@ -38,5 +38,10 @@ Temporary Items
 .RData
 .Rhistory
 .Rbuildignore
+*.tar.gz
+*.Rcheck/
+coverage.html
+coverage.xml
+cobertura.xml
 inst/doc
 vignettes/*.R

@@ -16,3 +16,8 @@
 ^codecov\.yml$
 ^\.github$
 ^CRAN-SUBMISSION$
+^AGENTS\.md$
+^Justfile$
+^coverage\.html$
+^coverage\.xml$
+^cobertura\.xml$
