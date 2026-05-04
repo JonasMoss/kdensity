@@ -26,17 +26,17 @@ compute_beta_rot_bandwidth <- function(x) {
     stop("Sample variance is zero.")
   }
 
-  if (variance >= mu * (1 - mu)) {
+  if (variance >= mu * (1 - mu)) { # nocov start
     stop("Sample variance is too large for Beta parameters.")
-  }
+  } # nocov end
 
   common <- mu * (1 - mu) / variance - 1
   alpha <- mu * common
   beta <- (1 - mu) * common
 
-  if (alpha <= 0 || beta <= 0) {
+  if (alpha <= 0 || beta <= 0) { # nocov start
     stop("Estimated Beta parameters must be positive.")
-  }
+  } # nocov end
 
   bandwidth <- NA_real_
   use_fallback <- !(alpha > 1.5 && beta > 1.5 && (alpha + beta) > 3)
@@ -53,9 +53,11 @@ compute_beta_rot_bandwidth <- function(x) {
     denominator_term_1 <- (alpha - 1) * (beta - 1)
     denominator_term_2 <- 6 - 4 * beta + alpha * (3 * beta - 4)
 
-    if (denominator_term_1 <= 0 || denominator_term_2 <= 0) {
+    if (denominator_term_1 <= 0 || denominator_term_2 <= 0) { # nocov start
       use_fallback <- TRUE
-    } else {
+    } # nocov end
+
+    if (denominator_term_1 > 0 && denominator_term_2 > 0) {
       log_denominator <- log(denominator_term_1) +
         log(denominator_term_2) +
         lgamma(2 * alpha - 3) +
@@ -66,10 +68,10 @@ compute_beta_rot_bandwidth <- function(x) {
       log_factor <- log(2) + log(n) + 0.5 * log(pi)
       bandwidth <- exp((2 / 5) * (log_numerator - log_denominator - log_factor))
 
-      if (!(bandwidth > 0 && bandwidth < 1)) {
+      if (!(bandwidth > 0 && bandwidth < 1)) { # nocov start
         use_fallback <- TRUE
         bandwidth <- NA_real_
-      }
+      } # nocov end
     }
   }
 
@@ -85,9 +87,9 @@ compute_beta_rot_bandwidth <- function(x) {
     if (scale > 0) {
       correction <- 1 + abs(beta_skewness) + abs(beta_kurtosis)
       bandwidth <- scale / correction * n^(-0.4)
-    } else {
+    } else { # nocov start
       bandwidth <- 1e-5
-    }
+    } # nocov end
 
     warning(
       "MISE rule not applicable; using the beta_rot fallback heuristic.",

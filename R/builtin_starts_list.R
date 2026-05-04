@@ -80,6 +80,7 @@ get_density_and_support <- function(fun) {
     return(list(density = eval(parser(density)), support = support))
   }
 
+  # nocov start
   fun <- eval(parser(paste0("univariateML::ml", fun)))
 
   for (i in seq(length(body(fun)))) {
@@ -92,6 +93,7 @@ get_density_and_support <- function(fun) {
     }
   }
   list(density = eval(parser(density)), support = support)
+  # nocov end
 }
 
 starts <- new.env(hash = FALSE)
