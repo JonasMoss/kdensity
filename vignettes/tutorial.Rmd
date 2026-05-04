@@ -115,35 +115,7 @@ plot(kde_normal,
 )
 ```
 
-The density is clearly non-normal. Still, it looks fairly regular, and it should be possible to model it parametrically with some success. One of many parametric families of distributions more flexible than the normal family is the *skew hyperbolic t-distribution*, which is implemented in the `R` package `SkewHyperbolic`. This package contains the density function `dskewhyp` and a maximum likelihood estimating function in `skewhypFit`. Using these functions, we make the following list: 
-
-```{r}
-skew_hyperbolic <- list(
-  density = SkewHyperbolic::dskewhyp,
-  estimator = function(x) {
-    SkewHyperbolic::skewhypFit(x, printOut = FALSE)$param
-  },
-  support = c(-Inf, Inf)
-)
-```
-
-Now we are ready to run `kdensity` and do some plotting. Note the `plot` option `plot_start = TRUE`. With this option on, the estimated parametric density is plotted without any non-parametric correction.
-
-```{r, fig.height = 5, fig.width = 5, fig.align = "center"}
-kde_skewhyp <- kdensity(LH, start = skew_hyperbolic)
-plot(kde_skewhyp,
-  lwd = 2, col = "blue",
-  main = "Lake Huron differences"
-)
-lines(kde_normal)
-lines(kde_skewhyp, plot_start = TRUE, lty = 2, lwd = 2)
-rug(LH)
-```
-
-Since all the curves are in agreement, kernel density estimation appears to add
-unnecessary complexity without sufficient compensation in fit. We are justified 
-in using the skew hyperbolic t-distribution if this simplifies our analysis down
-the line.
+The density is clearly non-normal. Still, it looks fairly regular, and it should be possible to model it parametrically with some success. In practice, `kdensity` can also work with user-supplied densities and estimators from other packages, as long as you provide a list with `density`, `estimator`, and `support`.
 
 ## Kernels
 
