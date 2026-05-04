@@ -15,7 +15,7 @@
 #'   which is passed from `kdensity`.
 #'
 #' @section Supported parametric starts: `kdensity` supports more than
-#'    20 built-in starts from the [univariateML] package, see
+#'    20 built-in starts from the [univariateML][univariateML::univariateML-package] package, see
 #'    `univariateML::univariateML_models` for a list. Densities with variable
 #'    support, `power`, are not supported. The `pareto` density has its
 #'    support fixed to `(1,Inf)`. The
@@ -98,11 +98,11 @@ get_density_and_support <- function(fun) {
 
 if (utils::packageVersion("univariateML") >= "1.5") {
   meta <- "univariateML::univariateML_metadata"
-  densities <- names(Filter(\(x) {
+  densities <- names(Filter(function(x) {
     get_univariate_ml_support(x)$type == "R" &&
       density_namespace_available(x$density)
   }, eval(parser(meta))))
-  densities <- unname(sapply(densities, \(x) substring(x, 3)))
+  densities <- unname(sapply(densities, function(x) substring(x, 3)))
 } else {
   densities <- univariateML::univariateML_models
 }

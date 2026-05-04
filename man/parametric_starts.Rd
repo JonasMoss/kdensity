@@ -20,7 +20,7 @@ which is passed from \code{kdensity}.
 
 \section{Supported parametric starts}{
  \code{kdensity} supports more than
-20 built-in starts from the \link{univariateML} package, see
+20 built-in starts from the \link[univariateML:univariateML-package]{univariateML} package, see
 \code{univariateML::univariateML_models} for a list. Densities with variable
 support, \code{power}, are not supported. The \code{pareto} density has its
 support fixed to \verb{(1,Inf)}. The
