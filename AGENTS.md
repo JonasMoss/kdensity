@@ -6,14 +6,16 @@ This repository is an R package. Keep changes small, package-oriented, and easy 
 
 - `just test`: run the testthat suite.
 - `just check`: run `R CMD check` with `--as-cran` and `--no-manual`.
-- `just coverage`: print coverage, write `coverage.xml`, and write `coverage.html` when the optional HTML dependencies are installed.
+- `just coverage`: print coverage and write both `coverage.xml` and a readable `coverage.html`.
+- `just readme`: render `README.md` from `README.Rmd`.
+- `just clean`: remove local check, coverage, tarball, and generated test artifacts.
 
 ## Repo Conventions
 
 - `README.md` is generated from `README.Rmd`. Edit `README.Rmd` if the rendered README needs to change.
 - Package documentation in `man/` is generated from roxygen comments in `R/`.
 - Keep top-level developer files such as `AGENTS.md` and `Justfile` out of package builds.
-- `tests/testthat/Rplots.pdf` is a generated artifact from some test runs. Do not update it unless you intend to refresh tracked test output.
+- `tests/testthat/Rplots.pdf` is a disposable artifact. Recipes should remove it automatically.
 
 ## Change Scope
 

@@ -4,10 +4,16 @@ default:
     @just --list
 
 test:
-    Rscript -e "testthat::test_local(reporter = 'summary')"
+    trap 'rm -f tests/testthat/Rplots.pdf' EXIT; Rscript -e "testthat::test_local(reporter = 'summary')"
 
 check:
-    pkg=$(Rscript -e 'd <- read.dcf("DESCRIPTION"); cat(sprintf("%s_%s.tar.gz", d[1, "Package"], d[1, "Version"]))'); R CMD build . && R CMD check --as-cran --no-manual "$pkg"
+    trap 'rm -f tests/testthat/Rplots.pdf' EXIT; pkg=$(Rscript -e 'd <- read.dcf("DESCRIPTION"); cat(sprintf("%s_%s.tar.gz", d[1, "Package"], d[1, "Version"]))'); R CMD build . && R CMD check --as-cran --no-manual "$pkg"
 
 coverage:
-    Rscript -e "cov <- covr::package_coverage(); print(cov); cat(as.character(covr::to_cobertura(cov)), file = 'coverage.xml'); if (requireNamespace('DT', quietly = TRUE) && requireNamespace('htmltools', quietly = TRUE)) { covr::report(cov, file = 'coverage.html', browse = FALSE) } else { message('Skipping coverage.html; install DT and htmltools to render it.') }"
+    trap 'rm -f tests/testthat/Rplots.pdf' EXIT; Rscript tools/render-coverage-report.R
+
+readme:
+    Rscript -e "pkgload::load_all(quiet = TRUE); rmarkdown::render('README.Rmd', output_format = 'github_document', quiet = TRUE)"
+
+clean:
+    rm -rf ..Rcheck .Rcheck kdensity.Rcheck inst/doc README.html README_files coverage.html coverage.xml cobertura.xml *.tar.gz tests/testthat/Rplots.pdf

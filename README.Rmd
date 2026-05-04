@@ -87,6 +87,17 @@ In addition to parametric starts, the package implements some *asymmetric kernel
 
 These features can be combined to make asymmetric kernel densities estimators with parametric starts, see the example below. The package contains only one function, `kdensity`, in addition to the generics `plot`, `points`, `lines`, `summary`, and `print`. 
 
+For the bias-corrected `beta` kernel with a uniform or constant start, `kdensity`
+now defaults to the closed-form `beta_rot` bandwidth selector based on
+Hallberg Szabadváry's beta reference rule.
+
+```{r beta-kernel-example, echo = TRUE}
+set.seed(42)
+beta_fit <- kdensity(rbeta(250, 2, 5), kernel = "beta")
+beta_fit$bw_str
+beta_fit$bw
+```
+
 ## Usage
 
 The function `kdensity` takes some `data`, a kernel `kernel` and a parametric start `start`. You can optionally specify the `support` parameter, which is used to find the normalizing constant.

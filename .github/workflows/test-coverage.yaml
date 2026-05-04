@@ -30,7 +30,20 @@ jobs:
           extra-packages: any::covr
           needs: coverage
 
-      - name: Test coverage
+      - name: Render coverage reports
+        run: |
+          Rscript tools/render-coverage-report.R
+
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            coverage.html
+            coverage.xml
+
+      - name: Upload coverage to Codecov
         run: |
           covr::codecov(
             quiet = FALSE,
