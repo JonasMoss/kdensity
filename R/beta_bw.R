@@ -1,16 +1,4 @@
 compute_beta_rot_bandwidth <- function(x) {
-  if (!is.numeric(x)) {
-    stop("'x' must be a numeric vector.")
-  }
-
-  if (length(x) < 2L) {
-    stop("'x' must have at least 2 observations.")
-  }
-
-  if (any(x < 0 | x > 1, na.rm = TRUE)) {
-    stop("All values in 'x' must be in [0, 1].")
-  }
-
   x <- x[!is.na(x)]
   n <- length(x)
   x_interior <- x[x > 0 & x < 1]
@@ -26,17 +14,9 @@ compute_beta_rot_bandwidth <- function(x) {
     stop("Sample variance is zero.")
   }
 
-  if (variance >= mu * (1 - mu)) { # nocov start
-    stop("Sample variance is too large for Beta parameters.")
-  } # nocov end
-
   common <- mu * (1 - mu) / variance - 1
   alpha <- mu * common
   beta <- (1 - mu) * common
-
-  if (alpha <= 0 || beta <= 0) { # nocov start
-    stop("Estimated Beta parameters must be positive.")
-  } # nocov end
 
   bandwidth <- NA_real_
   use_fallback <- !(alpha > 1.5 && beta > 1.5 && (alpha + beta) > 3)
@@ -53,26 +33,15 @@ compute_beta_rot_bandwidth <- function(x) {
     denominator_term_1 <- (alpha - 1) * (beta - 1)
     denominator_term_2 <- 6 - 4 * beta + alpha * (3 * beta - 4)
 
-    if (denominator_term_1 <= 0 || denominator_term_2 <= 0) { # nocov start
-      use_fallback <- TRUE
-    } # nocov end
+    log_denominator <- log(denominator_term_1) +
+      log(denominator_term_2) +
+      lgamma(2 * alpha - 3) +
+      lgamma(2 * beta - 3) +
+      lgamma(alpha + beta) +
+      lgamma(alpha + beta - 1)
 
-    if (denominator_term_1 > 0 && denominator_term_2 > 0) {
-      log_denominator <- log(denominator_term_1) +
-        log(denominator_term_2) +
-        lgamma(2 * alpha - 3) +
-        lgamma(2 * beta - 3) +
-        lgamma(alpha + beta) +
-        lgamma(alpha + beta - 1)
-
-      log_factor <- log(2) + log(n) + 0.5 * log(pi)
-      bandwidth <- exp((2 / 5) * (log_numerator - log_denominator - log_factor))
-
-      if (!(bandwidth > 0 && bandwidth < 1)) { # nocov start
-        use_fallback <- TRUE
-        bandwidth <- NA_real_
-      } # nocov end
-    }
+    log_factor <- log(2) + log(n) + 0.5 * log(pi)
+    bandwidth <- exp((2 / 5) * (log_numerator - log_denominator - log_factor))
   }
 
   if (use_fallback) {
@@ -84,12 +53,8 @@ compute_beta_rot_bandwidth <- function(x) {
       (alpha * beta * (alpha + beta + 2) * (alpha + beta + 3))
 
     scale <- sqrt(beta_variance)
-    if (scale > 0) {
-      correction <- 1 + abs(beta_skewness) + abs(beta_kurtosis)
-      bandwidth <- scale / correction * n^(-0.4)
-    } else { # nocov start
-      bandwidth <- 1e-5
-    } # nocov end
+    correction <- 1 + abs(beta_skewness) + abs(beta_kurtosis)
+    bandwidth <- scale / correction * n^(-0.4)
 
     warning(
       "MISE rule not applicable; using the beta_rot fallback heuristic.",

@@ -32,9 +32,9 @@ expect_warning(
   "fallback heuristic"
 )
 
-expect_error(compute_beta_rot_bandwidth("not numeric"), "'x' must be a numeric vector.")
-expect_error(compute_beta_rot_bandwidth(0.5), "at least 2 observations")
-expect_error(compute_beta_rot_bandwidth(c(-0.1, 0.2)), "must be in \\[0, 1\\]")
+expect_error(get_bw("beta_rot")("not numeric", "beta", "uniform", c(0, 1)), "'x' must be a numeric vector.")
+expect_error(get_bw("beta_rot")(0.5, "beta", "uniform", c(0, 1)), "at least 2 observations")
+expect_error(get_bw("beta_rot")(c(-0.1, 0.2), "beta", "uniform", c(0, 1)), "must be in \\[0, 1\\]")
 expect_error(compute_beta_rot_bandwidth(c(0, 1, NA)), "No data strictly within")
 expect_error(compute_beta_rot_bandwidth(c(0.4, 0.4, 0.4)), "Sample variance is zero.")
 

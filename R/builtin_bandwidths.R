@@ -98,6 +98,18 @@ bw_environment$bcv <- function(data, kernel, start, support) stats::bw.bcv(data)
 bw_environment$SJ <- function(data, kernel, start, support) stats::bw.SJ(data)
 
 bw_environment$beta_rot <- function(x, kernel = NULL, start = NULL, support = NULL) {
+  if (!is.numeric(x)) {
+    stop("'x' must be a numeric vector.")
+  }
+
+  if (length(x) < 2L) {
+    stop("'x' must have at least 2 observations.")
+  }
+
+  if (any(x < 0 | x > 1, na.rm = TRUE)) {
+    stop("All values in 'x' must be in [0, 1].")
+  }
+
   tryCatch(
     compute_beta_rot_bandwidth(x),
     error = function(error) {
