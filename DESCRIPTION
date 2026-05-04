@@ -29,8 +29,7 @@ Suggests: extraDistr,
     covr,
     knitr,
     rmarkdown
-Imports: assertthat,
-    univariateML,
+Imports: univariateML,
     EQL
 RoxygenNote: 7.3.2
 VignetteBuilder: knitr

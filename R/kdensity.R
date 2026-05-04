@@ -125,7 +125,7 @@ kdensity <- function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
   data.name <- deparse(substitute(x))
   has.na <- anyNA(x)
 
-  assertthat::assert_that(!(has.na & !na.rm),
+  assert_(!(has.na & !na.rm),
     msg = "x contains NAs and na.rm = FALSE."
   )
 
@@ -211,7 +211,7 @@ kdensity <- function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
     bw_str <- "user supplied"
     if (bw == Inf) {
       msg <- "bw = Inf does not work with a uniform start."
-      assertthat::assert_that(start_str != "uniform", start_str != "constant", msg = msg)
+      assert_(start_str != "uniform", start_str != "constant", msg = msg)
     }
   }
 
@@ -257,10 +257,10 @@ kdensity <- function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
    2.) change kernel, or
    3.) increase the 'tolerance' parameter for kdensity"
 
-    assertthat::assert_that(!is.nan(integral$abs.error / integral$value),
+    assert_(!is.nan(integral$abs.error / integral$value),
       msg = msg
     )
-    assertthat::assert_that(integral$abs.error / integral$value < tolerance,
+    assert_(integral$abs.error / integral$value < tolerance,
       msg = msg
     )
 

@@ -4,12 +4,12 @@
 #' @param bw_str a string specifying the density of interest.
 #' @return a bandwidth function.
 get_bw <- function(bw_str) {
-  assertthat::assert_that(is.character(bw_str))
+  assert_(is.character(bw_str))
 
   bw <- bw_environment[[bw_str]]
 
   msg <- paste0("The supplied bandwidth function ('", bw_str, "') is not implemented.")
-  assertthat::assert_that(!is.null(bw), msg = msg)
+  assert_(!is.null(bw), msg = msg)
 
   bw
 }
@@ -23,15 +23,15 @@ get_bw <- function(bw_str) {
 #' @return None.
 
 add_bw <- function(bw_str, bw) {
-  assertthat::assert_that(is.character(bw_str))
-  assertthat::assert_that(all(bw_str == make.names(bw_str)),
+  assert_(is.character(bw_str))
+  assert_(all(bw_str == make.names(bw_str)),
     msg = "The name of the  bw is not valid. Use a short, valid name. (E.g. kdensity(x, bw = nrd0), where 'nrd0' is a predefined bw function.)"
   )
 
   func_msg <- paste0("The bw ('", bw_str, "') must be a function.")
   form_msg <- paste0("The bw ('", bw_str, "') must take the arguments 'x', 'kernel', 'start', 'support'.")
-  assertthat::assert_that(is.function(bw), msg = func_msg)
-  assertthat::assert_that(all(names(formals(bw)) == c("x", "kernel", "start", "support")),
+  assert_(is.function(bw), msg = func_msg)
+  assert_(all(names(formals(bw)) == c("x", "kernel", "start", "support")),
     msg = form_msg
   )
 
