@@ -24,4 +24,5 @@
   unavailable; not package-related.
 
 ## Reverse dependencies
-No problems.
+We checked the 2 reverse dependencies (RealSurvSim, tscopula) by
+running R CMD check against this version. No problems found.

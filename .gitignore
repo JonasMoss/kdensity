@@ -51,3 +51,5 @@ README_files/
 tests/testthat/Rplots.pdf
 inst/doc
 vignettes/*.R
+revdep/
+revdep-manual/
