@@ -6,3 +6,8 @@ expect_equal(kdensity(precip, support = c(7, 999))$kernel_str, "gamma")
 expect_equal(kdensity(precip, support = c(-5, 999))$kernel_str, "gaussian")
 set.seed(313)
 expect_equal(kdensity(rbeta(10, 10, 10), support = c(0.1, 0.9))$kernel_str, "gcopula")
+
+set.seed(313)
+beta_fit <- kdensity(rbeta(50, 2, 5), kernel = "beta")
+expect_equal(beta_fit$bw_str, "beta_rot")
+expect_gt(beta_fit$bw, 0)

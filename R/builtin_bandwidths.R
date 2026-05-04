@@ -24,6 +24,10 @@ bw_environment <- new.env(hash = FALSE)
 #'    `"ucv"`: Unbiased cross validation. The standard option for
 #'    asymmetric kernels.
 #'
+#'    `"beta_rot"`: Closed-form reference rule for the beta kernel on
+#'    the unit interval. This is the default for `kernel = "beta"`
+#'    with a uniform or constant start.
+#'
 #'    `"RHE"`: Selector for parametric starts with a symmetric kernel,
 #'    based on a reference rule with Hermite polynomials.
 #'    Described in Hjort & Glad (1995). The default method in `kdensity` when a parametric
@@ -54,6 +58,7 @@ bw_environment <- new.env(hash = FALSE)
 #' @references
 #' Jones, M. C., and D. A. Henderson. "Kernel-type density estimation on the unit interval." Biometrika 94.4 (2007): 977-984.
 #' Hjort, Nils Lid, and Ingrid K. Glad. "Nonparametric density estimation with a parametric start." The Annals of Statistics (1995): 882-904.
+#' Hallberg Szabadváry, Johan. "A Fast, Closed-Form Bandwidth Selector for the Beta Kernel Density Estimator." arXiv preprint arXiv:2601.19553 (2026).
 #' @name bandwidths
 NULL
 
@@ -91,6 +96,23 @@ bw_environment$nrd0 <- function(data, kernel, start, support) stats::bw.nrd0(dat
 bw_environment$nrd <- function(data, kernel, start, support) stats::bw.nrd(data)
 bw_environment$bcv <- function(data, kernel, start, support) stats::bw.bcv(data)
 bw_environment$SJ <- function(data, kernel, start, support) stats::bw.SJ(data)
+
+bw_environment$beta_rot <- function(x, kernel = NULL, start = NULL, support = NULL) {
+  tryCatch(
+    compute_beta_rot_bandwidth(x),
+    error = function(error) {
+      warning(
+        paste0(
+          "Bandwidth selector 'beta_rot' failed: ",
+          conditionMessage(error),
+          ". Falling back to 'ucv'."
+        ),
+        call. = FALSE
+      )
+      bw_environment$ucv(x, kernel = kernel, start = start, support = support)
+    }
+  )
+}
 
 bw_environment$ucv <- function(x, kernel = NULL, start = NULL, support = NULL) {
   ## We check for the combination start == "uniform" and kernel == "gaussian",

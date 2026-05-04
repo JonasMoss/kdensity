@@ -52,6 +52,9 @@ get_standard_bw <- function(kernel_str, start_str, support) {
   if (kernel_str == "gcopula" & (start_str == "constant" |
     start_str == "uniform")) {
     bw <- "JH"
+  } else if (kernel_str == "beta" & (start_str == "constant" |
+    start_str == "uniform")) {
+    bw <- "beta_rot"
   } else if (start_str != "constant" & start_str != "uniform") {
     if (!is.null(get_kernel(kernel_str)$sd)) {
       bw <- "RHE"

@@ -32,6 +32,10 @@ constant parametric starts.
 \code{"ucv"}: Unbiased cross validation. The standard option for
 asymmetric kernels.
 
+\code{"beta_rot"}: Closed-form reference rule for the beta kernel on
+the unit interval. This is the default for \code{kernel = "beta"}
+with a uniform or constant start.
+
 \code{"RHE"}: Selector for parametric starts with a symmetric kernel,
 based on a reference rule with Hermite polynomials.
 Described in Hjort & Glad (1995). The default method in \code{kdensity} when a parametric
@@ -61,6 +65,7 @@ kdensity(mtcars$mpg, start = "gumbel", bw = silly_width)
 \references{
 Jones, M. C., and D. A. Henderson. "Kernel-type density estimation on the unit interval." Biometrika 94.4 (2007): 977-984.
 Hjort, Nils Lid, and Ingrid K. Glad. "Nonparametric density estimation with a parametric start." The Annals of Statistics (1995): 882-904.
+Hallberg Szabadváry, Johan. "A Fast, Closed-Form Bandwidth Selector for the Beta Kernel Density Estimator." arXiv preprint arXiv:2601.19553 (2026).
 }
 \seealso{
 \code{\link[=kdensity]{kdensity()}}, \code{\link[stats:kernel]{stats::bandwidth.kernel()}} for the
