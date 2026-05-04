@@ -6,7 +6,7 @@ This repository is an R package. Keep changes small, package-oriented, and easy 
 
 - `just test`: run the testthat suite.
 - `just check`: run `R CMD check` with `--as-cran` and `--no-manual`.
-- `just coverage`: print coverage and write both `coverage.xml` and a readable `coverage.html`.
+- `just coverage`: print coverage and write a readable `coverage.html`.
 - `just readme`: render `README.md` from `README.Rmd`.
 - `just clean`: remove local check, coverage, tarball, and generated test artifacts.
 

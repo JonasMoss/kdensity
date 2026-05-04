@@ -1,6 +1,5 @@
 args <- commandArgs(trailingOnly = TRUE)
 output_html <- if (length(args) >= 1L) args[[1]] else "coverage.html"
-output_xml <- if (length(args) >= 2L) args[[2]] else "coverage.xml"
 
 escape_html <- function(x) {
   x <- gsub("&", "&amp;", x, fixed = TRUE)
@@ -23,7 +22,6 @@ html_table <- function(data) {
 
 cov <- covr::package_coverage()
 print(cov)
-cat(as.character(covr::to_cobertura(cov)), file = output_xml)
 
 coverage_data <- as.data.frame(cov)
 coverage_data$covered <- coverage_data$value > 0
