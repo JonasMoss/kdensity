@@ -211,3 +211,60 @@ kernel_environment$beta_biased <- list(
   kernel  = function(y, x, h) h * dbeta(x, y / h + 1, (1 - y) / h + 1),
   support = c(0, 1)
 )
+
+## ---------------------------------------------------------------------------
+## Accessors.
+## ---------------------------------------------------------------------------
+
+#' Helper function that gets a kernel function for kdensity.
+#'
+#' @keywords internal
+#' @param kernel_str a string specifying which kernel to use.
+#' @return a kernel function of the format k(u) with integral normalized
+#' to 1.
+
+get_kernel <- function(kernel_str) {
+  assert_(is.character(kernel_str))
+
+  kernel <- kernel_environment[[kernel_str]]
+
+  msg <- paste0("The supplied kernel ('", kernel_str, "') is not implemented.")
+  assert_(!is.null(kernel), msg = msg)
+
+  kernel
+}
+
+#' Add a new kernel to `kernels_environment`.
+#'
+#' @keywords internal
+#' @param kernel_str A string giving the name of the density.
+#' @param kernel The kernel function.
+#' @return None.
+
+add_kernel <- function(kernel_str, kernel) {
+  assert_(is.character(kernel_str))
+  assert_(all(kernel_str == make.names(kernel_str)),
+    msg = "The name of the kernel is not valid. Use a short, valid name. (E.g. kdensity(x, kernel = gaussian), where gaussian is a predefined kernel function.)"
+  )
+
+  list_msg <- paste0("The kernel ('", kernel_str, "') must be a list.")
+  assert_(is.list(kernel), msg = list_msg)
+
+  ## Checks for the right elements in kernel.
+  density_msg <- paste0("The kernel ('", kernel_str, "') must contain a function named 'kernel'.")
+  support_msg <- paste0("The kernel ('", kernel_str, "') must contain a function named 'support'.")
+  assert_(!is.null(kernel$kernel), msg = density_msg)
+  assert_(!is.null(kernel$support), msg = support_msg)
+
+  kernel_environment[[kernel_str]] <- kernel
+}
+
+# Anchors fully-qualified references for R CMD check's import scanner;
+# the modern code path in starts.R uses eval(parser(...)) which is invisible
+# to static analysis.
+
+# nocov start
+.kdensity_imports_anchor <- function() {
+  univariateML::univariateML_models
+}
+# nocov end

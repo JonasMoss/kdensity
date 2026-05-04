@@ -24,9 +24,9 @@ bw_environment <- new.env(hash = FALSE)
 #'    `"ucv"`: Unbiased cross validation. The standard option for
 #'    asymmetric kernels.
 #'
-#'    `"beta_rot"`: Closed-form reference rule for the beta kernel on
-#'    the unit interval. This is the default for `kernel = "beta"`
-#'    with a uniform or constant start.
+#'    `"HS"`: Hallberg Szabadváry's closed-form reference rule for the
+#'    beta kernel on the unit interval. This is the default for
+#'    `kernel = "beta"` with a uniform or constant start.
 #'
 #'    `"RHE"`: Selector for parametric starts with a symmetric kernel,
 #'    based on a reference rule with Hermite polynomials.
@@ -73,23 +73,30 @@ bw_environment$JH <- function(x, kernel = NULL, start = NULL, support = NULL) {
 }
 
 bw_environment$RHE <- function(x, kernel = NULL, start = NULL, support = NULL) {
-  max_degree <- 5 # The maximum degree of the Hermite polynomials.
   n <- length(x)
   mu <- mean(x)
   sigma <- stats::sd(x)
   z <- (x - mu) / sigma
 
-  ## Calculating the estimates of the robust Hermite polynomial coefficients.
-  delta <- rep(0, max_degree)
-  for (j in 2:max_degree) {
-    hermite <- EQL::hermite(sqrt(2) * z, j)
-    delta[j] <- mean(sqrt(2) * hermite * exp(-1 / 2 * z^2))
-  }
+  ## Probabilist's Hermite polynomials He_j(sqrt(2) * z) for j = 2..5.
+  u <- sqrt(2) * z
+  u2 <- u * u
+  he2 <- u2 - 1
+  he3 <- u * (u2 - 3)
+  he4 <- u2 * (u2 - 6) + 3
+  he5 <- u * (u2 * (u2 - 10) + 15)
 
-  bw <- (1 / 4)^(1 / 5) *
-    (delta[2]^2 + delta[3]^2 + delta[4]^2 / 2 + delta[5]^2 / 6)^(-1 / 5) *
+  weight <- sqrt(2) * exp(-z^2 / 2)
+  delta <- c(
+    mean(weight * he2),
+    mean(weight * he3),
+    mean(weight * he4),
+    mean(weight * he5)
+  )
+
+  (1 / 4)^(1 / 5) *
+    (delta[1]^2 + delta[2]^2 + delta[3]^2 / 2 + delta[4]^2 / 6)^(-1 / 5) *
     sigma * n^(-1 / 5)
-  return(bw)
 }
 
 bw_environment$nrd0 <- function(data, kernel, start, support) stats::bw.nrd0(data)
@@ -97,7 +104,7 @@ bw_environment$nrd <- function(data, kernel, start, support) stats::bw.nrd(data)
 bw_environment$bcv <- function(data, kernel, start, support) stats::bw.bcv(data)
 bw_environment$SJ <- function(data, kernel, start, support) stats::bw.SJ(data)
 
-bw_environment$beta_rot <- function(x, kernel = NULL, start = NULL, support = NULL) {
+bw_environment$HS <- function(x, kernel = NULL, start = NULL, support = NULL) {
   if (!is.numeric(x)) {
     stop("'x' must be a numeric vector.")
   }
@@ -111,11 +118,11 @@ bw_environment$beta_rot <- function(x, kernel = NULL, start = NULL, support = NU
   }
 
   tryCatch(
-    compute_beta_rot_bandwidth(x),
+    compute_hs_bandwidth(x),
     error = function(error) {
       warning(
         paste0(
-          "Bandwidth selector 'beta_rot' failed: ",
+          "Bandwidth selector 'HS' failed: ",
           conditionMessage(error),
           ". Falling back to 'ucv'."
         ),
@@ -229,4 +236,150 @@ bw_environment$ucv <- function(x, kernel = NULL, start = NULL, support = NULL) {
     }
   )
   return(bw)
+}
+
+## ---------------------------------------------------------------------------
+## Internal helpers used by the selectors above.
+## ---------------------------------------------------------------------------
+
+kdensity_sq <- function(x, h, kernel_fun, parametric_start, parametric_start_data,
+                        parametric_start_vector, support) {
+  normalization <- 1
+
+  pre_function <- function(y) {
+    sapply(y, function(y) mean(1 / h * kernel_fun(y, x, h) / parametric_start_data) * parametric_start_vector(y))
+  }
+
+  normalization <- tryCatch(stats::integrate(pre_function, lower = support[1], upper = support[2])$value,
+    error = function(e) {
+      stop("Normalization error: The function will not integrate. Two common causes are: 1.) The kernel is non-smooth, try a smooth kernel if possible. 2.) The supplied support is incorrect.")
+    }
+  )
+
+  return_function <- function(y) {
+    n <- length(y)
+    parametric_start_vector_y <- parametric_start_vector(y)
+    sapply(1:n, function(i) {
+      (1 / h * mean(kernel_fun(y[i], x, h) * parametric_start_vector_y[i] / parametric_start_data) / normalization)^2
+    })
+  }
+  return_function
+}
+
+compute_hs_bandwidth <- function(x) {
+  x <- x[!is.na(x)]
+  n <- length(x)
+  x_interior <- x[x > 0 & x < 1]
+
+  if (length(x_interior) == 0L) {
+    stop("No data strictly within (0, 1).")
+  }
+
+  mu <- mean(x_interior)
+  variance <- mean((x_interior - mu)^2)
+
+  if (variance == 0) {
+    stop("Sample variance is zero.")
+  }
+
+  common <- mu * (1 - mu) / variance - 1
+  alpha <- mu * common
+  beta <- (1 - mu) * common
+
+  bandwidth <- NA_real_
+  use_fallback <- !(alpha > 1.5 && beta > 1.5 && (alpha + beta) > 3)
+
+  if (!use_fallback) {
+    log_numerator <- log(2 * alpha + 2 * beta - 5) +
+      log(2 * alpha + 2 * beta - 3) +
+      lgamma(2 * alpha + 2 * beta - 6) +
+      lgamma(alpha) +
+      lgamma(beta) +
+      lgamma(alpha - 0.5) +
+      lgamma(beta - 0.5)
+
+    denominator_term_1 <- (alpha - 1) * (beta - 1)
+    denominator_term_2 <- 6 - 4 * beta + alpha * (3 * beta - 4)
+
+    log_denominator <- log(denominator_term_1) +
+      log(denominator_term_2) +
+      lgamma(2 * alpha - 3) +
+      lgamma(2 * beta - 3) +
+      lgamma(alpha + beta) +
+      lgamma(alpha + beta - 1)
+
+    log_factor <- log(2) + log(n) + 0.5 * log(pi)
+    bandwidth <- exp((2 / 5) * (log_numerator - log_denominator - log_factor))
+  }
+
+  if (use_fallback) {
+    beta_variance <- alpha * beta / ((alpha + beta)^2 * (alpha + beta + 1))
+    beta_skewness <- 2 * (beta - alpha) * sqrt(alpha + beta + 1) /
+      ((alpha + beta + 2) * sqrt(alpha * beta))
+    beta_kurtosis <- 6 * ((alpha - beta)^2 * (alpha + beta + 1) -
+      alpha * beta * (alpha + beta + 2)) /
+      (alpha * beta * (alpha + beta + 2) * (alpha + beta + 3))
+
+    scale <- sqrt(beta_variance)
+    correction <- 1 + abs(beta_skewness) + abs(beta_kurtosis)
+    bandwidth <- scale / correction * n^(-0.4)
+
+    warning(
+      "MISE rule not applicable; using the HS fallback heuristic.",
+      call. = FALSE
+    )
+  }
+
+  bandwidth
+}
+
+## ---------------------------------------------------------------------------
+## Accessors.
+## ---------------------------------------------------------------------------
+
+#' Get bandwidth functions from string.
+#'
+#' @keywords internal
+#' @param bw_str a string specifying the density of interest.
+#' @return a bandwidth function.
+get_bw <- function(bw_str) {
+  assert_(is.character(bw_str))
+
+  bw <- bw_environment[[bw_str]]
+
+  msg <- paste0("The supplied bandwidth function ('", bw_str, "') is not implemented.")
+  assert_(!is.null(bw), msg = msg)
+
+  bw
+}
+
+
+#' Get a bandwidth string when 'bw' is unspecified.
+#'
+#' @keywords internal
+#' @param kernel_str a kernel string
+#' @param start_str a parametric start string.
+#' @param support the support.
+#' @return a bandwidth string.
+
+get_standard_bw <- function(kernel_str, start_str, support) {
+  if (kernel_str == "gcopula" & (start_str == "constant" |
+    start_str == "uniform")) {
+    bw <- "JH"
+  } else if (kernel_str == "beta" & (start_str == "constant" |
+    start_str == "uniform")) {
+    bw <- "HS"
+  } else if (start_str != "constant" & start_str != "uniform") {
+    if (!is.null(get_kernel(kernel_str)$sd)) {
+      bw <- "RHE"
+    } else {
+      bw <- "ucv"
+    }
+  } else if (!is.null(get_kernel(kernel_str)$sd)) {
+    bw <- "nrd0"
+  } else {
+    bw <- "ucv"
+  }
+
+  bw
 }

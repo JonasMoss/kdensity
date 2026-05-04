@@ -9,5 +9,5 @@ expect_equal(kdensity(rbeta(10, 10, 10), support = c(0.1, 0.9))$kernel_str, "gco
 
 set.seed(313)
 beta_fit <- kdensity(rbeta(50, 2, 5), kernel = "beta")
-expect_equal(beta_fit$bw_str, "beta_rot")
+expect_equal(beta_fit$bw_str, "HS")
 expect_gt(beta_fit$bw, 0)

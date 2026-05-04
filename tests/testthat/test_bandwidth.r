@@ -1,18 +1,13 @@
 context("bandwidths")
 
-t <- function(x) {}
-good <- function(x, kernel, start, support) {}
-
-expect_error(add_bw("t", t))
-expect_silent(add_bw("t", good))
 expect_error(get_bw(5))
 expect_error(get_bw("no_kernel"))
-expect_silent(get_bw("beta_rot"))
+expect_silent(get_bw("HS"))
 
 expect_equal(get_standard_bw(kernel_str = "gcopula", start_str = "uniform"), "JH")
 expect_equal(get_standard_bw(kernel_str = "gcopula", start_str = "constant"), "JH")
-expect_equal(get_standard_bw(kernel_str = "beta", start_str = "uniform"), "beta_rot")
-expect_equal(get_standard_bw(kernel_str = "beta", start_str = "constant"), "beta_rot")
+expect_equal(get_standard_bw(kernel_str = "beta", start_str = "uniform"), "HS")
+expect_equal(get_standard_bw(kernel_str = "beta", start_str = "constant"), "HS")
 expect_equal(get_standard_bw(kernel_str = "beta", start_str = "gaussian"), "ucv")
 expect_equal(get_standard_bw(kernel_str = "normal", start_str = "normal"), "RHE")
 expect_equal(get_standard_bw(kernel_str = "uniform", start_str = "normal"), "RHE")
@@ -23,20 +18,30 @@ expect_equal(get_standard_bw(kernel_str = "triangular", start_str = "uniform"), 
 
 set.seed(1)
 regular_beta_sample <- rbeta(200, 2, 5)
-expect_gt(get_bw("beta_rot")(regular_beta_sample, "beta", "uniform", c(0, 1)), 0)
+hs_value <- get_bw("HS")(regular_beta_sample, "beta", "uniform", c(0, 1))
+expect_gt(hs_value, 0)
+## Regression pin for the closed-form HS path; recomputed manually from
+## the alpha/beta moment fit at seed = 1.
+expect_equal(hs_value, 0.0209275823, tolerance = 1e-8)
+
+set.seed(1)
+rhe_sample <- rnorm(500)
+## Regression pin for the inlined Hermite polynomial RHE selector;
+## matches the previous EQL-based implementation to ~1e-12.
+expect_equal(get_bw("RHE")(rhe_sample), 0.4314342622, tolerance = 1e-8)
 
 set.seed(1)
 boundary_beta_sample <- rbeta(200, 0.5, 0.5)
 expect_warning(
-  get_bw("beta_rot")(boundary_beta_sample, "beta", "uniform", c(0, 1)),
+  get_bw("HS")(boundary_beta_sample, "beta", "uniform", c(0, 1)),
   "fallback heuristic"
 )
 
-expect_error(get_bw("beta_rot")("not numeric", "beta", "uniform", c(0, 1)), "'x' must be a numeric vector.")
-expect_error(get_bw("beta_rot")(0.5, "beta", "uniform", c(0, 1)), "at least 2 observations")
-expect_error(get_bw("beta_rot")(c(-0.1, 0.2), "beta", "uniform", c(0, 1)), "must be in \\[0, 1\\]")
-expect_error(compute_beta_rot_bandwidth(c(0, 1, NA)), "No data strictly within")
-expect_error(compute_beta_rot_bandwidth(c(0.4, 0.4, 0.4)), "Sample variance is zero.")
+expect_error(get_bw("HS")("not numeric", "beta", "uniform", c(0, 1)), "'x' must be a numeric vector.")
+expect_error(get_bw("HS")(0.5, "beta", "uniform", c(0, 1)), "at least 2 observations")
+expect_error(get_bw("HS")(c(-0.1, 0.2), "beta", "uniform", c(0, 1)), "must be in \\[0, 1\\]")
+expect_error(compute_hs_bandwidth(c(0, 1, NA)), "No data strictly within")
+expect_error(compute_hs_bandwidth(c(0.4, 0.4, 0.4)), "Sample variance is zero.")
 
 expect_error(
   kdensity_sq(

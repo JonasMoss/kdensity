@@ -104,7 +104,6 @@ lines(kdensity(concentration, start = "gaussian", kernel = "gamma", adjust = 1 /
 )
 rug(concentration)
 
-
 }
 \references{
 Hjort, Nils Lid, and Ingrid K. Glad. "Nonparametric density estimation with a parametric start." The Annals of Statistics (1995): 882-904.

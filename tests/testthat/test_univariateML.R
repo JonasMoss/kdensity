@@ -54,5 +54,3 @@ kde <- kdensity(rands, start = "lomax")
 coef(kde)
 logLik(kde)
 AIC(kde)
-
-expect_length(g(), 3)

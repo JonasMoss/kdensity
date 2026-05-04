@@ -13,8 +13,12 @@ starts and asymmetric kernels.
 
 ## News
 
-`kdensity` is now linked to `univariateML`, meaning it supports the
-approximately 30+ parametric starts from that package!
+For the bias-corrected `beta` kernel with a uniform or constant start,
+`kdensity` now defaults to a new closed-form bandwidth selector, `"HS"`,
+from [Hallberg Szabadváry’s *A Fast, Closed-Form Bandwidth Selector for
+the Beta Kernel Density Estimator*
+(2026)](https://arxiv.org/abs/2601.19553). It is much faster than the
+previous `"ucv"` default.
 
 ## Overview
 
@@ -124,15 +128,11 @@ estimators with parametric starts, see the example below. The package
 contains only one function, `kdensity`, in addition to the generics
 `plot`, `points`, `lines`, `summary`, and `print`.
 
-For the bias-corrected `beta` kernel with a uniform or constant start,
-`kdensity` now defaults to the closed-form `beta_rot` bandwidth selector
-based on Hallberg Szabadváry’s beta reference rule.
-
 ``` r
 set.seed(42)
 beta_fit <- kdensity(rbeta(250, 2, 5), kernel = "beta")
 beta_fit$bw_str
-#> [1] "beta_rot"
+#> [1] "HS"
 beta_fit$bw
 #> [1] 0.02052664
 ```
@@ -209,3 +209,7 @@ Conduct](https://www.contributor-covenant.org/version/1/4/code-of-conduct/).
 
 - \[Chen, Song Xi. “Beta kernel estimators for density functions.”
   Computational Statistics & Data Analysis 31.2 (1999): 131-145.\]
+
+- [Hallberg Szabadváry, Johan. “A Fast, Closed-Form Bandwidth Selector
+  for the Beta Kernel Density Estimator.” arXiv preprint
+  arXiv:2601.19553 (2026).](https://arxiv.org/abs/2601.19553)

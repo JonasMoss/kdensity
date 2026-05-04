@@ -1,7 +1,7 @@
 Package: kdensity
 Type: Package
 Title: Kernel Density Estimation with Parametric Starts and Asymmetric Kernels
-Version: 1.1.1
+Version: 1.2.0
 Authors@R: c(
     person("Jonas", "Moss", , "jonas.gjertsen@gmail.com", role = c("aut", "cre"), 
       comment = c(ORCID = "0000-0002-6876-6964")),
@@ -26,8 +26,7 @@ Suggests: extraDistr,
     testthat,
     knitr,
     rmarkdown
-Imports: univariateML,
-    EQL
+Imports: univariateML
 RoxygenNote: 7.3.2
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)

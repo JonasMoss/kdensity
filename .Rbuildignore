@@ -1,4 +1,5 @@
 ^.*\.Rproj$
+^.claude$
 ^\.Rproj\.user$
 ^README\.Rmd$
 ^README\.html$
