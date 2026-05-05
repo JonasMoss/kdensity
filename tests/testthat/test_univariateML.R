@@ -1,5 +1,20 @@
 univariateML_densities <- c("norm", "lnorm", "weibull", "invgauss", "beta")
 
+expect_true(density_namespace_available("dnorm"))
+expect_true(density_namespace_available("stats::dnorm"))
+expect_false(density_namespace_available("definitelymissingpkg::dfoo"))
+
+methods::setClass("MockSupportKdensityCoverage", contains = "matrix", slots = c(type = "character"))
+mock_support <- methods::new(
+  "MockSupportKdensityCoverage",
+  matrix(c(-Inf, Inf), nrow = 1),
+  type = "R"
+)
+expect_equal(
+  get_univariate_ml_support(list(support = mock_support)),
+  list(bounds = c(-Inf, Inf), type = "R")
+)
+
 # There are some exceptions we won't test.
 
 exceptions <- c("pareto", "unif", "lomax")

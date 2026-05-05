@@ -104,27 +104,6 @@ lines(kdensity(concentration, start = "gaussian", kernel = "gamma", adjust = 1 /
 )
 rug(concentration)
 
-## Using a density and and estimator from another package.
-
-skew_hyperbolic <- list(
-  density   = SkewHyperbolic::dskewhyp,
-  estimator = function(x) SkewHyperbolic::skewhypFit(x, printOut = FALSE)$param,
-  support   = c(-Inf, Inf)
-)
-
-kde <- kdensity(diff(LakeHuron), start = skew_hyperbolic)
-plot(kde,
-  lwd = 2, col = "blue",
-  main = "Annual differences in water level (ft) of Lake Huron, 1875 - 1972"
-)
-lines(kde, plot_start = TRUE, lty = 2, lwd = 2) # Plots the skew hyperbolic density.
-rug(diff(LakeHuron))
-
-kde$estimates # Also: coef(kde)
-# Displays the parameter estimates:
-#        mu     delta      beta        nu
-# -1.140713  3.301112  2.551657 26.462469
-
 }
 \references{
 Hjort, Nils Lid, and Ingrid K. Glad. "Nonparametric density estimation with a parametric start." The Annals of Statistics (1995): 882-904.

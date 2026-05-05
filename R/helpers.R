@@ -1,3 +1,14 @@
+assert_ <- function(..., msg = "Assertion failed.") {
+  conditions <- list(...)
+  ok <- all(vapply(conditions, function(condition) isTRUE(all(condition)), logical(1)))
+
+  if (!ok) {
+    stop(msg, call. = FALSE)
+  }
+
+  invisible(TRUE)
+}
+
 #' Fill in missing kernel, start or support given the supplied values.
 #'
 #' This function takes the supplied values of kernel, start, and support
@@ -103,22 +114,22 @@ get_kernel_start_support <- function(kernel, start, support) {
 #' @param kernel,start,support The kernel, start and support to check.
 #' @return None.
 support_compatible <- function(kernel, start, support) {
-  assertthat::assert_that(kernel$support[1] <= support[1],
+  assert_(kernel$support[1] <= support[1],
     msg =
       "The lower end point of the support is smaller than the lower end point of the 'kernel support'."
   )
 
-  assertthat::assert_that(kernel$support[2] >= support[2],
+  assert_(kernel$support[2] >= support[2],
     msg =
       "The upper end point of the support is larger than the upper end point of the 'kernel support'."
   )
 
-  assertthat::assert_that(start$support[1] <= support[1],
+  assert_(start$support[1] <= support[1],
     msg =
       "The lower end point of the support is smaller than the lower end point of the 'start support'."
   )
 
-  assertthat::assert_that(start$support[2] >= support[2],
+  assert_(start$support[2] >= support[2],
     msg =
       "The upper end point of the support is larger than the upper end point of the 'start support'."
   )

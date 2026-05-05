@@ -5,7 +5,7 @@
 
 [![R build
 status](https://github.com/JonasMoss/kdensity/workflows/R-CMD-check/badge.svg)](https://github.com/JonasMoss/kdensity/actions)
-[![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version/kdensity)](https://cran.r-project.org/package=kdensity)
+[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/kdensity)](https://cran.r-project.org/package=kdensity)
 [![DOI](https://zenodo.org/badge/120678148.svg)](https://zenodo.org/badge/latestdoi/120678148)
 
 An `R` package for univariate kernel density estimation with parametric
@@ -13,8 +13,12 @@ starts and asymmetric kernels.
 
 ## News
 
-`kdensity` is now linked to `univariateML`, meaning it supports the
-approximately 30+ parametric starts from that package\!
+For the bias-corrected `beta` kernel with a uniform or constant start,
+`kdensity` now defaults to a new closed-form bandwidth selector, `"HS"`,
+from [Hallberg Szabadváry’s *A Fast, Closed-Form Bandwidth Selector for
+the Beta Kernel Density Estimator*
+(2026)](https://arxiv.org/abs/2601.19553). It is much faster than the
+previous `"ucv"` default.
 
 ## Overview
 
@@ -23,18 +27,18 @@ with support for parametric starts and asymmetric kernels. Its main
 function is `kdensity`, which is has approximately the same syntax as
 `stats::density`. Its new functionality is:
 
-  - `kdensity` has built-in support for many *parametric starts*, such
-    as `normal` and `gamma`, but you can also supply your own. For a
-    list of supported parametric starts, see the readme of
-    [`univariateML`](https://github.com/JonasMoss/univariateML).
-  - It supports several asymmetric kernels ones such as `gcopula` and
-    `gamma` kernels, but also the common symmetric ones. In addition,
-    you can also supply your own kernels.
-  - A selection of choices for the bandwidth function `bw`, again
-    including an option to specify your own.
-  - The returned value is density function. This can be used for
-    e.g. numerical integration, numerical differentiation, and point
-    evaluations.
+- `kdensity` has built-in support for many *parametric starts*, such as
+  `normal` and `gamma`, but you can also supply your own. For a list of
+  supported parametric starts, see the readme of
+  [`univariateML`](https://github.com/JonasMoss/univariateML).
+- It supports several asymmetric kernels ones such as `gcopula` and
+  `gamma` kernels, but also the common symmetric ones. In addition, you
+  can also supply your own kernels.
+- A selection of choices for the bandwidth function `bw`, again
+  including an option to specify your own.
+- The returned value is density function. This can be used for
+  e.g. numerical integration, numerical differentiation, and point
+  evaluations.
 
 A reason to use `kdensity` is to avoid *boundary bias* when estimating
 densities on the unit interval or the positive half-line. Asymmetric
@@ -100,29 +104,38 @@ sharp boundaries, such as data supported on the positive half-line or
 the unit interval. Currently we support the following asymmetric
 kernels:
 
-  - Jones and Henderson’s *Gaussian copula KDE*, from [Kernel-Type
-    Density Estimation on the Unit Interval
-    (2007)](https://academic.oup.com/biomet/article-abstract/94/4/977/246269).
-    This is used for data on the unit interval. The bandwidth selection
-    mechanism described in that paper is implemented as well. This
-    kernel is called `gcopula`.
+- Jones and Henderson’s *Gaussian copula KDE*, from [Kernel-Type Density
+  Estimation on the Unit Interval
+  (2007)](https://academic.oup.com/biomet/article-abstract/94/4/977/246269).
+  This is used for data on the unit interval. The bandwidth selection
+  mechanism described in that paper is implemented as well. This kernel
+  is called `gcopula`.
 
-  - Chen’s two *beta kernels* from [Beta kernel estimators for density
-    functions
-    (1999)](https://www.sciencedirect.com/science/article/pii/S0167947399000109).
-    These are used for data supported on the on the unit interval, and
-    are called `beta` and `beta_biased`.
+- Chen’s two *beta kernels* from [Beta kernel estimators for density
+  functions
+  (1999)](https://www.sciencedirect.com/science/article/pii/S0167947399000109).
+  These are used for data supported on the on the unit interval, and are
+  called `beta` and `beta_biased`.
 
-  - Chen’s two *gamma kernels* from [Probability Density Function
-    Estimation Using Gamma Kernels
-    (2000)](https://link.springer.com/article/10.1023/A:1004165218295).
-    These are used for data supported on the positive half-line, and are
-    called `gamma` and `gamma_biased`.
+- Chen’s two *gamma kernels* from [Probability Density Function
+  Estimation Using Gamma Kernels
+  (2000)](https://link.springer.com/article/10.1023/A:1004165218295).
+  These are used for data supported on the positive half-line, and are
+  called `gamma` and `gamma_biased`.
 
 These features can be combined to make asymmetric kernel densities
 estimators with parametric starts, see the example below. The package
 contains only one function, `kdensity`, in addition to the generics
 `plot`, `points`, `lines`, `summary`, and `print`.
+
+``` r
+set.seed(42)
+beta_fit <- kdensity(rbeta(250, 2, 5), kernel = "beta")
+beta_fit$bw_str
+#> [1] "HS"
+beta_fit$bw
+#> [1] 0.02052664
+```
 
 ## Usage
 
@@ -130,7 +143,7 @@ The function `kdensity` takes some `data`, a kernel `kernel` and a
 parametric start `start`. You can optionally specify the `support`
 parameter, which is used to find the normalizing constant.
 
-The following example uses the  data set. The black curve is a
+The following example uses the data set. The black curve is a
 gamma-kernel density estimate with a gamma start, the red curve a fully
 parametric gamma density and and the blue curve an ordinary `density`
 estimate. Notice the boundary bias of the ordinary `density` estimator.
@@ -138,7 +151,7 @@ The underlying parameter estimates are always maximum likelilood.
 
 ``` r
 library("kdensity")
-kde = kdensity(airquality$Wind, start = "gamma", kernel = "gamma")
+kde <- kdensity(airquality$Wind, start = "gamma", kernel = "gamma")
 plot(kde, main = "Wind speed (mph)")
 lines(kde, plot_start = TRUE, col = "red")
 lines(density(airquality$Wind, adjust = 2), col = "blue")
@@ -182,17 +195,21 @@ Conduct](https://www.contributor-covenant.org/version/1/4/code-of-conduct/).
 
 ## References
 
-  - [Hjort, Nils Lid, and Ingrid K. Glad. “Nonparametric density
-    estimation with a parametric start.” The Annals of Statistics
-    (1995): 882-904.](https://projecteuclid.org/euclid.aos/1176324627).
+- [Hjort, Nils Lid, and Ingrid K. Glad. “Nonparametric density
+  estimation with a parametric start.” The Annals of Statistics (1995):
+  882-904.](https://projecteuclid.org/euclid.aos/1176324627).
 
-  - [Jones, M. C., and D. A. Henderson. “Miscellanea kernel-type density
-    estimation on the unit interval.” Biometrika 94.4 (2007):977-984.]
+- \[Jones, M. C., and D. A. Henderson. “Miscellanea kernel-type density
+  estimation on the unit interval.” Biometrika 94.4 (2007): 977-984.\].
 
-  - [Chen, Song Xi. “Probability density function estimation using gamma
-    kernels.” Annals of the Institute of Statistical Mathematics 52.3
-    (2000):
-    471-480.](https://link.springer.com/article/10.1023/A:1004165218295).
+- [Chen, Song Xi. “Probability density function estimation using gamma
+  kernels.” Annals of the Institute of Statistical Mathematics 52.3
+  (2000):
+  471-480.](https://link.springer.com/article/10.1023/A:1004165218295).
 
-  - [Chen, Song Xi. “Beta kernel estimators for density functions.”
-    Computational Statistics & Data Analysis 31.2 (1999):131-145.]
+- \[Chen, Song Xi. “Beta kernel estimators for density functions.”
+  Computational Statistics & Data Analysis 31.2 (1999): 131-145.\]
+
+- [Hallberg Szabadváry, Johan. “A Fast, Closed-Form Bandwidth Selector
+  for the Beta Kernel Density Estimator.” arXiv preprint
+  arXiv:2601.19553 (2026).](https://arxiv.org/abs/2601.19553)

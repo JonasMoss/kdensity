@@ -68,7 +68,11 @@ update.kdensity <- function(object, ...) {
   }
 
   arg_names <- lapply(match.call(expand.dots = TRUE)[-1], deparse)
-  args <- listmerge(current, passed, type = "template")
+  args <- utils::modifyList(
+    current,
+    passed[intersect(names(passed), names(current))],
+    keep.null = TRUE
+  )
   new_object <- do.call(kdensity, args)
 
   if ("x" %in% names(arg_names)) {
@@ -94,7 +98,7 @@ coef.kdensity <- function(object, ...) object$estimates
 #' @export
 logLik.kdensity <- function(object, ...) {
   msg <- "'logLik' only makes sense for kdensity objects with a non-uniform parametric start."
-  assertthat::assert_that(object$start_str != "uniform" & object$start_str != "constant", msg = msg)
+  assert_(object$start_str != "uniform" & object$start_str != "constant", msg = msg)
   val <- object$logLik
   attr(val, "nobs") <- length(object$n)
   attr(val, "df") <- length(stats::coef(object))
@@ -194,9 +198,10 @@ plot_helper <- function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, p
     lwd = 1
   )
 
-  args <- listmerge(
-    x = defaults,
-    y = supplied
+  args <- utils::modifyList(
+    defaults,
+    supplied,
+    keep.null = TRUE
   )
   args$x <- range
 
@@ -204,7 +209,7 @@ plot_helper <- function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, p
     start <- x$start_str
 
     msg <- "To use 'plot_start = TRUE', supply a parametric start that is a proper density."
-    assertthat::assert_that(!is.null(start), start != "uniform", msg = msg)
+    assert_(!is.null(start), start != "uniform", msg = msg)
 
     start <- get_start(start)
 
