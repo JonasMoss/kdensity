@@ -134,3 +134,80 @@ support_compatible <- function(kernel, start, support) {
       "The upper end point of the support is larger than the upper end point of the 'start support'."
   )
 }
+
+## Resolve the `bw` argument of kdensity() into a numeric bandwidth and a
+## reporting string. `bw` may be NULL (use the standard selector), a string
+## naming a built-in selector, a custom function, or a numeric value.
+## `bw_label` is `deparse(substitute(bw))` captured by the caller, used only to
+## label a custom bandwidth function.
+resolve_bandwidth <- function(bw, bw_label, x, kernel_str, start_str, support) {
+  if (is.null(bw)) {
+    bw <- get_standard_bw(kernel_str, start_str, support)
+  }
+
+  if (!is.numeric(bw)) {
+    if (is.character(bw)) {
+      bw_str <- bw
+      bw <- get_bw(bw)(x, kernel_str, start_str, support)
+    } else {
+      bw_str <- bw_label
+      bw <- bw(x, kernel_str, start_str, support)
+    }
+  } else {
+    bw_str <- "user supplied"
+    if (bw == Inf) {
+      msg <- "bw = Inf does not work with a uniform start."
+      assert_(start_str != "uniform", start_str != "constant", msg = msg)
+    }
+  }
+
+  list(bw = bw, bw_str = bw_str)
+}
+
+## Compute the normalization constant for the unnormalized density. Uses a
+## known closed-form normalizer when available, otherwise numerical integration
+## with a relative-error tolerance check.
+resolve_normalization <- function(unnormalized_density, start, kernel, support,
+                                  h, x, estimates, tolerance) {
+  normalization <- known_normalization(
+    start = start,
+    kernel = kernel,
+    support = support,
+    h = h,
+    x = x,
+    estimates = estimates
+  )
+
+  if (!is.null(normalization)) {
+    return(normalization)
+  }
+
+  integral <- tryCatch(
+    stats::integrate(unnormalized_density,
+      lower = support[1],
+      upper = support[2]
+    ),
+    error = function(e) {
+      stop(paste0(
+        "Normalization error: The function will not integrate.",
+        "Two common causes are: 1.) The kernel is non-smooth, ",
+        "try a smooth kernel if possible. 2.) The supplied ",
+        "support is incorrect."
+      ))
+    }
+  )
+
+  msg <- "The normalization constant has too large relative error.
+   1.) try to normalize the data, or
+   2.) change kernel, or
+   3.) increase the 'tolerance' parameter for kdensity"
+
+  assert_(!is.nan(integral$abs.error / integral$value),
+    msg = msg
+  )
+  assert_(integral$abs.error / integral$value < tolerance,
+    msg = msg
+  )
+
+  integral$value
+}

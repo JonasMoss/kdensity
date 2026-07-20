@@ -1,5 +1,3 @@
-context("parametric starts")
-
 t_without_estim <- list(
   density = dt,
   support = c(-Inf, Inf)

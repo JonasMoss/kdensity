@@ -11,6 +11,7 @@
 ^\.github$
 ^AGENTS\.md$
 ^Justfile$
+^TODO\.md$
 ^cran-comments\.md$
 ^CRAN-RELEASE$
 ^CRAN-SUBMISSION$

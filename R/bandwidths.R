@@ -28,6 +28,12 @@ bw_environment <- new.env(hash = FALSE)
 #'    beta kernel on the unit interval. This is the default for
 #'    `kernel = "beta"` with a uniform or constant start.
 #'
+#'    `"GR"`: Chen's AMISE-optimal bandwidth for the bias-corrected gamma
+#'    kernel, with the unknown density replaced by a fitted gamma reference.
+#'    This avoids cross-validation, but is currently explicit rather than the
+#'    default because `kdensity` additionally normalizes the estimator and may
+#'    use a non-uniform parametric start.
+#'
 #'    `"RHE"`: Selector for parametric starts with a symmetric kernel,
 #'    based on a reference rule with Hermite polynomials.
 #'    Described in Hjort & Glad (1995). The default method in `kdensity` when a parametric
@@ -133,6 +139,27 @@ bw_environment$HS <- function(x, kernel = NULL, start = NULL, support = NULL) {
   )
 }
 
+bw_environment$GR <- function(x, kernel = NULL, start = NULL, support = NULL) {
+  if (!is.null(kernel) && kernel != "gamma") {
+    stop("Bandwidth selector 'GR' is only defined for kernel = 'gamma'.")
+  }
+
+  tryCatch(
+    compute_gr_bandwidth(x),
+    error = function(error) {
+      warning(
+        paste0(
+          "Bandwidth selector 'GR' failed: ",
+          conditionMessage(error),
+          ". Falling back to 'ucv'."
+        ),
+        call. = FALSE
+      )
+      bw_environment$ucv(x, kernel = kernel, start = start, support = support)
+    }
+  )
+}
+
 bw_environment$ucv <- function(x, kernel = NULL, start = NULL, support = NULL) {
   ## We check for the combination start == "uniform" and kernel == "gaussian",
   ## as this is handled by stats::density's related functions.
@@ -168,21 +195,44 @@ bw_environment$ucv <- function(x, kernel = NULL, start = NULL, support = NULL) {
   dstart <- function(data, parameters) {
     arguments[[1]] <- data
     if (length(parameters) > 0) {
-      for (i in 1:length(parameters)) arguments[[i + 1]] <- parameters[[i]]
+      for (i in seq_along(parameters)) arguments[[i + 1]] <- parameters[[i]]
     }
     do.call(start_density, arguments)
   }
 
-  param_loo <- lapply(1:n, function(i) start_estimator(x[-i]))
+  uniform_start <- start %in% c("constant", "uniform")
+  use_compiled_loo <- !uniform_start &&
+    !is.null(kernel_obj$compiled_id) &&
+    !is.null(start_obj$compiled_id)
+  compiled_param_loo <- if (use_compiled_loo) {
+    tryCatch(make_compiled_loo_parameters(x, start_obj), error = function(e) NULL)
+  } else {
+    NULL
+  }
+  ## Fall back to the R leave-one-out path when the compiled fit fails or
+  ## returns non-finite parameters (degenerate or pathological data), so a bad
+  ## fit degrades to the univariateML path and the outer tryCatch instead of
+  ## aborting kdensity().
+  if (use_compiled_loo &&
+      (is.null(compiled_param_loo) || anyNA(compiled_param_loo))) {
+    use_compiled_loo <- FALSE
+  }
+  param_loo <- if (uniform_start || use_compiled_loo) {
+    NULL
+  } else {
+    lapply(seq_len(n), function(i) start_estimator(x[-i]))
+  }
 
   parametric_start_vector <- function(data) dstart(data, full_parameters)
 
   parametric_start_data <- parametric_start_vector(x)
+  uniform_data <- rep(1, n)
 
   obj_func <- function(h) {
     kdensity_sqrd <- kdensity_sq(x,
       h = h,
       kernel_fun = kernel_fun,
+      kernel_obj = kernel_obj,
       parametric_start_data = parametric_start_data,
       parametric_start_vector = parametric_start_vector,
       parametric_start = start_density,
@@ -194,14 +244,38 @@ bw_environment$ucv <- function(x, kernel = NULL, start = NULL, support = NULL) {
       upper = support[2]
     )$value
 
-    term2_vec <- rep(0, n)
-    for (i in 1:n) {
-      # Will not work fro asymmetric? Difference between x and y in kernel.
-      term2_vec[i] <- mean(1 / h * kernel_fun(x[-i], x[i], h) /
-        dstart(x[-i], param_loo[[i]])) *
-        dstart(x[i], param_loo[[i]])
+    if (uniform_start && !is.null(kernel_obj$compiled_id)) {
+      full_evaluator <- make_kernel_evaluator(
+        x = x,
+        h = h,
+        kernel = kernel_obj,
+        parametric_start_data = uniform_data
+      )
+      full_sum <- sum(full_evaluator(x))
+      diagonal <- vapply(x, function(point) {
+        kernel_fun(point, point, h) / h
+      }, numeric(1))
+      term2 <- 2 * (full_sum - mean(diagonal)) / (n - 1)
+    } else if (use_compiled_loo) {
+      term2 <- compiled_ucv_term2(
+        x = x,
+        h = h,
+        kernel = kernel_obj,
+        start = start_obj,
+        parameters = compiled_param_loo
+      )
+    } else {
+      term2_vec <- numeric(n)
+      for (i in seq_len(n)) {
+        # Eval-first: the LOO density at x[i] sets the (possibly asymmetric)
+      # kernel's shape from the evaluation point x[i] and evaluates it at the
+      # other data points x[-i], consistent with term1 and the estimator.
+      term2_vec[i] <- mean(1 / h * kernel_fun(x[i], x[-i], h) /
+          dstart(x[-i], param_loo[[i]])) *
+          dstart(x[i], param_loo[[i]])
+      }
+      term2 <- 2 * mean(term2_vec)
     }
-    term2 <- 2 * mean(term2_vec)
 
     obj_func_value <- term1 - term2
     return(obj_func_value)
@@ -243,11 +317,26 @@ bw_environment$ucv <- function(x, kernel = NULL, start = NULL, support = NULL) {
 ## ---------------------------------------------------------------------------
 
 kdensity_sq <- function(x, h, kernel_fun, parametric_start, parametric_start_data,
-                        parametric_start_vector, support) {
+                        parametric_start_vector, support, kernel_obj = NULL) {
   normalization <- 1
 
+  if (is.null(kernel_obj)) {
+    kernel_evaluator <- function(y) {
+      vapply(y, function(point) {
+        mean(1 / h * kernel_fun(point, x, h) / parametric_start_data)
+      }, numeric(1))
+    }
+  } else {
+    kernel_evaluator <- make_kernel_evaluator(
+      x = x,
+      h = h,
+      kernel = kernel_obj,
+      parametric_start_data = parametric_start_data
+    )
+  }
+
   pre_function <- function(y) {
-    sapply(y, function(y) mean(1 / h * kernel_fun(y, x, h) / parametric_start_data) * parametric_start_vector(y))
+    kernel_evaluator(y) * parametric_start_vector(y)
   }
 
   normalization <- tryCatch(stats::integrate(pre_function, lower = support[1], upper = support[2])$value,
@@ -257,11 +346,8 @@ kdensity_sq <- function(x, h, kernel_fun, parametric_start, parametric_start_dat
   )
 
   return_function <- function(y) {
-    n <- length(y)
     parametric_start_vector_y <- parametric_start_vector(y)
-    sapply(1:n, function(i) {
-      (1 / h * mean(kernel_fun(y[i], x, h) * parametric_start_vector_y[i] / parametric_start_data) / normalization)^2
-    })
+    (kernel_evaluator(y) * parametric_start_vector_y / normalization)^2
   }
   return_function
 }
@@ -331,6 +417,65 @@ compute_hs_bandwidth <- function(x) {
   }
 
   bandwidth
+}
+
+compute_gr_bandwidth <- function(x) {
+  if (!is.numeric(x)) {
+    stop("'x' must be a numeric vector.")
+  }
+
+  x <- x[!is.na(x)]
+  n <- length(x)
+  if (n < 2L) {
+    stop("'x' must have at least 2 observations.")
+  }
+  if (any(!is.finite(x)) || any(x <= 0)) {
+    stop("All values in 'x' must be finite and strictly positive.")
+  }
+
+  mean_x <- mean(x)
+  mean_log_x <- mean(log(x))
+  s <- log(mean_x) - mean_log_x
+  if (!is.finite(s) || s <= 0) {
+    stop("The gamma reference fit is degenerate.")
+  }
+
+  shape <- 1 / (12 * s) *
+    (3 - s + sqrt((s - 3)^2 + 24 * s)) * 0.9989 + 0.0102
+  tolerance <- .Machine$double.eps^0.25
+  for (iteration in seq_len(100L)) {
+    step <- (log(shape) - digamma(shape) - s) /
+      (1 / shape - trigamma(shape))
+    next_shape <- shape - step
+    if (!is.finite(next_shape) || next_shape <= 0) {
+      stop("The gamma reference fit did not converge.")
+    }
+    if (abs((shape - next_shape) / shape) < tolerance) {
+      shape <- next_shape
+      break
+    }
+    shape <- next_shape
+  }
+  rate <- shape / mean_x
+
+  if (shape <= 1.5) {
+    stop("The fitted gamma shape must exceed 3/2 for finite AMISE roughness.")
+  }
+
+  # For f = Gamma(shape, rate), Chen's two AMISE integrals reduce to
+  #
+  # V = integral x^(-1/2) f(x) dx
+  # R = integral {x f''(x)}^2 dx.
+  #
+  # Work on the log scale to retain accuracy for concentrated references.
+  log_v <- 0.5 * log(rate) + lgamma(shape - 0.5) - lgamma(shape)
+  log_r <- 3 * log(rate) + lgamma(2 * shape - 3) -
+    (2 * shape - 3) * log(2) - 2 * lgamma(shape) +
+    log(shape - 1) + log(3 * shape - 4) - log(4)
+
+  exp((2 / 5) * (
+    log_v - log(2 * sqrt(pi)) - log_r - log(n)
+  ))
 }
 
 ## ---------------------------------------------------------------------------

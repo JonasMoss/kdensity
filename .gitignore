@@ -37,10 +37,12 @@ Temporary Items
 .Rproj.user
 .RData
 .Rhistory
-.Rbuildignore
 .agents/
 .codex/
 *.tar.gz
+src/*.o
+src/*.so
+src/*.dll
 *.Rcheck/
 ..Rcheck/
 coverage.html
@@ -53,3 +55,4 @@ inst/doc
 vignettes/*.R
 revdep/
 revdep-manual/
+tools/results/

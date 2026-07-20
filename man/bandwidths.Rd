@@ -36,6 +36,12 @@ asymmetric kernels.
 beta kernel on the unit interval. This is the default for
 \code{kernel = "beta"} with a uniform or constant start.
 
+\code{"GR"}: Chen's AMISE-optimal bandwidth for the bias-corrected gamma
+kernel, with the unknown density replaced by a fitted gamma reference.
+This avoids cross-validation, but is currently explicit rather than the
+default because \code{kdensity} additionally normalizes the estimator and may
+use a non-uniform parametric start.
+
 \code{"RHE"}: Selector for parametric starts with a symmetric kernel,
 based on a reference rule with Hermite polynomials.
 Described in Hjort & Glad (1995). The default method in \code{kdensity} when a parametric
@@ -68,7 +74,7 @@ Hjort, Nils Lid, and Ingrid K. Glad. "Nonparametric density estimation with a pa
 Hallberg Szabadváry, Johan. "A Fast, Closed-Form Bandwidth Selector for the Beta Kernel Density Estimator." arXiv preprint arXiv:2601.19553 (2026).
 }
 \seealso{
-\code{\link[=kdensity]{kdensity()}}, \code{\link[stats:kernel]{stats::bandwidth.kernel()}} for the
+\code{\link[=kdensity]{kdensity()}}, \code{\link[stats:bandwidth.kernel]{stats::bandwidth.kernel()}} for the
 bandwidth selectors of \code{\link[stats:density]{stats::density()}}. In addition,
 \code{\link[=kernels]{kernels()}}; \code{\link[=parametric_starts]{parametric_starts()}}
 }

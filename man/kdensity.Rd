@@ -62,8 +62,10 @@ or not, and whether the density is normalized.}
 \item{\code{call}}{The \code{call} to \code{kdensity}.}
 \item{\code{estimates}}{Named numeric vector containing the parameter
 estimates from the parametric start.}
-\item{\code{logLik}}{The log-likelihood of the parametric starts. Is \code{NA}
-for the uniform start.}
+\item{\code{logLik}}{The log-likelihood of the \emph{fitted parametric start}
+(not of the kernel density estimate): the sum of \code{log start(x_i)} at the
+maximum-likelihood estimates. Is \code{NA} for the \code{uniform} and
+\code{constant} starts.}
 
 }
 }
@@ -84,6 +86,13 @@ to ordinary kernel density estimation. The typical default value for
 
 If \code{normalized} is \code{FALSE} and \code{start != "uniform"}, the resulting
 density will not integrate to 1 in general.
+
+The \code{logLik()}, \code{AIC()}, and \code{BIC()} methods for \code{kdensity}
+objects describe the \emph{fitted parametric start} alone, not the kernel
+density estimate: they use the start's maximum-likelihood log-likelihood, so
+they can be used to compare candidate parametric starts. They are undefined for
+the \code{uniform} and \code{constant} starts (\code{logLik()} returns
+\code{NA} and errors), which have no parametric model.
 }
 \examples{
 ## Use gamma kernels to model positive data, the concentration of

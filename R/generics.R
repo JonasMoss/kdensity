@@ -25,11 +25,9 @@
   )
 
   i <- match.arg(i, allowed_arg)
-  environment(x)$obj_name <- "x"
   args <- list(object = x)
   args[[i]] <- value
   do.call(update.kdensity, args)
-  x
 }
 
 
@@ -59,15 +57,6 @@ update.kdensity <- function(object, ...) {
   )
 
   passed <- list(...)
-
-  ## Part of a hack to make $<- and [[<- work.
-  if (!is.null(environment(object)$obj_name)) {
-    obj_name <- environment(object)$obj_name
-  } else {
-    obj_name <- deparse(substitute(object))
-  }
-
-  arg_names <- lapply(match.call(expand.dots = TRUE)[-1], deparse)
   args <- utils::modifyList(
     current,
     passed[intersect(names(passed), names(current))],
@@ -75,6 +64,8 @@ update.kdensity <- function(object, ...) {
   )
   new_object <- do.call(kdensity, args)
 
+  ## Preserve the original data name unless new data was supplied.
+  arg_names <- lapply(match.call(expand.dots = TRUE)[-1], deparse)
   if ("x" %in% names(arg_names)) {
     data.name <- arg_names$x
   } else {
@@ -87,9 +78,12 @@ update.kdensity <- function(object, ...) {
   )
 
   environment(new_object)$call <- call
-
   environment(new_object)$data.name <- data.name
-  assign(obj_name, new_object, envir = parent.frame())
+
+  ## `update()` follows R's copy-on-modify semantics: it returns a new object
+  ## and never mutates the caller's binding. The `$<-` / `[[<-` methods pass the
+  ## returned object back through R's replacement protocol.
+  new_object
 }
 
 #' @export
@@ -100,7 +94,7 @@ logLik.kdensity <- function(object, ...) {
   msg <- "'logLik' only makes sense for kdensity objects with a non-uniform parametric start."
   assert_(object$start_str != "uniform" & object$start_str != "constant", msg = msg)
   val <- object$logLik
-  attr(val, "nobs") <- length(object$n)
+  attr(val, "nobs") <- object$n
   attr(val, "df") <- length(stats::coef(object))
   class(val) <- "logLik"
   val
@@ -132,6 +126,9 @@ get_range <- function(obj) {
 #' @param range range of x values.
 #' @param plot_start logical; if `TRUE`, plots the parametric start instead of the kernel density estimate.
 #' @param zero_line logical; if `TRUE`, add a base line at `y = 0`.
+#' @param grid Evaluation backend. `"exact"` retains direct evaluation;
+#'   `"fft"` uses the approximate grid backend supported by [kdensity_grid()];
+#'   and `"auto"` uses FFT when available with an exact fallback.
 #' @param ... further plotting parameters.
 #' @return None.
 #' @seealso [kdensity()]
@@ -145,20 +142,31 @@ get_range <- function(obj) {
 #' lines(kde_gamma, plot_start = TRUE, lty = 2)
 #' lines(kde, lty = 3)
 #' rug(precip)
-plot.kdensity <- function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ...) {
-  plot_helper(x, range, plot_start, zero_line, ptype = "plot", ...)
+plot.kdensity <- function(x, range = NULL, plot_start = FALSE,
+                          zero_line = TRUE, grid = "exact", ...) {
+  plot_helper(
+    x, range, plot_start, zero_line, grid = grid, ptype = "plot", ...
+  )
 }
 
 #' @rdname plot.kdensity
 #' @export
-lines.kdensity <- function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ...) {
-  plot_helper(x, range, plot_start, zero_line, ptype = "lines", type = "l", ...)
+lines.kdensity <- function(x, range = NULL, plot_start = FALSE,
+                           zero_line = TRUE, grid = "exact", ...) {
+  plot_helper(
+    x, range, plot_start, zero_line, grid = grid,
+    ptype = "lines", type = "l", ...
+  )
 }
 
 #' @rdname plot.kdensity
 #' @export
-points.kdensity <- function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ...) {
-  plot_helper(x, range, plot_start, zero_line, ptype = "points", type = "p", ...)
+points.kdensity <- function(x, range = NULL, plot_start = FALSE,
+                            zero_line = TRUE, grid = "exact", ...) {
+  plot_helper(
+    x, range, plot_start, zero_line, grid = grid,
+    ptype = "points", type = "p", ...
+  )
 }
 
 #' Helper function for the plot methods.
@@ -170,14 +178,19 @@ points.kdensity <- function(x, range = NULL, plot_start = FALSE, zero_line = TRU
 #' @param range An optional range vector; like `x` in `plot.default`.
 #' @param plot_start Logical; if `TRUE`, plots the parametric start only.
 #' @param zero_line Logical; if `TRUE`, adds a line at `y = 0`.
+#' @param grid Evaluation backend passed to [kdensity_grid()].
 #' @param ptype The kind of plot to make
 #' @param ... Passed to plot.default.
 #' @keywords internal
 #' @return None.
 
-plot_helper <- function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ptype = c("plot", "lines", "points"), ...) {
+plot_helper <- function(x, range = NULL, plot_start = FALSE,
+                        zero_line = TRUE, grid = "exact",
+                        ptype = c("plot", "lines", "points"), ...) {
   ptype <- match.arg(ptype)
+  grid <- match.arg(grid, c("exact", "auto", "fft"))
 
+  supplied_range <- !is.null(range)
   if (is.null(range)) range <- get_range(x)
 
   ## Potential arguments in ellipses are handled here. They are modelled
@@ -220,7 +233,28 @@ plot_helper <- function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, p
       do.call(parametric_start, as.list(c("x" = y, parameters)))
     })
   } else {
-    args$y <- x(range)
+    if (grid == "exact") {
+      args$y <- x(range)
+    } else {
+      grid_fit <- kdensity_grid(
+        x,
+        from = min(range),
+        to = max(range),
+        n = length(range),
+        method = grid
+      )
+      if (supplied_range) {
+        args$y <- stats::approx(
+          grid_fit$x,
+          grid_fit$y,
+          xout = range,
+          rule = 2
+        )$y
+      } else {
+        args$x <- grid_fit$x
+        args$y <- grid_fit$y
+      }
+    }
   }
 
   switch(ptype,
@@ -256,7 +290,7 @@ summary.kdensity <- function(object, ...) {
   if (length(parameters) > 0) {
     params <- c(
       "Parameter estimates:", "\n",
-      sapply(1:length(parameters), function(i) paste0(names(parameters)[i], ": ", formatC(parameters[i], digits), "\n")),
+      vapply(seq_along(parameters), function(i) paste0(names(parameters)[i], ": ", formatC(parameters[i], digits), "\n"), character(1)),
       "\n"
     )
   }

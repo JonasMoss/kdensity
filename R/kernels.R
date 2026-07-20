@@ -195,12 +195,18 @@ kernel_environment$beta <- list(
     cut_points <- c(2 * h, 1 - 2 * h)
     sectioning <- findInterval(y, cut_points)
 
-    y0 <- y[sectioning == 0]
-    y1 <- y[sectioning == 1]
-    y2 <- y[sectioning == 2]
+    lower <- sectioning == 0
+    interior <- sectioning == 1
+    upper <- sectioning == 2
+    par1 <- numeric(N)
+    par2 <- numeric(N)
 
-    par1 <- c(rho(y0, h), y1 / h, y2 / h)
-    par2 <- c((1 - y0) / h, (1 - y1) / h, rho(1 - y2, h))
+    par1[lower] <- rho(y[lower], h)
+    par2[lower] <- (1 - y[lower]) / h
+    par1[interior] <- y[interior] / h
+    par2[interior] <- (1 - y[interior]) / h
+    par1[upper] <- y[upper] / h
+    par2[upper] <- rho(1 - y[upper], h)
 
     h * dbeta(x, par1, par2)
   },
@@ -211,6 +217,33 @@ kernel_environment$beta_biased <- list(
   kernel  = function(y, x, h) h * dbeta(x, y / h + 1, (1 - y) / h + 1),
   support = c(0, 1)
 )
+
+compiled_kernel_ids <- c(
+  gaussian = 1L,
+  normal = 1L,
+  epanechnikov = 2L,
+  rectangular = 3L,
+  uniform = 3L,
+  triangular = 4L,
+  biweight = 5L,
+  cosine = 6L,
+  optcosine = 7L,
+  triweight = 8L,
+  tricube = 9L,
+  laplace = 10L,
+  gcopula = 11L,
+  gamma = 12L,
+  gamma_biased = 13L,
+  beta = 14L,
+  beta_biased = 15L
+)
+
+for (kernel_name in names(compiled_kernel_ids)) {
+  kernel_environment[[kernel_name]]$compiled_id <-
+    unname(compiled_kernel_ids[[kernel_name]])
+}
+
+rm(compiled_kernel_ids, kernel_name)
 
 ## ---------------------------------------------------------------------------
 ## Accessors.

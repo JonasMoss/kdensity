@@ -6,11 +6,32 @@
 \alias{points.kdensity}
 \title{Plot, Lines and Points Methods for Kernel Density Estimation}
 \usage{
-\method{plot}{kdensity}(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ...)
+\method{plot}{kdensity}(
+  x,
+  range = NULL,
+  plot_start = FALSE,
+  zero_line = TRUE,
+  grid = "exact",
+  ...
+)
 
-\method{lines}{kdensity}(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ...)
+\method{lines}{kdensity}(
+  x,
+  range = NULL,
+  plot_start = FALSE,
+  zero_line = TRUE,
+  grid = "exact",
+  ...
+)
 
-\method{points}{kdensity}(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ...)
+\method{points}{kdensity}(
+  x,
+  range = NULL,
+  plot_start = FALSE,
+  zero_line = TRUE,
+  grid = "exact",
+  ...
+)
 }
 \arguments{
 \item{x}{a \code{kdensity} object.}
@@ -20,6 +41,10 @@
 \item{plot_start}{logical; if \code{TRUE}, plots the parametric start instead of the kernel density estimate.}
 
 \item{zero_line}{logical; if \code{TRUE}, add a base line at \code{y = 0}.}
+
+\item{grid}{Evaluation backend. \code{"exact"} retains direct evaluation;
+\code{"fft"} uses the approximate grid backend supported by \code{\link[=kdensity_grid]{kdensity_grid()}};
+and \code{"auto"} uses FFT when available with an exact fallback.}
 
 \item{...}{further plotting parameters.}
 }

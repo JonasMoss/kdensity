@@ -1,24 +1,15 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# kdensity <img src="man/figures/logo.png" align="right" width="247" height="70" />
+# kdensity
 
 [![R build
-status](https://github.com/JonasMoss/kdensity/workflows/R-CMD-check/badge.svg)](https://github.com/JonasMoss/kdensity/actions)
+status](https://github.com/JonasMoss/kdensity/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JonasMoss/kdensity/actions)
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/kdensity)](https://cran.r-project.org/package=kdensity)
 [![DOI](https://zenodo.org/badge/120678148.svg)](https://zenodo.org/badge/latestdoi/120678148)
 
 An `R` package for univariate kernel density estimation with parametric
 starts and asymmetric kernels.
-
-## News
-
-For the bias-corrected `beta` kernel with a uniform or constant start,
-`kdensity` now defaults to a new closed-form bandwidth selector, `"HS"`,
-from [Hallberg Szabadváry’s *A Fast, Closed-Form Bandwidth Selector for
-the Beta Kernel Density Estimator*
-(2026)](https://arxiv.org/abs/2601.19553). It is much faster than the
-previous `"ucv"` default.
 
 ## Overview
 
@@ -158,7 +149,7 @@ lines(density(airquality$Wind, adjust = 2), col = "blue")
 rug(airquality$Wind)
 ```
 
-<img src="man/figures/README-example-1.png" width="750px" />
+<img src="man/figures/README-example-1.png" alt="" width="750px" />
 
 Since the return value of `kdensity` is a function, `kde` is callable
 and can be used as any density function in `R` (such as `stats::dnorm`).
@@ -166,10 +157,16 @@ For example, you can do:
 
 ``` r
 kde(10)
-#> [1] 0.09980471
+#> [1] 0.1067221
 integrate(kde, lower = 0, upper = 1) # The cumulative distribution up to 1.
-#> 1.27532e-05 with absolute error < 2.2e-19
+#> 2.55945e-05 with absolute error < 4e-19
 ```
+
+For large plotting grids, `kdensity_grid()` provides an explicitly
+approximate binning-and-FFT backend for the built-in symmetric kernels
+and the Gaussian-copula kernel. Calling `kde()` remains exact. Plotting
+also opts in with `grid = "fft"` for supported fits; use `grid = "auto"`
+when an exact fallback is preferred for unsupported kernels.
 
 You can access the parameter estimates by using `coef`. You can also
 access the log likelihood (`logLik`), AIC and BIC of the parametric
@@ -181,9 +178,9 @@ coef(kde)
 #>  shape    rate  
 #> 7.1873  0.7218
 logLik(kde)
-#> 'log Lik.' 12.33787 (df=2)
+#> 'log Lik.' -410.5129 (df=2)
 AIC(kde)
-#> [1] -20.67574
+#> [1] 825.0259
 ```
 
 ## How to Contribute or Get Help
@@ -199,16 +196,18 @@ Conduct](https://www.contributor-covenant.org/version/1/4/code-of-conduct/).
   estimation with a parametric start.” The Annals of Statistics (1995):
   882-904.](https://projecteuclid.org/euclid.aos/1176324627).
 
-- \[Jones, M. C., and D. A. Henderson. “Miscellanea kernel-type density
-  estimation on the unit interval.” Biometrika 94.4 (2007): 977-984.\].
+- [Jones, M. C., and D. A. Henderson. “Miscellanea kernel-type density
+  estimation on the unit interval.” Biometrika 94.4 (2007):
+  977-984.](https://academic.oup.com/biomet/article-abstract/94/4/977/246269).
 
 - [Chen, Song Xi. “Probability density function estimation using gamma
   kernels.” Annals of the Institute of Statistical Mathematics 52.3
   (2000):
   471-480.](https://link.springer.com/article/10.1023/A:1004165218295).
 
-- \[Chen, Song Xi. “Beta kernel estimators for density functions.”
-  Computational Statistics & Data Analysis 31.2 (1999): 131-145.\]
+- [Chen, Song Xi. “Beta kernel estimators for density functions.”
+  Computational Statistics & Data Analysis 31.2 (1999):
+  131-145.](https://www.sciencedirect.com/science/article/pii/S0167947399000109)
 
 - [Hallberg Szabadváry, Johan. “A Fast, Closed-Form Bandwidth Selector
   for the Beta Kernel Density Estimator.” arXiv preprint

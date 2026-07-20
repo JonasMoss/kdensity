@@ -1,5 +1,3 @@
-context("kernels")
-
 t_without_kernel <- list(
   support = c(-Inf, Inf)
 )
