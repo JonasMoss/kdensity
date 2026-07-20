@@ -144,3 +144,24 @@ test_that("logLik is unavailable for uniform and constant starts", {
   expect_error(logLik(kdensity(rnorm(50), start = "uniform")), "non-uniform")
   expect_true(is.na(kdensity(rnorm(50), start = "uniform")$logLik))
 })
+
+test_that("logLik uses a built-in density's log scale without underflow", {
+  x <- c(rep(0, 1999), 1e100)
+  fit <- kdensity(
+    x,
+    start = "normal",
+    kernel = "gaussian",
+    bw = 1,
+    normalized = FALSE
+  )
+  estimates <- coef(fit)
+  expected <- sum(dnorm(
+    x,
+    mean = estimates[["mean"]],
+    sd = estimates[["sd"]],
+    log = TRUE
+  ))
+
+  expect_true(is.finite(logLik(fit)))
+  expect_equal(as.numeric(logLik(fit)), expected)
+})

@@ -168,6 +168,8 @@ rm(compiled_start_ids, start_name)
 ## Make starts_environments with evaled support.
 for (i in seq_along(starts)) {
   starts[[i]]$support <- eval(starts[[i]]$support)
+  starts[[i]]$density_has_log <-
+    "log" %in% names(formals(starts[[i]]$density))
 }
 
 starts_environment <- as.environment(starts)

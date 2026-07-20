@@ -160,7 +160,10 @@ double compact_node_sum(const int node, const int kernel_id,
     return kPi / 4.0 * cosine_sum;
   }
 
+  // All kernel ids accepted by the sorted evaluator are handled above.
+  // # nocov start
   return NA_REAL;
+  // # nocov end
 }
 
 double compact_range_sum(int left, int right, const int kernel_id,
@@ -204,7 +207,10 @@ int start_parameter_count(const int start_id) {
     case 4: return 2;  // Gamma: shape, rate.
     case 5: return 2;  // Weibull: shape, scale.
     case 6: return 2;  // Beta: shape1, shape2.
+    // Callers validate start ids before reaching this helper.
+    // # nocov start
     default: return 0;
+    // # nocov end
   }
 }
 
@@ -227,8 +233,11 @@ double start_log_constant(const int start_id,
     case 6:
       return std::lgamma(p0 + parameters(row, 1)) -
         std::lgamma(p0) - std::lgamma(parameters(row, 1));
+    // Callers validate start ids before reaching this helper.
+    // # nocov start
     default:
       return NA_REAL;
+    // # nocov end
   }
 }
 
@@ -268,8 +277,11 @@ double start_log_density(const double x, const double log_x,
         ? constant + (p0 - 1.0) * log_x +
           (parameters(row, 1) - 1.0) * log1m_x
         : R::dbeta(x, p0, parameters(row, 1), true);
+    // Callers validate start ids before reaching this helper.
+    // # nocov start
     default:
       return NA_REAL;
+    // # nocov end
   }
 }
 
@@ -366,7 +378,10 @@ double pair_log_kernel(const double y, const double x, const double h,
     return std::log(h) + R::dbeta(x, shape1, shape2, true);
   }
 
+  // Callers validate kernel ids before reaching this helper.
+  // # nocov start
   return NA_REAL;
+  // # nocov end
 }
 
 }  // namespace
@@ -399,7 +414,10 @@ List compact_kernel_cache_cpp(const NumericVector& sorted_x,
   int base = 1;
   while (base < n) {
     if (base > std::numeric_limits<int>::max() / 2) {
+      // R vectors cannot reach this size on supported platforms.
+      // # nocov start
       Rcpp::stop("The compact-kernel cache is too large.");
+      // # nocov end
     }
     base *= 2;
   }
@@ -424,7 +442,10 @@ List compact_kernel_cache_cpp(const NumericVector& sorted_x,
 
   for (int node = base - 1; node >= 1; --node) {
     if ((node & 16383) == 0) {
+      // Polling is operational rather than data-dependent behavior.
+      // # nocov start
       Rcpp::checkUserInterrupt();
+      // # nocov end
     }
     const int left = 2 * node;
     const int right = left + 1;
@@ -738,7 +759,10 @@ NumericVector kernel_weighted_sum_cpp(const NumericVector& y,
     double sum = 0.0;
     for (R_xlen_t j = 0; j < nx; ++j) {
       if (i == 0 && j != 0 && (j & 1048575) == 0) {
+        // Polling is operational rather than data-dependent behavior.
+        // # nocov start
         Rcpp::checkUserInterrupt();
+        // # nocov end
       }
 
       const double xj = x[j];
@@ -849,9 +873,6 @@ std::optional<double> fit_gamma_shape_loo(const double s, const double tolerance
     shape = next;
   }
 
-  if (std::isnan(shape)) {
-    return std::nullopt;
-  }
   return shape;
 }
 
@@ -894,9 +915,6 @@ std::optional<BetaShapes> fit_beta_shapes_loo(const double s, const double r,
     b = next;
   }
 
-  if (std::isnan(alpha) || std::isnan(exp_b)) {
-    return std::nullopt;
-  }
   return BetaShapes{alpha, exp_b};
 }
 
@@ -942,9 +960,6 @@ std::optional<double> fit_weibull_sigma_loo(const NumericVector& negative_log_x,
     sigma = next;
   }
 
-  if (std::isnan(sigma)) {
-    return std::nullopt;
-  }
   return sigma;
 }
 
@@ -1023,10 +1038,37 @@ NumericMatrix designated_loo_parameters_cpp(const NumericVector& x,
 
       if (start_id <= 3) {
         const double value = transformed[i];
-        const double mean_loo = (sum - value) / n_loo;
+        double mean_loo = (sum - value) / n_loo;
 
         if (start_id == 2) {
-          out(i, 0) = 1.0 / mean_loo;
+          // Subtracting the omitted observation from a much larger total can
+          // erase the retained observations completely. Recompute this rare
+          // pathological case after scaling by the largest retained value.
+          if (!std::isfinite(mean_loo) || mean_loo <= 0.0) {
+            double maximum_loo = 0.0;
+            for (R_xlen_t j = 0; j < n; ++j) {
+              if (j != i) {
+                maximum_loo = std::max(maximum_loo, x[j]);
+              }
+            }
+            if (!std::isfinite(maximum_loo) || maximum_loo <= 0.0) {
+              out(i, 0) = NA_REAL;
+              continue;
+            }
+
+            double scaled_sum = 0.0;
+            for (R_xlen_t j = 0; j < n; ++j) {
+              if (j != i) {
+                scaled_sum += x[j] / maximum_loo;
+              }
+            }
+            mean_loo = maximum_loo * (scaled_sum / n_loo);
+          }
+
+          const double rate = 1.0 / mean_loo;
+          out(i, 0) = std::isfinite(rate) && rate > 0.0
+            ? rate
+            : NA_REAL;
           continue;
         }
 

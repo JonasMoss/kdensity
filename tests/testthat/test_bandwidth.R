@@ -68,6 +68,22 @@ expect_error(
   "strictly positive"
 )
 expect_error(
+  compute_gr_bandwidth("not numeric"),
+  "numeric vector"
+)
+expect_error(
+  compute_gr_bandwidth(1),
+  "at least 2 observations"
+)
+expect_error(
+  compute_gr_bandwidth(rep(2, 3)),
+  "gamma reference fit is degenerate"
+)
+expect_error(
+  compute_gr_bandwidth(c(.Machine$double.xmin, 1)),
+  "did not converge"
+)
+expect_error(
   compute_gr_bandwidth(qgamma(ppoints(100), shape = 1, rate = 1)),
   "shape must exceed 3/2"
 )

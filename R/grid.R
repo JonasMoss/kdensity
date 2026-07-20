@@ -38,13 +38,7 @@ kdensity_grid <- function(object, from = NULL, to = NULL, n = 512L,
     stop("'object' must be a kdensity fit.")
   }
   method <- match.arg(method)
-  n <- as.integer(n)
-  if (length(n) != 1L || is.na(n) || n < 2L) {
-    stop("'n' must be a single integer of at least two.")
-  }
-  if (length(truncate) != 1L || !is.finite(truncate) || truncate <= 0) {
-    stop("'truncate' must be a single positive number.")
-  }
+  n <- validate_grid_count(n, "n", 2L, "two")
 
   default_grid <- get_range(object)
   if (is.null(from)) {
@@ -58,23 +52,39 @@ kdensity_grid <- function(object, from = NULL, to = NULL, n = 512L,
     stop("'from' and 'to' must be finite scalars with 'from' < 'to'.")
   }
 
-  if (is.null(fft_n)) {
-    fft_n <- max(2048L, 4L * n)
-  }
-  fft_n <- as.integer(fft_n)
-  if (length(fft_n) != 1L || is.na(fft_n) || fft_n < 512L) {
-    stop("'fft_n' must be a single integer of at least 512.")
-  }
-
-  support_problem <- fft_grid_support_problem(object, from, to)
-  actual_method <- method
-  if (method == "auto") {
-    actual_method <- if (is.null(support_problem)) "fft" else "exact"
-  } else if (method == "fft" && !is.null(support_problem)) {
-    stop("FFT grid evaluation is unavailable: ", support_problem)
+  actual_method <- "exact"
+  if (method != "exact") {
+    support_problem <- fft_grid_support_problem(object, from, to)
+    if (method == "auto") {
+      actual_method <- if (is.null(support_problem)) "fft" else "exact"
+    } else if (!is.null(support_problem)) {
+      stop("FFT grid evaluation is unavailable: ", support_problem)
+    } else {
+      actual_method <- "fft"
+    }
   }
 
-  grid <- make_kdensity_grid(object, from, to, n, truncate)
+  if (actual_method == "fft") {
+    if (!is.numeric(truncate) || length(truncate) != 1L ||
+        is.na(truncate) || !is.finite(truncate) || truncate <= 0) {
+      stop("'truncate' must be a single positive number.")
+    }
+    if (is.null(fft_n)) {
+      fft_n <- max(2048, 4 * as.double(n))
+    }
+    fft_n <- validate_grid_count(fft_n, "fft_n", 512L, "512")
+  } else {
+    fft_n <- NA_integer_
+  }
+
+  grid <- make_kdensity_grid(
+    object,
+    from,
+    to,
+    n,
+    truncate,
+    use_probit = actual_method == "fft"
+  )
   values <- if (actual_method == "fft") {
     evaluate_kdensity_fft_grid(
       object,
@@ -97,10 +107,23 @@ kdensity_grid <- function(object, from = NULL, to = NULL, n = 512L,
       has.na = object$has.na,
       method = actual_method,
       grid_n = n,
-      fft_n = if (actual_method == "fft") fft_n else NA_integer_
+      fft_n = fft_n
     ),
     class = "density"
   )
+}
+
+validate_grid_count <- function(value, name, minimum, minimum_label) {
+  if (!is.numeric(value) || length(value) != 1L || is.na(value) ||
+      !is.finite(value) || value < minimum || value != floor(value) ||
+      value > .Machine$integer.max) {
+    stop(
+      "'", name, "' must be a single whole number of at least ",
+      minimum_label, "."
+    )
+  }
+
+  as.integer(value)
 }
 
 fft_grid_kernel_name <- function(kernel_id) {
@@ -153,8 +176,9 @@ fft_grid_support_problem <- function(object, from, to) {
   NULL
 }
 
-make_kdensity_grid <- function(object, from, to, n, truncate) {
-  if (identical(object$kernel$compiled_id, 11L) &&
+make_kdensity_grid <- function(object, from, to, n, truncate,
+                               use_probit = FALSE) {
+  if (use_probit && identical(object$kernel$compiled_id, 11L) &&
       from >= 0 && to <= 1) {
     lower <- if (from == 0) -truncate else stats::qnorm(from)
     upper <- if (to == 1) truncate else stats::qnorm(to)
@@ -178,10 +202,14 @@ density_fft <- function(...) {
   if (getRversion() >= "4.4.0") {
     return(stats::density(...))
   }
+  # This compatibility path cannot run on the minimum R version used for
+  # coverage, but remains necessary for older supported R releases.
+  # nocov start
   args <- list(...)
   args$subdensity <- NULL
   args$ext <- NULL
   suppressWarnings(do.call(stats::density, args))
+  # nocov end
 }
 
 evaluate_kdensity_fft_grid <- function(object, grid, fft_n, truncate) {

@@ -30,6 +30,61 @@ test_that("make_compiled_loo_parameters surfaces degeneracy as NA, not an error"
   expect_true(all(is.na(small)))
 })
 
+test_that("compiled leave-one-out validation rejects non-finite parameters", {
+  expect_false(compiled_loo_parameters_are_valid(
+    matrix(Inf, nrow = 4L, ncol = 1L),
+    2L
+  ))
+  expect_false(compiled_loo_parameters_are_valid(
+    cbind(mean = 1:4, sd = 0),
+    1L
+  ))
+})
+
+test_that("exponential leave-one-out means avoid subtractive cancellation", {
+  x <- c(rep(1e-300, 20), 1)
+  parameters <- make_compiled_loo_parameters(x, get_start("exponential"))
+
+  expect_true(all(is.finite(parameters)))
+  expect_equal(
+    unname(parameters[nrow(parameters), "rate"]),
+    1e300,
+    tolerance = 1e-12
+  )
+})
+
+test_that("compiled leave-one-out fits handle numerical boundary cases", {
+  exponential <- designated_loo_parameters_cpp(c(0, 0, 1), 2L)
+  expect_true(is.na(exponential[3, 1]))
+
+  almost_constant <- c(
+    0x1.a2fe76a3f9475p-498,
+    0x1.a2fe76a3f9475p-499,
+    0x1.a2fe76a3f77aap-499,
+    0x1.a2fe76a3f9473p-499,
+    0x1.a2fe76a3f9473p-499,
+    0x1.a2fe76a3fb14p-499,
+    0x1.a2fe76a3f77aap-499,
+    0x1.a2fe76a3f77aap-499,
+    0x1.a2fe76a3f9473p-499
+  )
+  normal <- designated_loo_parameters_cpp(almost_constant, 1L)
+  expect_identical(normal[1, 2], 0)
+
+  weibull <- designated_loo_parameters_cpp(rep(1, 3), 5L)
+  expect_true(all(is.na(weibull)))
+
+  difficult_beta <- c(
+    9.01349529317247e-16,
+    8.34193070929293e-58,
+    9.96483385752205e-90,
+    1.3187543768896e-114,
+    1.65819281622785e-189
+  )
+  beta <- designated_loo_parameters_cpp(difficult_beta, 6L)
+  expect_true(all(is.na(beta)))
+})
+
 test_that("degenerate fits return the same NaN structure across designated starts", {
   ## n = 2 is degenerate for every designated start; all must return NaN, none
   ## may throw.

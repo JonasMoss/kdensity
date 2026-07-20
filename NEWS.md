@@ -1,48 +1,56 @@
-## kdensity (development version)
+## kdensity 1.3.0 (2026-07-20)
 
-* Compact-support kernels now switch lazily to exact sorted-data range
-  evaluation after enough cumulative work. Laplace kernels use an exact
-  two-sweep recurrence. This accelerates large and repeated callable
-  evaluations without adding sorting overhead to small calls.
-* Added `kdensity_grid()`, an explicitly approximate linear-binning/FFT
-  backend for the built-in translation-invariant kernels and for the
-  Gaussian-copula kernel on the probit scale. Callable `kdensity` objects
-  remain exact; plotting opts in with `grid = "fft"` or `"auto"`.
+### Breaking changes
+
+* `update()` on a `kdensity` object now returns a new object and follows R's
+  copy-on-modify semantics instead of modifying the caller's variable in place.
+  Replace `update(kde, ...)` with `kde <- update(kde, ...)`. The `$<-` and
+  `[[<-` replacement forms are unchanged.
+
+### New features
+
+* Added `kdensity_grid()`, an explicitly approximate linear-binning/FFT backend
+  for the built-in translation-invariant kernels and the Gaussian-copula kernel
+  (on the probit scale). Callable `kdensity` objects stay exact; plotting opts
+  in with `grid = "fft"` or `"auto"`. Exact grids ignore FFT-only arguments,
+  stay linearly spaced, and require whole-number grid sizes.
+* Added the `"GR"` gamma-reference bandwidth selector, obtained by substituting
+  a fitted gamma density into Chen's AMISE-optimal bandwidth. It is not yet a
+  default: the effect of final normalization and non-uniform starts still needs
+  validation.
+
+### Performance
+
 * Built-in kernels now use an exact compiled evaluation path. Gaussian and
-  Gaussian-copula evaluation is substantially faster, while beta and gamma
-  kernels also reuse cached data transformations.
+  Gaussian-copula evaluation is substantially faster, and beta and gamma kernels
+  reuse cached data transformations. User-supplied kernels keep the R path.
+* Compact-support kernels switch lazily to exact sorted-data range evaluation
+  after enough cumulative work, and Laplace kernels use an exact two-sweep
+  recurrence — speeding up large and repeated callable evaluations without
+  adding sorting overhead to small calls.
 * Exact normalization constants replace numerical integration for ordinary
   symmetric KDEs, Gaussian-copula KDEs, and Gaussian kernels with a normal
   parametric start. This also avoids spurious normalization failures for
   compact symmetric kernels.
-* Unbiased cross-validation reuses the compiled evaluator and avoids
-  R-level leave-one-out loops for built-in kernels with a uniform start.
-* Unbiased cross-validation now has a compiled, log-stable pairwise path for
-  normal, exponential, lognormal, gamma, Weibull, and beta starts. Their
-  leave-one-out MLEs are embedded and batched, so this path does not rely on
-  unpublished `univariateML` C++ headers.
-* Fixed the unbiased cross-validation (`bw = "ucv"`) leave-one-out cross term
-  for asymmetric kernels (`gamma`, `beta`, and their bias-corrected variants)
-  with a non-uniform parametric start: it previously set the kernel's shape
-  from the wrong data point, making the objective inconsistent with the
-  estimator. Selected bandwidths for those combinations change slightly.
-* Fixed `logLik()`, `AIC()`, and `BIC()` for `kdensity` objects with a
-  parametric start. `logLik()` summed the parametric start's densities instead
-  of their logarithms, and reported `nobs = 1`, so all three statistics were
-  wrong. They now return the parametric start's true log-likelihood and the
-  correct AIC/BIC.
-* Added the explicit `"GR"` gamma-reference selector, obtained by substituting
-  a fitted gamma density into Chen's AMISE-optimal bandwidth. It is not yet a
-  default because the effect of final normalization and non-uniform starts
-  still needs validation.
+* Unbiased cross-validation (`bw = "ucv"`) gains compiled paths: it reuses the
+  compiled evaluator for built-in kernels with a uniform start, and adds a
+  log-stable pairwise path for normal, exponential, lognormal, gamma, Weibull,
+  and beta starts. Their leave-one-out MLEs are embedded and batched, so this
+  path does not rely on unpublished `univariateML` C++ headers; non-finite or
+  invalid compiled fits fall back to the existing R path.
+
+### Bug fixes
+
+* `bw = "ucv"` for asymmetric kernels (`gamma`, `beta`, and their bias-corrected
+  variants) with a non-uniform parametric start set the kernel's shape from the
+  wrong data point, making the objective inconsistent with the estimator.
+  Selected bandwidths for those combinations change slightly.
+* `logLik()`, `AIC()`, and `BIC()` on objects with a parametric start were
+  wrong: `logLik()` summed the start's densities instead of their logarithms and
+  reported `nobs = 1`. They now return the start's true log-likelihood (evaluated
+  on the log scale when supported) and the correct AIC/BIC.
 * Fixed the bias-corrected beta kernel's vectorized path, which previously
   reordered values from the lower, interior, and upper sections.
-* `update()` for `kdensity` objects now returns a new object and follows R's
-  copy-on-modify semantics instead of reassigning the caller's variable in
-  place. Code relying on the in-place side effect must switch from
-  `update(kde, ...)` to `kde <- update(kde, ...)`. The `$<-` and `[[<-`
-  replacement forms are unchanged.
-* User-supplied kernels retain the existing R evaluation path.
 
 ## kdensity 1.2.0 (2026-05-04)
 

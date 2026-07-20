@@ -210,11 +210,14 @@ bw_environment$ucv <- function(x, kernel = NULL, start = NULL, support = NULL) {
     NULL
   }
   ## Fall back to the R leave-one-out path when the compiled fit fails or
-  ## returns non-finite parameters (degenerate or pathological data), so a bad
-  ## fit degrades to the univariateML path and the outer tryCatch instead of
-  ## aborting kdensity().
+  ## returns non-finite/invalid parameters (degenerate or pathological data),
+  ## so a bad fit degrades to the univariateML path and the outer tryCatch
+  ## instead of aborting kdensity().
   if (use_compiled_loo &&
-      (is.null(compiled_param_loo) || anyNA(compiled_param_loo))) {
+      !compiled_loo_parameters_are_valid(
+        compiled_param_loo,
+        start_obj$compiled_id
+      )) {
     use_compiled_loo <- FALSE
   }
   param_loo <- if (uniform_start || use_compiled_loo) {

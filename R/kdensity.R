@@ -61,8 +61,10 @@
 #'               estimates from the parametric start.}
 #'   \item{`logLik`}{The log-likelihood of the *fitted parametric start*
 #'               (not of the kernel density estimate): the sum of
-#'               `log start(x_i)` at the maximum-likelihood estimates. Is `NA`
-#'               for the `uniform` and `constant` starts.}
+#'               `log start(x_i)` at the maximum-likelihood estimates,
+#'               evaluated directly on the log scale when supported by the
+#'               start density. Is `NA` for the `uniform` and `constant`
+#'               starts.}
 #'
 #' }
 #'
@@ -181,6 +183,17 @@ kdensity <- function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
     do.call(parametric_start, parametric_arguments)
   }
 
+  parametric_log_start_vector <- if (isTRUE(start$density_has_log)) {
+    function(x) {
+      arguments <- parametric_arguments
+      arguments[[1]] <- x
+      arguments$log <- TRUE
+      do.call(parametric_start, arguments)
+    }
+  } else {
+    function(x) log(parametric_start_vector(x))
+  }
+
   ## Takes care of the bandwidth. Can be either a double, a string, or a
   ## function taking the arguments data, kernel, start support.
 
@@ -259,7 +272,7 @@ kdensity <- function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
   logLik <- if (start_str == "uniform" || start_str == "constant") {
     NA
   } else {
-    sum(log(parametric_start_vector(x)))
+    sum(parametric_log_start_vector(x))
   }
 
   ## S3 attributes:

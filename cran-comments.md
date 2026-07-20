@@ -1,28 +1,16 @@
-## Resubmission / update
+## Update
 
-* New closed-form bandwidth selector `"HS"` (Hallberg Szabadváry's beta
-  reference rule, arXiv:2601.19553); now the default for the
-  bias-corrected `beta` kernel with a uniform or constant start.
-* Several packages removed from Imports and Suggests.
-* Internal cleanup: consolidated R source layout, no user-visible API
-  changes.
+This release adds compiled evaluation for the built-in kernels, an optional
+FFT grid backend, and the explicit `"GR"` gamma-reference bandwidth selector.
+It also corrects asymmetric-kernel cross-validation, the vectorized
+bias-corrected beta kernel, `logLik()`/AIC/BIC, and `update()` copy semantics.
 
 ## Test environments
-* macos-latest (release)
-* windows-latest (release)
-* ubuntu-latest (devel)
-* ubuntu-latest (release)
-* ubuntu-latest (oldrel-1)
+* local: Ubuntu 26.04, R 4.6.1
 
 ## R CMD check results
-0 ERRORs, 0 WARNINGs, 2 NOTEs:
-
-* `Found the following (possibly) invalid URLs:` — the Biometrika article
-  link in `README.md` returns HTTP 403 to automated requests but is
-  reachable in a browser. The DOI is correct.
-* `unable to verify current time` — local clock-verification service
-  unavailable; not package-related.
+0 ERRORs, 0 WARNINGs, 0 NOTEs.
 
 ## Reverse dependencies
-We checked the 2 reverse dependencies (RealSurvSim, tscopula) by
-running R CMD check against this version. No problems found.
+We checked the 2 reverse imports (RealSurvSim and tscopula) by running
+R CMD check against this version. No problems were found.

@@ -122,6 +122,31 @@ test_that("known built-in normalizations avoid numerical integration", {
       x = c(0.25, 0.75), estimates = c(mean = 0.5, sd = 0.25)
     )
   )
+  expect_null(
+    known_normalization(
+      normal, get_kernel("gaussian"), c(-Inf, Inf), 0.2,
+      x = c(-1, 1), estimates = c(location = 0, scale = 1)
+    )
+  )
+  expect_null(
+    known_normalization(
+      normal, get_kernel("gaussian"), c(-Inf, Inf), 0,
+      x = c(-1, 1), estimates = c(mean = 0, sd = 1)
+    )
+  )
+})
+
+test_that("compiled helpers fall back cleanly for custom objects", {
+  expect_null(compiled_start_parameter_names(NULL))
+  expect_null(compiled_start_parameter_names(99L))
+  expect_null(make_compiled_loo_parameters(1:3, list()))
+  expect_null(compiled_ucv_term2(
+    x = 1:3,
+    h = 0.2,
+    kernel = list(),
+    start = get_start("normal"),
+    parameters = matrix(1, nrow = 3, ncol = 2)
+  ))
 })
 
 test_that("normal starts with Gaussian kernels have a closed normalization", {
@@ -231,6 +256,131 @@ test_that("compiled non-uniform UCV terms match the R criterion", {
       info = paste(kernel_name, start_name)
     )
   }
+})
+
+test_that("the compiled UCV backend covers every kernel and start family", {
+  interior <- c(0.15, 0.35, 0.65, 0.85)
+  normal_parameters <- matrix(
+    rep(c(0.5, 0.3), length(interior)),
+    nrow = length(interior),
+    byrow = TRUE
+  )
+
+  for (kernel_id in 1:15) {
+    value <- ucv_loo_term_cpp(
+      interior,
+      if (kernel_id >= 12) 0.1 else 0.25,
+      kernel_id,
+      1L,
+      normal_parameters
+    )
+    expect_type(value, "double")
+  }
+  expect_type(
+    ucv_loo_term_cpp(
+      c(0, 0.2, 0.8, 1),
+      0.1,
+      14L,
+      1L,
+      normal_parameters
+    ),
+    "double"
+  )
+
+  start_cases <- list(
+    list(id = 1L, x = c(-1, 0, 1), parameters = c(0, 1)),
+    list(id = 2L, x = c(0, 1, 2), parameters = 1),
+    list(id = 3L, x = c(0, 1, 2), parameters = c(0, 1)),
+    list(id = 4L, x = c(0, 1, 2), parameters = c(2, 1)),
+    list(id = 5L, x = c(0, 1, 2), parameters = c(2, 1)),
+    list(id = 6L, x = c(0, 0.5, 1), parameters = c(2, 2))
+  )
+  for (case in start_cases) {
+    parameters <- matrix(
+      rep(case$parameters, length(case$x)),
+      nrow = length(case$x),
+      byrow = TRUE
+    )
+    expect_type(
+      ucv_loo_term_cpp(
+        case$x, 0.25, 1L, case$id, parameters
+      ),
+      "double"
+    )
+  }
+
+  exponential_parameters <- matrix(1, nrow = 3, ncol = 1)
+  expect_identical(
+    ucv_loo_term_cpp(
+      c(1, -1, 2), 1, 1L, 2L, exponential_parameters
+    ),
+    Inf
+  )
+
+  separated <- c(0, 10, 20)
+  separated_parameters <- matrix(
+    rep(c(10, 5), length(separated)),
+    nrow = length(separated),
+    byrow = TRUE
+  )
+  expect_equal(
+    ucv_loo_term_cpp(
+      separated, 0.1, 2L, 1L, separated_parameters
+    ),
+    0
+  )
+})
+
+test_that("compiled UCV validates its direct interface", {
+  x <- c(0.2, 0.5, 0.8)
+  parameters <- matrix(rep(c(0.5, 0.3), 3), nrow = 3, byrow = TRUE)
+
+  expect_error(
+    ucv_loo_term_cpp(x[1], 0.2, 1L, 1L, parameters[1, , drop = FALSE]),
+    "At least two"
+  )
+  expect_error(
+    ucv_loo_term_cpp(x, 0, 1L, 1L, parameters),
+    "positive"
+  )
+  expect_error(
+    ucv_loo_term_cpp(x, 0.2, 99L, 1L, parameters),
+    "kernel id"
+  )
+  expect_error(
+    ucv_loo_term_cpp(x, 0.2, 1L, 99L, parameters),
+    "start id"
+  )
+  expect_error(
+    ucv_loo_term_cpp(x, 0.2, 1L, 1L, parameters[, 1, drop = FALSE]),
+    "wrong dimensions"
+  )
+})
+
+test_that("direct compiled kernel sums validate cache dimensions", {
+  x <- c(0.2, 0.8)
+  weights <- c(0.5, 0.5)
+
+  expect_error(
+    kernel_weighted_sum_cpp(0.5, x, 1, 0.2, 1L, numeric(), numeric()),
+    "same length"
+  )
+  expect_error(
+    kernel_weighted_sum_cpp(0.5, x, weights, 0.2, 99L, numeric(), numeric()),
+    "kernel id"
+  )
+  expect_error(
+    kernel_weighted_sum_cpp(0.5, x, weights, 0.2, 11L, 0, numeric()),
+    "copula cache"
+  )
+  expect_error(
+    kernel_weighted_sum_cpp(0.5, x, weights, 0.2, 12L, 0, numeric()),
+    "log-data cache"
+  )
+  expect_error(
+    kernel_weighted_sum_cpp(0.5, x, weights, 0.2, 14L, c(0, 0), 0),
+    "beta-kernel cache"
+  )
 })
 
 test_that("the bias-corrected beta kernel preserves vector order", {

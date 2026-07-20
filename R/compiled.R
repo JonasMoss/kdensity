@@ -84,6 +84,10 @@ make_kernel_evaluator <- function(x, h, kernel, parametric_start_data) {
 }
 
 compiled_start_parameter_names <- function(start_id) {
+  if (length(start_id) != 1L || is.na(start_id)) {
+    return(NULL)
+  }
+
   switch(as.character(start_id),
     "1" = c("mean", "sd"),
     "2" = "rate",
@@ -105,6 +109,19 @@ make_compiled_loo_parameters <- function(x, start) {
   parameters <- designated_loo_parameters_cpp(x, start_id)
   colnames(parameters) <- parameter_names
   parameters
+}
+
+compiled_loo_parameters_are_valid <- function(parameters, start_id) {
+  if (is.null(parameters) || length(parameters) == 0L ||
+      any(!is.finite(parameters))) {
+    return(FALSE)
+  }
+
+  if (start_id %in% c(1L, 3L)) {
+    return(all(parameters[, 2L] > 0))
+  }
+
+  all(parameters > 0)
 }
 
 compiled_ucv_term2 <- function(x, h, kernel, start, parameters) {

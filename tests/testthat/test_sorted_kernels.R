@@ -125,6 +125,12 @@ test_that("the dispatched sorted path retains parametric-start weights", {
 
 test_that("sorted-kernel helpers validate their inputs", {
   expect_error(
+    kernel_weighted_sum_sorted_cpp(
+      0, numeric(), numeric(), 0.2, 2L, list()
+    ),
+    "equal positive length"
+  )
+  expect_error(
     compact_kernel_cache_cpp(c(1, 0), c(1, 1), 0.2),
     "must be sorted"
   )
@@ -133,10 +139,67 @@ test_that("sorted-kernel helpers validate their inputs", {
     "equal positive length"
   )
   expect_error(
+    compact_kernel_cache_cpp(c(0, 1), c(1, 1), 0),
+    "finite and positive"
+  )
+  expect_error(
+    compact_kernel_cache_cpp(c(0, Inf), c(1, 1), 0.2),
+    "must be finite"
+  )
+  expect_error(
     kernel_weighted_sum_sorted_cpp(
       0, c(0, 1), c(1, 1), 0.2, 1L, list()
     ),
     "kernel ids 2 through 10"
+  )
+  expect_error(
+    kernel_weighted_sum_sorted_cpp(
+      0, c(0, 1), c(1, 1), 0, 2L, list()
+    ),
+    "finite and positive"
+  )
+  expect_error(
+    kernel_weighted_sum_sorted_cpp(
+      0, c(0, Inf), c(1, 1), 0.2, 2L, list()
+    ),
+    "must be finite"
+  )
+  expect_error(
+    kernel_weighted_sum_sorted_cpp(
+      0, c(1, 0), c(1, 1), 0.2, 2L, list()
+    ),
+    "must be sorted"
+  )
+  expect_error(
+    kernel_weighted_sum_sorted_cpp(
+      0, c(0, 1), c(1, 1), 0.2, 2L, list()
+    ),
+    "cache is incomplete"
+  )
+  expect_error(
+    kernel_weighted_sum_sorted_cpp(
+      0, c(0, 1), c(1, 1), 0.2, 2L,
+      list(
+        base = 2L,
+        centers = numeric(3),
+        summaries = matrix(0, nrow = 4, ncol = 14)
+      )
+    ),
+    "incompatible dimensions"
+  )
+})
+
+test_that("uncached compact nodes recurse to their leaves", {
+  cache <- list(
+    base = 2L,
+    centers = numeric(4),
+    summaries = matrix(NA_real_, nrow = 4, ncol = 14)
+  )
+  expect_equal(
+    kernel_weighted_sum_sorted_cpp(
+      0.5, c(0, 1), c(1, 1), 1, 2L, cache
+    ),
+    0
   )
 })
 

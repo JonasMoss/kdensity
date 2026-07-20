@@ -5,3 +5,14 @@ expect_identical(plot(obj), obj)
 expect_identical(plot(obj, plot_start = TRUE), obj)
 expect_identical(points(obj), obj)
 expect_identical(lines(obj), obj)
+
+expect_identical(plot(obj, grid = "auto", zero_line = FALSE), obj)
+expect_identical(
+  plot(
+    obj,
+    range = range(obj$x),
+    grid = "auto",
+    zero_line = FALSE
+  ),
+  obj
+)

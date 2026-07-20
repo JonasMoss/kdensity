@@ -127,7 +127,95 @@ test_that("grid arguments are validated", {
 
   expect_error(kdensity_grid(precip), "must be a kdensity")
   expect_error(kdensity_grid(fit, n = 1), "at least two")
+  expect_error(kdensity_grid(fit, n = 2.9), "whole number")
   expect_error(kdensity_grid(fit, from = 2, to = 1), "from.*to")
   expect_error(kdensity_grid(fit, fft_n = 100), "at least 512")
   expect_error(kdensity_grid(fit, truncate = 0), "positive")
+
+  exact <- kdensity_grid(
+    fit,
+    method = "exact",
+    fft_n = 100,
+    truncate = 0
+  )
+  expect_identical(exact$method, "exact")
+  expect_true(is.na(exact$fft_n))
+  expect_equal(exact$y, fit(exact$x))
+})
+
+test_that("exact Gaussian-copula grids are linearly spaced", {
+  set.seed(20260720)
+  fit <- kdensity(rbeta(100, 2, 5), kernel = "gcopula", bw = 0.12)
+  exact <- kdensity_grid(
+    fit,
+    from = 0.01,
+    to = 0.99,
+    n = 21,
+    method = "exact",
+    fft_n = 1,
+    truncate = 0
+  )
+
+  expect_equal(exact$x, seq(0.01, 0.99, length.out = 21))
+  expect_equal(exact$y, fit(exact$x))
+})
+
+test_that("FFT support diagnostics cover invalid fitted state", {
+  expect_null(fft_grid_kernel_name(99L))
+
+  bad_bandwidth <- kdensity(precip, bw = 0.2)
+  environment(bad_bandwidth)$h <- 0
+  expect_match(
+    fft_grid_support_problem(bad_bandwidth, 0, 1),
+    "bandwidth"
+  )
+
+  bad_start <- kdensity(precip, bw = 0.2)
+  environment(bad_start)$parametric_start_data <-
+    rep(0, bad_start$n)
+  expect_match(
+    fft_grid_support_problem(bad_start, 0, 1),
+    "data weights"
+  )
+
+  bad_normalization <- kdensity(precip, bw = 0.2)
+  environment(bad_normalization)$normalization <- 0
+  expect_match(
+    fft_grid_support_problem(bad_normalization, 0, 1),
+    "normalization"
+  )
+
+  set.seed(20260720)
+  copula_boundary <- kdensity(
+    rbeta(20, 2, 5),
+    kernel = "gcopula",
+    bw = 0.12
+  )
+  environment(copula_boundary)$x[[1]] <- 0
+  expect_match(
+    fft_grid_support_problem(copula_boundary, 0, 1),
+    "strictly inside"
+  )
+
+  copula_bandwidth <- kdensity(
+    rbeta(20, 2, 5),
+    kernel = "gcopula",
+    bw = 0.12
+  )
+  environment(copula_bandwidth)$h <- sqrt(2)
+  expect_match(
+    fft_grid_support_problem(copula_bandwidth, 0, 1),
+    "bandwidth requires"
+  )
+})
+
+test_that("short copula convolution grids use exact evaluation", {
+  set.seed(20260720)
+  fit <- kdensity(rbeta(20, 2, 5), kernel = "gcopula", bw = 0.12)
+  grid <- c(0, 1)
+
+  expect_identical(
+    evaluate_kdensity_fft_grid(fit, grid, fft_n = 512, truncate = 8),
+    fit(grid)
+  )
 })
