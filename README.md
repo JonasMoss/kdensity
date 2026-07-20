@@ -15,45 +15,19 @@ starts and asymmetric kernels.
 
 ## Overview
 
-kdensity is an implementation of univariate kernel density estimation
-with support for parametric starts and asymmetric kernels. Its main
-function is `kdensity`, which is has approximately the same syntax as
-`stats::density`. Its new functionality is:
+kdensity implements univariate kernel density estimation with roughly
+the same syntax as `stats::density`, adding three things: *parametric
+starts*, *asymmetric kernels*, and configurable bandwidth selection.
+Built-in parametric starts include `normal` and `gamma` (see
+[`univariateML`](https://github.com/JonasMoss/univariateML) for the full
+list), and the asymmetric kernels include `gcopula` and Chen’s `gamma`
+and `beta` kernels; you can also supply your own starts, kernels, and
+bandwidth functions. The return value is itself a density function,
+ready for numerical integration, differentiation, or point evaluation.
 
-- `kdensity` has built-in support for many *parametric starts*, such as
-  `normal` and `gamma`, but you can also supply your own. For a list of
-  supported parametric starts, see the readme of
-  [`univariateML`](https://github.com/JonasMoss/univariateML).
-- It supports several asymmetric kernels ones such as `gcopula` and
-  `gamma` kernels, but also the common symmetric ones. In addition, you
-  can also supply your own kernels.
-- A selection of choices for the bandwidth function `bw`, again
-  including an option to specify your own.
-- The returned value is density function. This can be used for
-  e.g. numerical integration, numerical differentiation, and point
-  evaluations.
-
-A reason to use `kdensity` is to avoid *boundary bias* when estimating
-densities on the unit interval or the positive half-line. Asymmetric
-kernels such as `gamma` and `gcopula` are designed for this purpose. The
-support for parametric starts allows you to easily use a method that is
-often superior to ordinary kernel density estimation.
-
-Several `R` packages deal with kernel estimation. For an overview see
-[Deng & Hadley Wickham
-(2011)](https://vita.had.co.nz/papers/density-estimation.pdf). While no
-other `R` package handles density estimation with parametric starts,
-several packages supports methods that handle boundary bias.
-[`evmix`](http://www.math.canterbury.ac.nz/~c.scarrott/evmix/) provides
-a variety of boundary bias correction methods in the `bckden` function.
-[`kde1d`](https://github.com/tnagler/kde1d) corrects for boundary bias
-using transformed univariate local polynomial kernel density estimation.
-[`logKDE`](https://github.com/andrewthomasjones/logKDE) corrects for
-boundary bias on the half line using a logarithmic transform.
-[`ks`](https://CRAN.R-project.org/package=ks) supports boundary
-correction through the `kde.boundary` function, while
-[`Ake`](https://CRAN.R-project.org/package=Ake) corrects for boundary
-bias using tailored kernel functions.
+Use a parametric start for an estimator that often beats ordinary kernel
+density estimation, and an asymmetric kernel to avoid *boundary bias*
+when your data live on the unit interval or the positive half-line.
 
 ## Installation
 
@@ -77,6 +51,8 @@ library("kdensity")
 plot(kdensity(mtcars$mpg, start = "normal"))
 ```
 
+<img src="man/figures/README-simpleuse-1.png" alt="" width="750px" />
+
 ## Description
 
 Kernel density estimation with a *parametric start* was introduced by
@@ -87,7 +63,7 @@ density estimation, so that your actual kernel density estimation will
 be a correction to the original parametric estimate. The resulting
 estimator will outperform the ordinary kernel density estimator in terms
 of asymptotic integrated mean squared error whenever the true density is
-close to your suggestion; and the estimator can be superior to the
+close to your suggestion, and the estimator can be superior to the
 ordinary kernel density estimator even when the suggestion is pretty far
 off.
 
@@ -116,10 +92,11 @@ kernels:
   These are used for data supported on the positive half-line, and are
   called `gamma` and `gamma_biased`.
 
-These features can be combined to make asymmetric kernel densities
-estimators with parametric starts, see the example below. The package
-contains only one function, `kdensity`, in addition to the generics
-`plot`, `points`, `lines`, `summary`, and `print`.
+These features can be combined to make asymmetric kernel density
+estimators with parametric starts, see the example below. The package’s
+two main functions are `kdensity()` and `kdensity_grid()`, in addition
+to methods for generics such as `plot()`, `points()`, `lines()`,
+`summary()`, and `print()`.
 
 ``` r
 set.seed(42)
@@ -136,11 +113,12 @@ The function `kdensity` takes some `data`, a kernel `kernel` and a
 parametric start `start`. You can optionally specify the `support`
 parameter, which is used to find the normalizing constant.
 
-The following example uses the data set. The black curve is a
-gamma-kernel density estimate with a gamma start, the red curve a fully
-parametric gamma density and and the blue curve an ordinary `density`
-estimate. Notice the boundary bias of the ordinary `density` estimator.
-The underlying parameter estimates are always maximum likelilood.
+The following example uses the `datasets::airquality` data set. The
+black curve is a gamma-kernel density estimate with a gamma start, the
+red curve a fully parametric gamma density, and the blue curve an
+ordinary `density` estimate. Notice the boundary bias of the ordinary
+`density` estimator. The underlying parameter estimates are always
+maximum likelihood.
 
 ``` r
 library("kdensity")
@@ -167,7 +145,7 @@ integrate(kde, lower = 0, upper = 1) # The cumulative distribution up to 1.
 For large plotting grids, `kdensity_grid()` provides an explicitly
 approximate binning-and-FFT backend for the built-in symmetric kernels
 and the Gaussian-copula kernel. Calling `kde()` remains exact. Plotting
-also opts in with `grid = "fft"` for supported fits; use `grid = "auto"`
+also opts in with `grid = "fft"` for supported fits. Use `grid = "auto"`
 when an exact fallback is preferred for unsupported kernels.
 
 You can access the parameter estimates by using `coef`. You can also
@@ -184,13 +162,6 @@ logLik(kde)
 AIC(kde)
 #> [1] 825.0259
 ```
-
-## How to Contribute or Get Help
-
-If you encounter a bug, have a feature request or need some help, open a
-[Github issue](https://github.com/JonasMoss/kdensity/issues). Create a
-pull requests to contribute. This project follows a [Contributor Code of
-Conduct](https://www.contributor-covenant.org/version/1/4/code-of-conduct/).
 
 ## References
 
