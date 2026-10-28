@@ -22,34 +22,63 @@ The bandwidth functions are not exported. They are members of the
 environment \code{bw_environments}, and can be accessed by
 \code{kdensity:::bw_environments}.
 }
+\section{Defaults}{
+
+Every default is a closed-form rule, so no default requires
+cross-validation:\tabular{lll}{
+   Kernel \tab Uniform start \tab Parametric start \cr
+   symmetric (\code{gaussian}, ...) \tab \code{"nrd0"} \tab \code{"RHE"} \cr
+   \code{gamma}, \code{gamma_biased} \tab \code{"GR"} \tab \code{"GR"} \cr
+   \code{beta}, \code{beta_biased} \tab \code{"HS"} \tab \code{"HS"} \cr
+   \code{gcopula} \tab \code{"SJ"} \tab \code{"SJ"} \cr
+   custom kernel without \code{sd} \tab \code{"ucv"} \tab \code{"ucv"} \cr
+}
+
+
+The rules use only the data, not the fitted parametric start. When the
+start fits well, the correction it leaves for the kernel is smoother than
+the density itself, so a larger bandwidth would be better; the rules then
+undersmooth slightly. \code{"ucv"} takes the start into account at the cost of
+a computation that grows with the square of the sample size.
+}
+
 \section{Bandwidth selectors}{
 
-\verb{"nrd0", "nrd", "bcv", "SJ"}: Bandwidth selectors from \code{stats}.
-They are documented in \verb{[bandwidth][stats::bandwidth] stats:bandwidth}.
-"nrd0" is the standard bandwidth selector for symmetric kernels with
-constant parametric starts.
+\verb{"nrd0", "nrd", "bcv"}: Bandwidth selectors from \code{stats}, documented
+in \code{\link[stats:bw.nrd0]{stats::bw.nrd0()}}. They are on the scale of the Gaussian kernel's
+standard deviation; \code{kdensity} rescales them for the other symmetric
+kernels.
 
-\code{"ucv"}: Unbiased cross validation. The standard option for
-asymmetric kernels.
+\code{"SJ"}: The Sheather & Jones (1991) plug-in selector \code{\link[stats:bw.SJ]{stats::bw.SJ()}}.
+For the \code{gcopula} kernel it is applied on the probit scale: there the
+Gaussian copula estimator is a Gaussian kernel estimate with bandwidth
+\code{s = sqrt(1 - rho^2)}, where \code{rho = 1 - h^2}, so the selected \code{s} is
+converted to \code{h = sqrt(1 - sqrt(1 - s^2))}. If the selector fails on
+degenerate data, \code{"JH"} is used with a warning.
+
+\code{"ucv"}: Unbiased cross-validation. With a parametric start it refits the
+start without each observation, so its cost grows with the square of the
+sample size.
 
 \code{"HS"}: Hallberg Szabadváry's closed-form reference rule for the
-beta kernel on the unit interval. This is the default for
-\code{kernel = "beta"} with a uniform or constant start.
+bias-corrected beta kernel, based on a beta reference density fitted by
+moments. Used for both beta kernels, with a fallback heuristic when the
+rule's moment conditions fail.
 
 \code{"GR"}: Chen's AMISE-optimal bandwidth for the bias-corrected gamma
-kernel, with the unknown density replaced by a fitted gamma reference.
-This avoids cross-validation, but is currently explicit rather than the
-default because \code{kdensity} additionally normalizes the estimator and may
-use a non-uniform parametric start.
+kernel, with the unknown density replaced by a gamma reference fitted by
+maximum likelihood to the positive observations. The fitted shape is
+floored at 3, keeping the fitted mean: the rule needs a shape above 3/2,
+and the floor was the most robust choice in simulations with exponential,
+lognormal, Weibull and mixture targets. Used for both gamma kernels.
 
-\code{"RHE"}: Selector for parametric starts with a symmetric kernel,
-based on a reference rule with Hermite polynomials.
-Described in Hjort & Glad (1995). The default method in \code{kdensity} when a parametric
-start is supplied and the kernel is symmetric.
+\code{"RHE"}: A reference rule for symmetric kernels that estimates the
+roughness of the density with Hermite polynomials around a fitted
+normal density. It uses only the data, not the parametric start.
 
-\code{"JH"}: Selector for the Gaussian copula kernel, based on
-normal reference rule. Described in Jones & Henderson. The default method when
-the \code{gcopula} kernel is used in \code{kdensity}.
+\code{"JH"}: Jones & Henderson's normal-reference rule for the Gaussian
+copula kernel. Accurate for unimodal data, but it oversmooths
+multimodal data badly; capped at 0.5.
 }
 
 \section{Structure}{
@@ -72,6 +101,8 @@ kdensity(mtcars$mpg, start = "gumbel", bw = silly_width)
 Jones, M. C., and D. A. Henderson. "Kernel-type density estimation on the unit interval." Biometrika 94.4 (2007): 977-984.
 Hjort, Nils Lid, and Ingrid K. Glad. "Nonparametric density estimation with a parametric start." The Annals of Statistics (1995): 882-904.
 Hallberg Szabadváry, Johan. "A Fast, Closed-Form Bandwidth Selector for the Beta Kernel Density Estimator." arXiv preprint arXiv:2601.19553 (2026).
+Sheather, S. J., and M. C. Jones. "A reliable data-based bandwidth selection method for kernel density estimation." Journal of the Royal Statistical Society: Series B 53.3 (1991): 683-690.
+Chen, Song Xi. "Probability density function estimation using gamma kernels." Annals of the Institute of Statistical Mathematics 52.3 (2000): 471-480.
 }
 \seealso{
 \code{\link[=kdensity]{kdensity()}}, \code{\link[stats:bandwidth.kernel]{stats::bandwidth.kernel()}} for the

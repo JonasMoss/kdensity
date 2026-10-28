@@ -15,34 +15,60 @@ bw_environment <- new.env(hash = FALSE)
 #' @param support The domain of definition for the kernel. (-Inf, Inf) for
 #' symmetric kernels.
 #'
-#' @section Bandwidth selectors:
-#'    `"nrd0", "nrd", "bcv", "SJ"`: Bandwidth selectors from `stats`.
-#'    They are documented in `[bandwidth][stats::bandwidth] stats:bandwidth`.
-#'    "nrd0" is the standard bandwidth selector for symmetric kernels with
-#'    constant parametric starts.
+#' @section Defaults:
+#'    Every default is a closed-form rule, so no default requires
+#'    cross-validation:
 #'
-#'    `"ucv"`: Unbiased cross validation. The standard option for
-#'    asymmetric kernels.
+#'    | Kernel | Uniform start | Parametric start |
+#'    |---|---|---|
+#'    | symmetric (`gaussian`, ...) | `"nrd0"` | `"RHE"` |
+#'    | `gamma`, `gamma_biased` | `"GR"` | `"GR"` |
+#'    | `beta`, `beta_biased` | `"HS"` | `"HS"` |
+#'    | `gcopula` | `"SJ"` | `"SJ"` |
+#'    | custom kernel without `sd` | `"ucv"` | `"ucv"` |
+#'
+#'    The rules use only the data, not the fitted parametric start. When the
+#'    start fits well, the correction it leaves for the kernel is smoother than
+#'    the density itself, so a larger bandwidth would be better; the rules then
+#'    undersmooth slightly. `"ucv"` takes the start into account at the cost of
+#'    a computation that grows with the square of the sample size.
+#'
+#' @section Bandwidth selectors:
+#'    `"nrd0", "nrd", "bcv"`: Bandwidth selectors from `stats`, documented
+#'    in [stats::bw.nrd0()]. They are on the scale of the Gaussian kernel's
+#'    standard deviation; `kdensity` rescales them for the other symmetric
+#'    kernels.
+#'
+#'    `"SJ"`: The Sheather & Jones (1991) plug-in selector [stats::bw.SJ()].
+#'    For the `gcopula` kernel it is applied on the probit scale: there the
+#'    Gaussian copula estimator is a Gaussian kernel estimate with bandwidth
+#'    `s = sqrt(1 - rho^2)`, where `rho = 1 - h^2`, so the selected `s` is
+#'    converted to `h = sqrt(1 - sqrt(1 - s^2))`. If the selector fails on
+#'    degenerate data, `"JH"` is used with a warning.
+#'
+#'    `"ucv"`: Unbiased cross-validation. With a parametric start it refits the
+#'    start without each observation, so its cost grows with the square of the
+#'    sample size.
 #'
 #'    `"HS"`: Hallberg Szabadváry's closed-form reference rule for the
-#'    beta kernel on the unit interval. This is the default for
-#'    `kernel = "beta"` with a uniform or constant start.
+#'    bias-corrected beta kernel, based on a beta reference density fitted by
+#'    moments. Used for both beta kernels, with a fallback heuristic when the
+#'    rule's moment conditions fail.
 #'
 #'    `"GR"`: Chen's AMISE-optimal bandwidth for the bias-corrected gamma
-#'    kernel, with the unknown density replaced by a fitted gamma reference.
-#'    This avoids cross-validation, but is currently explicit rather than the
-#'    default because `kdensity` additionally normalizes the estimator and may
-#'    use a non-uniform parametric start.
+#'    kernel, with the unknown density replaced by a gamma reference fitted by
+#'    maximum likelihood to the positive observations. The fitted shape is
+#'    floored at 3, keeping the fitted mean: the rule needs a shape above 3/2,
+#'    and the floor was the most robust choice in simulations with exponential,
+#'    lognormal, Weibull and mixture targets. Used for both gamma kernels.
 #'
-#'    `"RHE"`: Selector for parametric starts with a symmetric kernel,
-#'    based on a reference rule with Hermite polynomials.
-#'    Described in Hjort & Glad (1995). The default method in `kdensity` when a parametric
-#'    start is supplied and the kernel is symmetric.
+#'    `"RHE"`: A reference rule for symmetric kernels that estimates the
+#'    roughness of the density with Hermite polynomials around a fitted
+#'    normal density. It uses only the data, not the parametric start.
 #'
-#'    `"JH"`: Selector for the Gaussian copula kernel, based on
-#'    normal reference rule. Described in Jones & Henderson. The default method when
-#'    the `gcopula` kernel is used in `kdensity`.
-#'
+#'    `"JH"`: Jones & Henderson's normal-reference rule for the Gaussian
+#'    copula kernel. Accurate for unimodal data, but it oversmooths
+#'    multimodal data badly; capped at 0.5.
 #'
 #' @section Structure:
 #'    The bandwidth selector is a function of four arguments: The data
@@ -65,6 +91,8 @@ bw_environment <- new.env(hash = FALSE)
 #' Jones, M. C., and D. A. Henderson. "Kernel-type density estimation on the unit interval." Biometrika 94.4 (2007): 977-984.
 #' Hjort, Nils Lid, and Ingrid K. Glad. "Nonparametric density estimation with a parametric start." The Annals of Statistics (1995): 882-904.
 #' Hallberg Szabadváry, Johan. "A Fast, Closed-Form Bandwidth Selector for the Beta Kernel Density Estimator." arXiv preprint arXiv:2601.19553 (2026).
+#' Sheather, S. J., and M. C. Jones. "A reliable data-based bandwidth selection method for kernel density estimation." Journal of the Royal Statistical Society: Series B 53.3 (1991): 683-690.
+#' Chen, Song Xi. "Probability density function estimation using gamma kernels." Annals of the Institute of Statistical Mathematics 52.3 (2000): 471-480.
 #' @name bandwidths
 NULL
 
@@ -108,7 +136,26 @@ bw_environment$RHE <- function(x, kernel = NULL, start = NULL, support = NULL) {
 bw_environment$nrd0 <- function(data, kernel, start, support) stats::bw.nrd0(data)
 bw_environment$nrd <- function(data, kernel, start, support) stats::bw.nrd(data)
 bw_environment$bcv <- function(data, kernel, start, support) stats::bw.bcv(data)
-bw_environment$SJ <- function(data, kernel, start, support) stats::bw.SJ(data)
+bw_environment$SJ <- function(data, kernel = NULL, start = NULL, support = NULL) {
+  if (!identical(kernel, "gcopula")) {
+    return(stats::bw.SJ(data))
+  }
+
+  tryCatch(
+    compute_probit_sj_bandwidth(data),
+    error = function(error) {
+      warning(
+        paste0(
+          "Bandwidth selector 'SJ' failed: ",
+          conditionMessage(error),
+          ". Falling back to 'JH'."
+        ),
+        call. = FALSE
+      )
+      bw_environment$JH(data)
+    }
+  )
+}
 
 bw_environment$HS <- function(x, kernel = NULL, start = NULL, support = NULL) {
   if (!is.numeric(x)) {
@@ -140,8 +187,8 @@ bw_environment$HS <- function(x, kernel = NULL, start = NULL, support = NULL) {
 }
 
 bw_environment$GR <- function(x, kernel = NULL, start = NULL, support = NULL) {
-  if (!is.null(kernel) && kernel != "gamma") {
-    stop("Bandwidth selector 'GR' is only defined for kernel = 'gamma'.")
+  if (!is.null(kernel) && !kernel %in% c("gamma", "gamma_biased")) {
+    stop("Bandwidth selector 'GR' is only defined for the gamma kernels.")
   }
 
   tryCatch(
@@ -445,8 +492,15 @@ compute_gr_bandwidth <- function(x) {
   if (n < 2L) {
     stop("'x' must have at least 2 observations.")
   }
-  if (any(!is.finite(x)) || any(x <= 0)) {
-    stop("All values in 'x' must be finite and strictly positive.")
+  if (any(!is.finite(x)) || any(x < 0)) {
+    stop("All values in 'x' must be finite and non-negative.")
+  }
+
+  # The gamma reference is fitted to the positive observations; exact zeros
+  # have no likelihood under it. The bandwidth still uses the full n.
+  x <- x[x > 0]
+  if (length(x) < 2L) {
+    stop("At least 2 observations must be strictly positive.")
   }
 
   mean_x <- mean(x)
@@ -472,11 +526,13 @@ compute_gr_bandwidth <- function(x) {
     }
     shape <- next_shape
   }
+  # The roughness integral below is finite only for shape > 3/2 and blows up
+  # as the shape approaches 3/2. Flooring the shape at 3 (keeping the fitted
+  # mean) was the most robust choice in the default-bandwidth simulation
+  # (tools/default-bandwidth-sim): it tracks GR for gamma-like data and stays
+  # sensible for exponential, lognormal and mixture data.
+  shape <- max(shape, 3)
   rate <- shape / mean_x
-
-  if (shape <= 1.5) {
-    stop("The fitted gamma shape must exceed 3/2 for finite AMISE roughness.")
-  }
 
   # For f = Gamma(shape, rate), Chen's two AMISE integrals reduce to
   #
@@ -492,6 +548,19 @@ compute_gr_bandwidth <- function(x) {
   exp((2 / 5) * (
     log_v - log(2 * sqrt(pi)) - log_r - log(n)
   ))
+}
+
+## On the probit scale z = qnorm(u), the Gaussian copula estimator is exactly
+## a Gaussian kernel estimate of the points rho * qnorm(x_i) with bandwidth
+## s = sqrt(1 - rho^2), where rho = 1 - h^2. A Gaussian bandwidth s selected
+## for qnorm(x) therefore converts to h = sqrt(1 - sqrt(1 - s^2)), or about
+## s / sqrt(2). Observations at 0 or 1 have infinite probits and are dropped,
+## as in JH.
+compute_probit_sj_bandwidth <- function(x) {
+  z <- stats::qnorm(x)
+  s <- stats::bw.SJ(z[is.finite(z)])
+  s <- min(s, 1)
+  sqrt(1 - sqrt(1 - s^2))
 }
 
 ## ---------------------------------------------------------------------------
@@ -524,23 +593,19 @@ get_bw <- function(bw_str) {
 #' @return a bandwidth string.
 
 get_standard_bw <- function(kernel_str, start_str, support) {
-  if (kernel_str == "gcopula" & (start_str == "constant" |
-    start_str == "uniform")) {
-    bw <- "JH"
-  } else if (kernel_str == "beta" & (start_str == "constant" |
-    start_str == "uniform")) {
-    bw <- "HS"
-  } else if (start_str != "constant" & start_str != "uniform") {
-    if (!is.null(get_kernel(kernel_str)$sd)) {
-      bw <- "RHE"
-    } else {
-      bw <- "ucv"
-    }
-  } else if (!is.null(get_kernel(kernel_str)$sd)) {
-    bw <- "nrd0"
-  } else {
-    bw <- "ucv"
+  ## Every built-in kernel gets a closed-form rule; see the Defaults section
+  ## of ?bandwidths and tools/default-bandwidth-sim for the evidence.
+  if (kernel_str == "gcopula") {
+    return("SJ")
   }
-
-  bw
+  if (kernel_str %in% c("beta", "beta_biased")) {
+    return("HS")
+  }
+  if (kernel_str %in% c("gamma", "gamma_biased")) {
+    return("GR")
+  }
+  if (is.null(get_kernel(kernel_str)$sd)) {
+    return("ucv")
+  }
+  if (start_str %in% c("constant", "uniform")) "nrd0" else "RHE"
 }

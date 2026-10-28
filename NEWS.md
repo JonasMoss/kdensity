@@ -10,6 +10,27 @@ Version 1.3.0 was never released; its changes are part of this version.
   `y >= 2h` the kernel coincided with the uncorrected `gamma_biased` kernel and
   its boundary modification increased the error. Every fit that uses the gamma
   kernel changes, including the bandwidths selected for it.
+* Every built-in kernel now defaults to a closed-form bandwidth rule, so no
+  default needs cross-validation. Building a gamma-kernel fit at n = 10,000
+  took 48--198 seconds with the old `"ucv"` default; it now takes
+  milliseconds. The new defaults:
+  - `gamma` and `gamma_biased`, any start: `"GR"` (was `"ucv"`).
+  - `beta` and `beta_biased`, any start: `"HS"` (was `"ucv"` except for
+    `beta` with a uniform start).
+  - `gcopula`, any start: `"SJ"` (was `"JH"` with a uniform start and `"ucv"`
+    otherwise). `"JH"` oversmooths multimodal data badly, up to 29 times the
+    optimal integrated squared error in simulations.
+
+  The rules ignore the parametric start, as `"RHE"` already did for
+  symmetric kernels. When the start fits well they undersmooth a little;
+  `bw = "ucv"` remains available for a start-aware choice. A simulation over
+  gamma, exponential, lognormal, Weibull, beta and mixture targets found the
+  new defaults as good as or better than `"ucv"` with uniform starts.
+* `bw = "SJ"` with the `gcopula` kernel now applies Sheather and Jones's
+  selector on the probit scale, where the Gaussian copula estimator is a
+  Gaussian kernel estimate, and converts the result to the copula bandwidth.
+  It previously applied the selector to the raw data on the unit interval,
+  which is not a bandwidth for this kernel.
 * Fitted `kdensity` objects are read-only. The `update()`, `$<-` and `[[<-`
   methods are removed, so `kde$bw <- 0.5` and `kde[["kernel"]] <- "gamma"`
   now give an error. `update()` falls back to `stats::update.default()`, which
@@ -29,10 +50,11 @@ Version 1.3.0 was never released; its changes are part of this version.
   and asymmetric kernels. Gaussian-copula grids evaluate numerically unstable
   extreme probit tails exactly. Exact grids ignore FFT-only arguments, stay
   linearly spaced, and require whole-number grid sizes.
-* Added the `"GR"` gamma-reference bandwidth selector, obtained by substituting
-  a fitted gamma density into Chen's AMISE-optimal bandwidth. It is not yet a
-  default: the effect of final normalization and non-uniform starts still needs
-  validation.
+* Added the `"GR"` gamma-reference bandwidth selector: Chen's AMISE-optimal
+  bandwidth for the bias-corrected gamma kernel with a fitted gamma density
+  in place of the unknown one. The fitted shape is floored at 3 (keeping the
+  fitted mean), since the rule needs a shape above 3/2, and exact zeros are
+  left out of the reference fit.
 
 ### Performance
 
