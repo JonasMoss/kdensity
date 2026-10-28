@@ -32,7 +32,9 @@ error when the fitted kernel is unsupported.}
 four times \code{n} and at least 2048 points.}
 
 \item{truncate}{Number of Gaussian standard deviations used to pad an FFT
-convolution. Compact kernels use their exact support instead.}
+convolution. The Laplace kernel is padded by \code{truncate^2 / 2} bandwidths,
+where its tail is as small as the Gaussian tail at \code{truncate} standard
+deviations. Compact kernels use their exact support instead.}
 }
 \value{
 An object of class \code{"density"}. Its \code{method} element records whether
@@ -40,10 +42,10 @@ exact or FFT evaluation was used.
 }
 \description{
 \code{kdensity_grid()} evaluates a fitted \code{\link[=kdensity]{kdensity()}} object on a grid. The
-\code{"fft"} method uses linear binning and an FFT convolution for the built-in
-Gaussian, rectangular, triangular, Epanechnikov, biweight, cosine, and
-optimal-cosine kernels. It also supports the Gaussian-copula kernel through
-an exact Gaussian-convolution representation on the probit scale.
+\code{"fft"} method uses weighted linear binning and an FFT convolution with the
+fitted kernel, the algorithm of \code{\link[stats:density]{stats::density()}}, for every built-in
+symmetric kernel. It also supports the Gaussian-copula kernel through its
+exact Gaussian-convolution representation on the probit scale.
 }
 \details{
 The FFT method approximates only the binning and interpolation steps. The

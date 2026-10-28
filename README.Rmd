@@ -105,15 +105,13 @@ integrate(kde, lower = 0, upper = 1) # The cumulative distribution up to 1.
 ```
 
 For large plotting grids, `kdensity_grid()` provides an explicitly
-approximate binning-and-FFT backend for the `stats::density()` kernels
-(`gaussian`, `epanechnikov`, `rectangular`, `triangular`, `biweight`, `cosine`,
-and `optcosine`) and `gcopula`. The `triweight`, `tricube`, and `laplace`
-kernels use exact evaluation (sorted-data evaluation for the compact kernels
-and a two-sweep recurrence for Laplace). Calling `kde()` remains exact. Plotting defaults to
-`grid = "auto"`, which uses FFT for the Gaussian and Gaussian-copula kernels
-and retains the faster exact evaluator for compact and asymmetric kernels.
-Use `grid = "exact"` to force exact plotting or `grid = "fft"` to explicitly
-request the approximate backend for any supported kernel.
+approximate binning-and-FFT backend for every built-in symmetric kernel and
+the Gaussian-copula kernel. Calling `kde()` remains exact. Plotting defaults
+to `grid = "auto"`, which uses FFT for the Gaussian and Gaussian-copula
+kernels and the exact evaluators for the others, which are as fast: sorted
+range sums for the compact kernels and a two-sweep recurrence for Laplace.
+Use `grid = "exact"` to force exact plotting or `grid = "fft"` to request
+the approximate backend explicitly.
 
 Fitted objects are read-only: assignment with `$<-` or `[[<-` is not supported.
 To change a fit, use `kde <- update(kde, bw = 0.5)`, which refits from the

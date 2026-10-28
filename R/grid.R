@@ -1,10 +1,10 @@
 #' Evaluate a kdensity fit on a fast grid
 #'
 #' `kdensity_grid()` evaluates a fitted [kdensity()] object on a grid. The
-#' `"fft"` method uses linear binning and an FFT convolution for the built-in
-#' Gaussian, rectangular, triangular, Epanechnikov, biweight, cosine, and
-#' optimal-cosine kernels. It also supports the Gaussian-copula kernel through
-#' an exact Gaussian-convolution representation on the probit scale.
+#' `"fft"` method uses weighted linear binning and an FFT convolution with the
+#' fitted kernel, the algorithm of [stats::density()], for every built-in
+#' symmetric kernel. It also supports the Gaussian-copula kernel through its
+#' exact Gaussian-convolution representation on the probit scale.
 #'
 #' The FFT method approximates only the binning and interpolation steps. The
 #' fitted parametric start and the normalization constant from `object` are
@@ -22,7 +22,9 @@
 #' @param fft_n Size of the internal convolution grid. The default is at least
 #'   four times `n` and at least 2048 points.
 #' @param truncate Number of Gaussian standard deviations used to pad an FFT
-#'   convolution. Compact kernels use their exact support instead.
+#'   convolution. The Laplace kernel is padded by `truncate^2 / 2` bandwidths,
+#'   where its tail is as small as the Gaussian tail at `truncate` standard
+#'   deviations. Compact kernels use their exact support instead.
 #'
 #' @return An object of class `"density"`. Its `method` element records whether
 #'   exact or FFT evaluation was used.
@@ -135,22 +137,23 @@ validate_grid_count <- function(value, name, minimum, minimum_label) {
   as.integer(value)
 }
 
-fft_grid_kernel_name <- function(kernel_id) {
-  switch(as.character(kernel_id),
-    "1" = "gaussian",
-    "2" = "epanechnikov",
-    "3" = "rectangular",
-    "4" = "triangular",
-    "5" = "biweight",
-    "6" = "cosine",
-    "7" = "optcosine",
-    NULL
-  )
+# Half-width of the window that contributes to an FFT grid value. Compact
+# kernels (ids 2-9) vanish for |u| > 1, where u = (x - y) / h; the Gaussian is
+# truncated at `truncate` standard deviations, and the Laplace kernel exp(-|u|)
+# where it reaches the Gaussian tail level exp(-truncate^2 / 2).
+fft_half_width <- function(kernel_id, h, truncate) {
+  if (kernel_id == 1L) {
+    return(truncate * h)
+  }
+  if (kernel_id == 10L) {
+    return(truncate^2 / 2 * h)
+  }
+  h * (1 + sqrt(.Machine$double.eps))
 }
 
 fft_grid_support_problem <- function(object, from, to) {
   kernel_id <- object$kernel$compiled_id
-  if (is.null(kernel_id) || !kernel_id %in% c(1:7, 11L)) {
+  if (is.null(kernel_id) || !kernel_id %in% 1:11) {
     return("the fitted kernel has no FFT convolution representation.")
   }
   if (!is.finite(object$h) || object$h <= 0) {
@@ -203,22 +206,48 @@ make_kdensity_grid <- function(object, from, to, n, truncate,
   seq(from, to, length.out = n)
 }
 
-# stats::density() gained `subdensity` and `ext` in R 4.4.0. On older R drop
-# those two arguments and silence the deliberate sum(weights) != 1 warning; the
-# grid values are unchanged (density self-extends its FFT grid regardless of
-# `ext`), only this opt-in FFT path is affected.
-density_fft <- function(...) {
-  if (getRversion() >= "4.4.0") {
-    return(stats::density(...))
+# Weighted kernel sums  sum_i weights[i] * kernel_at(t - points[i])  at fft_n
+# equally spaced nodes t covering [from - half_width, to + half_width], by
+# linear binning and a circular FFT convolution padded against wrap-around:
+# the algorithm of stats::density(), with the caller's kernel. Points outside
+# the node range lie more than half_width from [from, to] and are dropped.
+# Roundoff can make sums slightly negative; they are clamped at zero.
+binned_kernel_sum <- function(points, weights, kernel_at, half_width,
+                              from, to, fft_n) {
+  lower <- from - half_width
+  upper <- to + half_width
+  spacing <- (upper - lower) / (fft_n - 1)
+  nodes <- lower + spacing * seq.int(0, fft_n - 1)
+
+  position <- (points - lower) / spacing
+  inside <- position >= 0 & position <= fft_n - 1
+  position <- position[inside]
+  weights <- weights[inside]
+  left <- pmin(floor(position), fft_n - 2)
+  fraction <- position - left
+  binned <- numeric(fft_n)
+  if (length(position) > 0L) {
+    sums <- rowsum(
+      c(weights * (1 - fraction), weights * fraction),
+      c(left, left + 1)
+    )
+    binned[as.integer(rownames(sums)) + 1L] <- sums[, 1L]
   }
-  # This compatibility path cannot run on the minimum R version used for
-  # coverage, but remains necessary for older supported R releases.
-  # nocov start
-  args <- list(...)
-  args$subdensity <- NULL
-  args$ext <- NULL
-  suppressWarnings(do.call(stats::density, args))
-  # nocov end
+
+  padded_n <- stats::nextn(2L * fft_n)
+  lags <- spacing * seq.int(0, fft_n - 1)
+  kernel_values <- numeric(padded_n)
+  kernel_values[seq_len(fft_n)] <- kernel_at(lags)
+  kernel_values[padded_n + 1L - seq_len(fft_n - 1L)] <- kernel_at(-lags[-1L])
+  convolution <- stats::fft(
+    stats::fft(c(binned, numeric(padded_n - fft_n))) *
+      stats::fft(kernel_values),
+    inverse = TRUE
+  )
+  list(
+    x = nodes,
+    y = pmax(Re(convolution[seq_len(fft_n)]) / padded_n, 0)
+  )
 }
 
 evaluate_kdensity_fft_grid <- function(object, grid, fft_n, truncate) {
@@ -245,17 +274,14 @@ evaluate_kdensity_fft_grid <- function(object, grid, fft_n, truncate) {
       return(object(grid))
     }
     transformed_grid <- transformed[fft_interior]
-    convolution <- density_fft(
-      rho * stats::qnorm(object$x),
+    convolution <- binned_kernel_sum(
+      points = rho * stats::qnorm(object$x),
       weights = 1 / (object$n * object$h * start_data),
-      bw = sigma,
-      kernel = "gaussian",
-      n = fft_n,
+      kernel_at = function(lag) stats::dnorm(lag, sd = sigma),
+      half_width = truncate * sigma,
       from = min(transformed_grid),
       to = max(transformed_grid),
-      cut = 0,
-      ext = truncate,
-      subdensity = TRUE
+      fft_n = fft_n
     )
     correction <- stats::approx(
       convolution$x,
@@ -271,23 +297,18 @@ evaluate_kdensity_fft_grid <- function(object, grid, fft_n, truncate) {
     values[!fft_interior] <- object(grid[!fft_interior])
     return(values)
   } else {
-    kernel_name <- fft_grid_kernel_name(kernel_id)
-    kernel_sd <- object$kernel$sd
-    convolution <- density_fft(
-      object$x,
+    # Symmetric kernels depend on y - x only; evaluate the fitted kernel
+    # itself at the lags so the FFT and exact paths share one definition.
+    h <- object$h
+    kernel_fun <- object$kernel$kernel
+    convolution <- binned_kernel_sum(
+      points = object$x,
       weights = 1 / (object$n * start_data),
-      bw = object$h / kernel_sd,
-      kernel = kernel_name,
-      n = fft_n,
+      kernel_at = function(lag) kernel_fun(0, lag, h) / h,
+      half_width = fft_half_width(kernel_id, h, truncate),
       from = min(grid),
       to = max(grid),
-      cut = 0,
-      ext = if (kernel_id == 1L) {
-        truncate
-      } else {
-        kernel_sd + sqrt(.Machine$double.eps)
-      },
-      subdensity = TRUE
+      fft_n = fft_n
     )
     correction <- stats::approx(
       convolution$x,

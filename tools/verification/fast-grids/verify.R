@@ -23,7 +23,7 @@ grid_n <- 1000L
 
 translation_kernels <- c(
   "gaussian", "epanechnikov", "rectangular", "triangular",
-  "biweight", "cosine", "optcosine"
+  "biweight", "cosine", "optcosine", "triweight", "tricube", "laplace"
 )
 
 translation_scenarios <- list(

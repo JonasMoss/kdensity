@@ -194,8 +194,6 @@ test_that("exact Gaussian-copula grids are linearly spaced", {
 })
 
 test_that("FFT support diagnostics cover invalid fitted state", {
-  expect_null(fft_grid_kernel_name(99L))
-
   bad_bandwidth <- kdensity(precip, bw = 0.2)
   environment(bad_bandwidth)$h <- 0
   expect_match(
@@ -251,4 +249,65 @@ test_that("short copula convolution grids use exact evaluation", {
     evaluate_kdensity_fft_grid(fit, grid, fft_n = 512, truncate = 8),
     fit(grid)
   )
+})
+
+test_that("the binned FFT convolution is exact for data on the grid nodes", {
+  # Linear binning is exact when every point sits on a node, so the FFT sums
+  # must equal direct kernel sums at the nodes.
+  set.seed(20261028)
+  fft_n <- 401L
+  lower <- -2
+  spacing <- 4 / (fft_n - 1)
+  points <- lower + spacing * sample(0:(fft_n - 1), 150, replace = TRUE)
+  weights <- runif(150)
+  for (kernel_name in c("gaussian", "epanechnikov", "tricube", "laplace")) {
+    kernel <- get_kernel(kernel_name)
+    h <- 0.25
+    half_width <- fft_half_width(kernel$compiled_id, h, truncate = 8)
+    sums <- binned_kernel_sum(
+      points, weights,
+      kernel_at = function(lag) kernel$kernel(0, lag, h) / h,
+      half_width = half_width,
+      from = lower + half_width,
+      to = 2 - half_width,
+      fft_n = fft_n
+    )
+    direct <- vapply(sums$x, function(node) {
+      sum(weights * kernel$kernel(node, points, h) / h)
+    }, numeric(1))
+    expect_equal(sums$y, direct, tolerance = 1e-12, info = kernel_name)
+  }
+
+  # Points farther than the half-width from [from, to] do not contribute.
+  empty <- binned_kernel_sum(
+    c(-100, 100), c(1, 1),
+    kernel_at = function(lag) stats::dnorm(lag),
+    half_width = 1, from = 0, to = 1, fft_n = 64L
+  )
+  expect_equal(empty$y, rep(0, 64))
+})
+
+test_that("every built-in symmetric kernel has an FFT grid", {
+  set.seed(20261028)
+  x <- c(rnorm(300), rnorm(200, 4, 0.7))
+  kernels <- c(
+    "gaussian", "epanechnikov", "rectangular", "triangular", "biweight",
+    "cosine", "optcosine", "triweight", "tricube", "laplace"
+  )
+  for (kernel_name in kernels) {
+    fit <- kdensity(x, kernel = kernel_name, bw = 0.3)
+    fast <- kdensity_grid(fit, n = 256, method = "fft")
+    exact <- fit(fast$x)
+    expect_identical(fast$method, "fft")
+    # The rectangular kernel is discontinuous, so linear binning leaves a
+    # visible error at the jumps; the others are continuous.
+    limit <- if (kernel_name == "rectangular") 0.03 else 2e-3
+    expect_lt(max(abs(fast$y - exact)) / max(exact), limit)
+  }
+
+  # Parametric starts reweight the same convolution.
+  fit <- kdensity(x, kernel = "laplace", start = "normal", bw = 0.3,
+    normalized = FALSE)
+  fast <- kdensity_grid(fit, n = 256, method = "fft")
+  expect_lt(max(abs(fast$y - fit(fast$x))) / max(fit(fast$x)), 2e-3)
 })
