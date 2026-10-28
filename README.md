@@ -5,8 +5,6 @@
 
 [![R build
 status](https://github.com/JonasMoss/kdensity/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JonasMoss/kdensity/actions)
-[![Codecov test
-coverage](https://codecov.io/gh/JonasMoss/kdensity/graph/badge.svg)](https://app.codecov.io/gh/JonasMoss/kdensity)
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/kdensity)](https://cran.r-project.org/package=kdensity)
 [![DOI](https://zenodo.org/badge/120678148.svg)](https://zenodo.org/badge/latestdoi/120678148)
 [![Project Status:
