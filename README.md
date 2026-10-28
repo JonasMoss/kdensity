@@ -137,9 +137,9 @@ For example, you can do:
 
 ``` r
 kde(10)
-#> [1] 0.1067221
+#> [1] 0.1075401
 integrate(kde, lower = 0, upper = 1) # The cumulative distribution up to 1.
-#> 2.55945e-05 with absolute error < 4e-19
+#> 8.819352e-06 with absolute error < 1.5e-19
 ```
 
 For large plotting grids, `kdensity_grid()` provides an explicitly

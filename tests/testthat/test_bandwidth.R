@@ -17,9 +17,11 @@ expect_equal(get_standard_bw(kernel_str = "triangular", start_str = "uniform"), 
 
 set.seed(123)
 gamma_ucv_sample <- rgamma(60, 2, 2)
+## Regression pin for Chen's modified gamma kernel with the normalized UCV
+## criterion (2.0.0). For this sample the ISE-optimal bandwidth is about 0.11.
 expect_equal(
   get_bw("ucv")(gamma_ucv_sample, "gamma", "uniform", c(0, Inf)),
-  0.0526979041,
+  0.1077853552,
   tolerance = 1e-8
 )
 
@@ -105,3 +107,56 @@ expect_error(
   kdensity(mtcars$mpg, kernel = "uniform", start = "gamma"),
   "Normalization error: The function will not integrate.Two common causes are: 1.) The kernel is non-smooth, try a smooth kernel if possible. 2.) The supplied support is incorrect."
 )
+
+test_that("the UCV objective normalizes both terms", {
+  # Independent reference: integral of the squared normalized estimate minus
+  # twice the mean leave-one-out estimate, divided by the full-data normalizer.
+  ucv_reference <- function(x, h, kernel_name, start_name) {
+    kernel <- get_kernel(kernel_name)$kernel
+    start <- get_start(start_name)
+    dstart <- function(data, estimates) {
+      do.call(start$density, c(list(data), as.list(estimates)))
+    }
+    full <- start$estimator(x)
+    unnormalized <- function(y) {
+      vapply(y, function(point) {
+        mean(kernel(point, x, h) / h / dstart(x, full)) * dstart(point, full)
+      }, numeric(1))
+    }
+    normalization <- integrate(unnormalized, 0, Inf)$value
+    term1 <- integrate(function(y) (unnormalized(y) / normalization)^2, 0, Inf)$value
+    loo <- vapply(seq_along(x), function(i) {
+      estimates <- start$estimator(x[-i])
+      mean(kernel(x[i], x[-i], h) / h / dstart(x[-i], estimates)) *
+        dstart(x[i], estimates)
+    }, numeric(1))
+    term1 - 2 * mean(loo) / normalization
+  }
+
+  set.seed(20261028)
+  x <- rgamma(40, 2, 2)
+  cases <- list(
+    c("gamma", "uniform"),
+    c("gamma_biased", "uniform"),
+    c("gamma", "gamma"),
+    c("gamma", "invgauss")
+  )
+  for (case in cases) {
+    objective <- make_ucv_objective(x, case[[1]], case[[2]], c(0, Inf))
+    for (h in c(0.05, 0.2, 0.6)) {
+      expect_equal(objective(h), ucv_reference(x, h, case[[1]], case[[2]]),
+        tolerance = 1e-5, info = paste(case[[1]], case[[2]], h)
+      )
+    }
+  }
+
+  # A failing compiled leave-one-out fit must fall back to the R path, which
+  # gives the same criterion.
+  local_mocked_bindings(
+    make_compiled_loo_parameters = function(...) stop("compiled fit failed")
+  )
+  objective <- make_ucv_objective(x, "gamma", "gamma", c(0, Inf))
+  expect_equal(objective(0.2), ucv_reference(x, 0.2, "gamma", "gamma"),
+    tolerance = 1e-5
+  )
+})

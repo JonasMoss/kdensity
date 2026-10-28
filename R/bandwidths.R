@@ -174,6 +174,53 @@ bw_environment$ucv <- function(x, kernel = NULL, start = NULL, support = NULL) {
 
 
   ## If we are here, we must do our own cross-validation.
+  obj_func <- make_ucv_objective(x, kernel, start, support)
+
+  # The range of allowable bandwidths vary from kernel to kernel.
+
+  eps <- 10^-10
+
+  if (kernel == "gcopula" | kernel == "beta" | kernel == "beta_biased") {
+    using_str <- "JH"
+    using <- bw_environment$JH(x)
+    lower <- 1 / 4 * using
+    upper <- 1 / 4 - eps
+  } else if (start == "constant" | start == "uniform") {
+    using_str <- "nrd0"
+    using <- stats::bw.nrd0(x)
+    lower <- 1 / 5 * using
+    upper <- 5 * using
+  } else {
+    using_str <- "RHE"
+    using <- bw_environment$RHE(x)
+    lower <- 1 / 5 * using
+    upper <- 5 * using
+  }
+
+  bw <- tryCatch(stats::optimize(obj_func, lower = lower, upper = upper, tol = 0.0001)$minimum,
+    error = function(e) {
+      warning(paste0("Integration failed when finding bandwidth using 'ucv'. Using '", using_str, "' instead."), call. = FALSE)
+      using
+    }
+  )
+  return(bw)
+}
+
+## ---------------------------------------------------------------------------
+## Internal helpers used by the selectors above.
+## ---------------------------------------------------------------------------
+
+## The unbiased cross-validation criterion
+##
+##   UCV(h) = integral fhat_h^2 - (2 / n) sum_i fhat_{h,-i}(x_i),
+##
+## estimating ISE(h) - integral f^2. kdensity() normalizes its estimates, so
+## both terms use normalized estimates: the leave-one-out sums are divided by
+## the full-data normalizer, which approximates each leave-one-out normalizer
+## to relative order 1 / n. Leaving the second term unnormalized biases the
+## criterion towards whichever bandwidths make the normalizer large; for the
+## gamma kernels that is a strong pull towards oversmoothing.
+make_ucv_objective <- function(x, kernel, start, support) {
   kernel_obj <- get_kernel(kernel)
   start_obj <- get_start(start)
   kernel_fun <- kernel_obj$kernel
@@ -231,7 +278,7 @@ bw_environment$ucv <- function(x, kernel = NULL, start = NULL, support = NULL) {
   parametric_start_data <- parametric_start_vector(x)
   uniform_data <- rep(1, n)
 
-  obj_func <- function(h) {
+  function(h) {
     kdensity_sqrd <- kdensity_sq(x,
       h = h,
       kernel_fun = kernel_fun,
@@ -280,44 +327,9 @@ bw_environment$ucv <- function(x, kernel = NULL, start = NULL, support = NULL) {
       term2 <- 2 * mean(term2_vec)
     }
 
-    obj_func_value <- term1 - term2
-    return(obj_func_value)
+    term1 - term2 / attr(kdensity_sqrd, "normalization")
   }
-
-
-  # The range of allowable bandwidths vary from kernel to kernel.
-
-  eps <- 10^-10
-
-  if (kernel == "gcopula" | kernel == "beta" | kernel == "beta_biased") {
-    using_str <- "JH"
-    using <- bw_environment$JH(x)
-    lower <- 1 / 4 * using
-    upper <- 1 / 4 - eps
-  } else if (start == "constant" | start == "uniform") {
-    using_str <- "nrd0"
-    using <- stats::bw.nrd0(x)
-    lower <- 1 / 5 * using
-    upper <- 5 * using
-  } else {
-    using_str <- "RHE"
-    using <- bw_environment$RHE(x)
-    lower <- 1 / 5 * using
-    upper <- 5 * using
-  }
-
-  bw <- tryCatch(stats::optimize(obj_func, lower = lower, upper = upper, tol = 0.0001)$minimum,
-    error = function(e) {
-      warning(paste0("Integration failed when finding bandwidth using 'ucv'. Using '", using_str, "' instead."), call. = FALSE)
-      using
-    }
-  )
-  return(bw)
 }
-
-## ---------------------------------------------------------------------------
-## Internal helpers used by the selectors above.
-## ---------------------------------------------------------------------------
 
 kdensity_sq <- function(x, h, kernel_fun, parametric_start, parametric_start_data,
                         parametric_start_vector, support, kernel_obj = NULL) {
@@ -352,6 +364,7 @@ kdensity_sq <- function(x, h, kernel_fun, parametric_start, parametric_start_dat
     parametric_start_vector_y <- parametric_start_vector(y)
     (kernel_evaluator(y) * parametric_start_vector_y / normalization)^2
   }
+  attr(return_function, "normalization") <- normalization
   return_function
 }
 

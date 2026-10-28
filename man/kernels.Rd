@@ -32,8 +32,11 @@ exponential density.
 
 
 
-\verb{gamma, gamma_biased}: The gamma kernel of Chen (2000). For use on the positive
-half-line. \code{gamma} is the recommended biased-corrected kernel.
+\verb{gamma, gamma_biased}: The gamma kernels of Chen (2000). For use on the
+positive half-line. \code{gamma_biased} is Chen's first kernel, a gamma
+density with shape \code{y / h + 1} and scale \code{h}. \code{gamma} is the recommended
+bias-corrected (modified) kernel, with shape \code{y / h} when \verb{y >= 2h} and
+\verb{(y / (2h))^2 + 1} otherwise.
 \code{gcopula}: The Gaussian copula kernel of Jones & Henderson (2007). For use
 on the unit interval.
 \verb{beta, beta_biased}: The beta kernel of Chen (1999). For use on the unit interval.

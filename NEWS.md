@@ -1,7 +1,15 @@
-## kdensity 1.3.0 (2026-07-20)
+## kdensity (development version)
+
+Version 1.3.0 was never released; its changes are part of this version.
 
 ### Breaking changes
 
+* `kernel = "gamma"` now implements Chen's (2000) modified gamma kernel, a
+  gamma density with scale `h` and shape `y / h` for `y >= 2h` and
+  `(y / (2h))^2 + 1` below. Earlier versions used a shape one larger, so for
+  `y >= 2h` the kernel coincided with the uncorrected `gamma_biased` kernel and
+  its boundary modification increased the error. Every fit that uses the gamma
+  kernel changes, including the bandwidths selected for it.
 * `update()` on a `kdensity` object now returns a new object and follows R's
   copy-on-modify semantics instead of modifying the caller's variable in place.
   Replace `update(kde, ...)` with `kde <- update(kde, ...)`. The `$<-` and
@@ -44,6 +52,13 @@
 
 ### Bug fixes
 
+* `bw = "ucv"` for asymmetric kernels and for parametric starts compared the
+  integral of the squared *normalized* estimate with *unnormalized*
+  leave-one-out estimates. Both terms are now normalized. Since the gamma
+  kernels' normalizer grows with the bandwidth, the old criterion pulled
+  strongly towards oversmoothing. Selected bandwidths change for these
+  combinations; symmetric kernels with a uniform start use `stats::bw.ucv()`
+  and are unaffected.
 * `bw = "ucv"` for asymmetric kernels (`gamma`, `beta`, and their bias-corrected
   variants) with a non-uniform parametric start set the kernel's shape from the
   wrong data point, making the objective inconsistent with the estimator.

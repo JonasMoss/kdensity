@@ -61,8 +61,11 @@ kernel_environment <- new.env(hash = FALSE)
 #'    `laplace`: Uses the Laplace density, also known as the double
 #'    exponential density.
 #' @section Asymmetric kernels:
-#'    `gamma, gamma_biased`: The gamma kernel of Chen (2000). For use on the positive
-#'    half-line. `gamma` is the recommended biased-corrected kernel.
+#'    `gamma, gamma_biased`: The gamma kernels of Chen (2000). For use on the
+#'    positive half-line. `gamma_biased` is Chen's first kernel, a gamma
+#'    density with shape `y / h + 1` and scale `h`. `gamma` is the recommended
+#'    bias-corrected (modified) kernel, with shape `y / h` when `y >= 2h` and
+#'    `(y / (2h))^2 + 1` otherwise.
 #'    `gcopula`: The Gaussian copula kernel of Jones & Henderson (2007). For use
 #'    on the unit interval.
 #'    `beta, beta_biased`: The beta kernel of Chen (1999). For use on the unit interval.
@@ -171,11 +174,15 @@ kernel_environment$gcopula <- list(
   support = c(0, 1)
 )
 
+## Chen's (2000) modified gamma kernel K_{rho_b(y), b}: gamma density with
+## scale h and shape rho_b(y) = y / h for y >= 2h and (y / (2h))^2 + 1 below.
+## In the interior its mean is exactly y, which removes the f' bias term of the
+## uncorrected kernel (shape y / h + 1, mean y + h).
 kernel_environment$gamma <- list(
   kernel = function(y, x, h) {
-    indices <- (y >= 2 * h)
-    y_new <- y / h * indices + (1 / 4 * (y / h)^2 + 1) * (!indices)
-    h * dgamma(x, y_new + 1, scale = h)
+    interior <- (y >= 2 * h)
+    shape <- y / h * interior + (1 / 4 * (y / h)^2 + 1) * (!interior)
+    h * dgamma(x, shape, scale = h)
   },
   support = c(0, Inf)
 )

@@ -28,8 +28,9 @@ parametric-start correction, or replace `Z`.
 The reference branch rules are the rules in `src/kernels.cpp`:
 
 - `gamma_biased`: gamma shape `a(y) = y / h + 1` and scale `h`;
-- `gamma`: `a(y) = (y / h)^2 / 4 + 2` when `y < 2h`, otherwise
-  `a(y) = y / h + 1`;
+- `gamma`: `a(y) = (y / h)^2 / 4 + 1` when `y < 2h`, otherwise
+  `a(y) = y / h` (Chen's modified kernel; corrected in 2.0.0, earlier
+  versions used `a(y) + 1`);
 - `beta_biased`: beta shapes `a(y) = y / h + 1` and
   `b(y) = (1 - y) / h + 1`;
 - `beta`: use the lower corrected shapes when `y < 2h`, the interior

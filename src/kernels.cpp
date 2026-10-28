@@ -193,6 +193,19 @@ double compact_range_sum(int left, int right, const int kernel_id,
   return out;
 }
 
+// Gamma-kernel shape at evaluation point y; the scale is always h.
+// kernel_id 13 is Chen's (2000) first kernel, shape y / h + 1 (mean y + h).
+// kernel_id 12 is his modified kernel, shape rho_b(y) = y / h for y >= 2h and
+// (y / (2h))^2 + 1 below, whose interior mean is exactly y.
+double gamma_kernel_shape(const double y, const double h,
+                          const int kernel_id) {
+  if (kernel_id == 13) {
+    return y / h + 1.0;
+  }
+  const double ratio = y / h;
+  return y >= 2.0 * h ? ratio : 0.25 * ratio * ratio + 1.0;
+}
+
 double beta_boundary_parameter(const double y, const double h,
                                const double rho_base) {
   return 2.0 * h * h + 2.5 -
@@ -343,9 +356,7 @@ double pair_log_kernel(const double y, const double x, const double h,
     return -inside / (2.0 * (1.0 - rho * rho));
   }
   if (kernel_id == 12 || kernel_id == 13) {
-    const double shape = kernel_id == 12 && y < 2.0 * h
-      ? 0.25 * (y / h) * (y / h) + 2.0
-      : y / h + 1.0;
+    const double shape = gamma_kernel_shape(y, h, kernel_id);
     return x > 0.0
       ? (shape - 1.0) * (log_x - std::log(h)) - x / h -
         std::lgamma(shape)
@@ -726,12 +737,8 @@ NumericVector kernel_weighted_sum_cpp(const NumericVector& y,
 
     if (kernel_id == 11) {
       qy = R::qnorm5(yi, 0.0, 1.0, true, false);
-    } else if (kernel_id == 12) {
-      shape1 = yi >= lower_cut
-        ? yi / h + 1.0
-        : 0.25 * (yi / h) * (yi / h) + 2.0;
-    } else if (kernel_id == 13) {
-      shape1 = yi / h + 1.0;
+    } else if (kernel_id == 12 || kernel_id == 13) {
+      shape1 = gamma_kernel_shape(yi, h, kernel_id);
     } else if (kernel_id == 14) {
       if (yi < lower_cut) {
         shape1 = beta_boundary_parameter(yi, h, rho_base);
