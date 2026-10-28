@@ -26,13 +26,15 @@ revdep-manual:
     set -euo pipefail
     # Private library with Posit Package Manager binaries for this Linux release;
     # the revdeps' Suggests are installed too, since R CMD check needs them.
+    # TreeDist suggests TreeDistData from its Additional_repositories.
     revdeps='c("RealSurvSim", "tscopula", "TreeDist")'
     . /etc/os-release
     p3m="https://packagemanager.posit.co/cran/__linux__/${VERSION_CODENAME}/latest"
+    extra="https://ms609.github.io/packages/"
     rm -rf revdep-manual
     mkdir -p revdep-manual/lib
     export R_LIBS_USER="$PWD/revdep-manual/lib"
-    Rscript -e "install.packages($revdeps, dependencies = TRUE, repos = '$p3m', Ncpus = 4)"
+    Rscript -e "install.packages($revdeps, dependencies = TRUE, repos = c('$p3m', '$extra'), Ncpus = 4)"
     R CMD INSTALL .
     cd revdep-manual
     Rscript -e "download.packages($revdeps, destdir = '.', type = 'source', repos = 'https://cloud.r-project.org')"
