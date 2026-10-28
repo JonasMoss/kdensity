@@ -5,8 +5,13 @@
 ### -- summary, print
 ### ===========================================================================
 
+## Fitted objects are read-only: there are no `$<-`, `[[<-` or `update()`
+## methods. `exact` is accepted so that getCall() / getElement() work, which
+## lets stats::update.default() refit by re-evaluating the stored call.
+## Names are matched partially, as `$` does for lists.
+
 #' @export
-`[[.kdensity` <- function(x, i) {
+`[[.kdensity` <- function(x, i, exact = TRUE) {
   allowed_arg <- c(
     "x", "bw_str", "bw", "adjust", "h", "kernel_str", "kernel",
     "start", "start_str", "support", "data.name", "n", "range",
@@ -18,78 +23,8 @@
 }
 
 #' @export
-`[[<-.kdensity` <- function(x, i, value) {
-  allowed_arg <- c(
-    "x", "bw", "adjust", "kernel", "start", "support", "na.rm",
-    "normalized"
-  )
-
-  i <- match.arg(i, allowed_arg)
-  environment(x)$obj_name <- "x"
-  args <- list(object = x)
-  args[[i]] <- value
-  do.call(update.kdensity, args)
-  x
-}
-
-
-#' @export
-`$<-.kdensity` <- function(x, name, value) {
-  x[[name]] <- value
-  x
-}
-
-
-#' @export
 `$.kdensity` <- function(x, name) {
   x[[name]]
-}
-
-#' @export
-update.kdensity <- function(object, ...) {
-  current <- list(
-    x = object$x,
-    bw = object$bw_str,
-    adjust = object$adjust,
-    kernel = object$kernel_str,
-    start = object$start_str,
-    support = object$support,
-    na.rm = object$na.rm,
-    normalized = object$normalized
-  )
-
-  passed <- list(...)
-
-  ## Part of a hack to make $<- and [[<- work.
-  if (!is.null(environment(object)$obj_name)) {
-    obj_name <- environment(object)$obj_name
-  } else {
-    obj_name <- deparse(substitute(object))
-  }
-
-  arg_names <- lapply(match.call(expand.dots = TRUE)[-1], deparse)
-  args <- utils::modifyList(
-    current,
-    passed[intersect(names(passed), names(current))],
-    keep.null = TRUE
-  )
-  new_object <- do.call(kdensity, args)
-
-  if ("x" %in% names(arg_names)) {
-    data.name <- arg_names$x
-  } else {
-    data.name <- object$data.name
-  }
-
-  call <- call("kdensity",
-    x = data.name, adjust = args$adjust,
-    kernel = args$kernel, start = args$start, support = args$support
-  )
-
-  environment(new_object)$call <- call
-
-  environment(new_object)$data.name <- data.name
-  assign(obj_name, new_object, envir = parent.frame())
 }
 
 #' @export
@@ -100,7 +35,7 @@ logLik.kdensity <- function(object, ...) {
   msg <- "'logLik' only makes sense for kdensity objects with a non-uniform parametric start."
   assert_(object$start_str != "uniform" & object$start_str != "constant", msg = msg)
   val <- object$logLik
-  attr(val, "nobs") <- length(object$n)
+  attr(val, "nobs") <- object$n
   attr(val, "df") <- length(stats::coef(object))
   class(val) <- "logLik"
   val
@@ -132,6 +67,11 @@ get_range <- function(obj) {
 #' @param range range of x values.
 #' @param plot_start logical; if `TRUE`, plots the parametric start instead of the kernel density estimate.
 #' @param zero_line logical; if `TRUE`, add a base line at `y = 0`.
+#' @param grid Evaluation backend. `"auto"` uses the fastest verified backend:
+#'   FFT for Gaussian and Gaussian-copula kernels, and exact evaluation
+#'   otherwise. `"exact"` always retains direct evaluation and `"fft"`
+#'   explicitly requests the approximate backend supported by
+#'   [kdensity_grid()].
 #' @param ... further plotting parameters.
 #' @return None.
 #' @seealso [kdensity()]
@@ -145,20 +85,31 @@ get_range <- function(obj) {
 #' lines(kde_gamma, plot_start = TRUE, lty = 2)
 #' lines(kde, lty = 3)
 #' rug(precip)
-plot.kdensity <- function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ...) {
-  plot_helper(x, range, plot_start, zero_line, ptype = "plot", ...)
+plot.kdensity <- function(x, range = NULL, plot_start = FALSE,
+                          zero_line = TRUE, grid = "auto", ...) {
+  plot_helper(
+    x, range, plot_start, zero_line, grid = grid, ptype = "plot", ...
+  )
 }
 
 #' @rdname plot.kdensity
 #' @export
-lines.kdensity <- function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ...) {
-  plot_helper(x, range, plot_start, zero_line, ptype = "lines", type = "l", ...)
+lines.kdensity <- function(x, range = NULL, plot_start = FALSE,
+                           zero_line = TRUE, grid = "auto", ...) {
+  plot_helper(
+    x, range, plot_start, zero_line, grid = grid,
+    ptype = "lines", type = "l", ...
+  )
 }
 
 #' @rdname plot.kdensity
 #' @export
-points.kdensity <- function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ...) {
-  plot_helper(x, range, plot_start, zero_line, ptype = "points", type = "p", ...)
+points.kdensity <- function(x, range = NULL, plot_start = FALSE,
+                            zero_line = TRUE, grid = "auto", ...) {
+  plot_helper(
+    x, range, plot_start, zero_line, grid = grid,
+    ptype = "points", type = "p", ...
+  )
 }
 
 #' Helper function for the plot methods.
@@ -170,14 +121,19 @@ points.kdensity <- function(x, range = NULL, plot_start = FALSE, zero_line = TRU
 #' @param range An optional range vector; like `x` in `plot.default`.
 #' @param plot_start Logical; if `TRUE`, plots the parametric start only.
 #' @param zero_line Logical; if `TRUE`, adds a line at `y = 0`.
+#' @param grid Evaluation backend passed to [kdensity_grid()].
 #' @param ptype The kind of plot to make
 #' @param ... Passed to plot.default.
 #' @keywords internal
 #' @return None.
 
-plot_helper <- function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ptype = c("plot", "lines", "points"), ...) {
+plot_helper <- function(x, range = NULL, plot_start = FALSE,
+                        zero_line = TRUE, grid = "auto",
+                        ptype = c("plot", "lines", "points"), ...) {
   ptype <- match.arg(ptype)
+  grid <- match.arg(grid, c("exact", "auto", "fft"))
 
+  supplied_range <- !is.null(range)
   if (is.null(range)) range <- get_range(x)
 
   ## Potential arguments in ellipses are handled here. They are modelled
@@ -220,7 +176,34 @@ plot_helper <- function(x, range = NULL, plot_start = FALSE, zero_line = TRUE, p
       do.call(parametric_start, as.list(c("x" = y, parameters)))
     })
   } else {
-    args$y <- x(range)
+    if (grid == "exact") {
+      args$y <- x(range)
+    } else {
+      grid_n <- length(range)
+      if (supplied_range &&
+          identical(x$kernel$compiled_id, 11L)) {
+        grid_n <- max(2048, 2 * as.double(grid_n))
+      }
+      grid_fit <- kdensity_grid(
+        x,
+        from = min(range),
+        to = max(range),
+        n = grid_n,
+        method = grid
+      )
+      if (supplied_range) {
+        unique_grid <- !duplicated(grid_fit$x)
+        args$y <- stats::approx(
+          grid_fit$x[unique_grid],
+          grid_fit$y[unique_grid],
+          xout = range,
+          rule = 2
+        )$y
+      } else {
+        args$x <- grid_fit$x
+        args$y <- grid_fit$y
+      }
+    }
   }
 
   switch(ptype,
@@ -256,7 +239,7 @@ summary.kdensity <- function(object, ...) {
   if (length(parameters) > 0) {
     params <- c(
       "Parameter estimates:", "\n",
-      sapply(1:length(parameters), function(i) paste0(names(parameters)[i], ": ", formatC(parameters[i], digits), "\n")),
+      vapply(seq_along(parameters), function(i) paste0(names(parameters)[i], ": ", formatC(parameters[i], digits), "\n"), character(1)),
       "\n"
     )
   }

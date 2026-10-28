@@ -7,9 +7,10 @@ kernel_environment <- new.env(hash = FALSE)
 #' in the list can be used in `kdensity` by using `kernel = "kernel"`
 #' for the intended kernel.
 #'
-#' Be careful combining kernels with compact support with parametric starts,
-#' as the normalizing integral typically fails to converge. Use `gaussian`
-#' instead.
+#' Ordinary symmetric kernel estimates use exact normalization constants.
+#' With a non-uniform parametric start, compact-support kernels still require
+#' numerical normalization, which can fail to converge; use `gaussian` if this
+#' occurs.
 #'
 #' @section Symmetric kernels:
 #' @section Asymmetric kernels:
@@ -28,21 +29,25 @@ kernel_environment <- new.env(hash = FALSE)
 #'    definition for the kernel. This is used to distinguish kernels on the
 #'    unit interval / positive half-line from kernels on R.
 #'
-#'    `sd` is used for symmetric kernels, and states the standard error
-#'    of the kernel. This is used to make kernels comparable to the Gaussian
-#'    kernel when calculating bandwidths.
+#'    `sd` is used for symmetric kernels and is the reciprocal of the kernel's
+#'    standard deviation. This scale factor converts a bandwidth on the Gaussian
+#'    standard-deviation scale to `h = adjust * bw * sd`.
+#'
+#'    Custom objects must use names different from the built-ins (for example,
+#'    `my_gaussian`). Registering another custom object under the same name
+#'    replaces the earlier custom object.
 #' @examples
-#' gaussian <- list(
+#' my_gaussian <- list(
 #'   kernel = function(y, x, h) stats::dnorm((y - x) / h),
 #'   sd = 1,
 #'   support = c(-Inf, Inf)
 #' )
 #'
-#' gcopula <- list(
+#' my_gcopula <- list(
 #'   kernel = function(y, x, h) {
 #'     rho <- 1 - h^2
 #'     inside <- rho^2 * (qnorm(y)^2 + qnorm(x)^2) - 2 * rho * qnorm(y) * qnorm(x)
-#'     exp(-inside / (2 * (1 - rho^2)))
+#'     h / sqrt(1 - rho^2) * exp(-inside / (2 * (1 - rho^2)))
 #'   },
 #'   support = c(0, 1)
 #' )
@@ -61,8 +66,11 @@ kernel_environment <- new.env(hash = FALSE)
 #'    `laplace`: Uses the Laplace density, also known as the double
 #'    exponential density.
 #' @section Asymmetric kernels:
-#'    `gamma, gamma_biased`: The gamma kernel of Chen (2000). For use on the positive
-#'    half-line. `gamma` is the recommended biased-corrected kernel.
+#'    `gamma, gamma_biased`: The gamma kernels of Chen (2000). For use on the
+#'    positive half-line. `gamma_biased` is Chen's first kernel, a gamma
+#'    density with shape `y / h + 1` and scale `h`. `gamma` is the recommended
+#'    bias-corrected (modified) kernel, with shape `y / h` when `y >= 2h` and
+#'    `(y / (2h))^2 + 1` otherwise.
 #'    `gcopula`: The Gaussian copula kernel of Jones & Henderson (2007). For use
 #'    on the unit interval.
 #'    `beta, beta_biased`: The beta kernel of Chen (1999). For use on the unit interval.
@@ -165,17 +173,29 @@ kernel_environment$laplace <- list(
 kernel_environment$gcopula <- list(
   kernel = function(y, x, h) {
     rho <- 1 - h^2
-    inside <- rho^2 * (qnorm(y)^2 + qnorm(x)^2) - 2 * rho * qnorm(y) * qnorm(x)
-    exp(-inside / (2 * (1 - rho^2)))
+    qy <- qnorm(y)
+    qx <- qnorm(x)
+    inside <- rho^2 * (qy^2 + qx^2) - 2 * rho * qy * qx
+    value <- h / sqrt(1 - rho^2) * exp(-inside / (2 * (1 - rho^2)))
+    ## At y = 0 or 1 the probit is infinite and the formula gives Inf - Inf.
+    ## Use the limit: 0, or the constant h of the independence copula when
+    ## rho = 0 (h = 1).
+    boundary <- rep_len(is.infinite(qy), length(value))
+    value[boundary] <- if (rho == 0) h else 0
+    value
   },
   support = c(0, 1)
 )
 
+## Chen's (2000) modified gamma kernel K_{rho_b(y), b}: gamma density with
+## scale h and shape rho_b(y) = y / h for y >= 2h and (y / (2h))^2 + 1 below.
+## In the interior its mean is exactly y, which removes the f' bias term of the
+## uncorrected kernel (shape y / h + 1, mean y + h).
 kernel_environment$gamma <- list(
   kernel = function(y, x, h) {
-    indices <- (y >= 2 * h)
-    y_new <- y / h * indices + (1 / 4 * (y / h)^2 + 1) * (!indices)
-    h * dgamma(x, y_new + 1, scale = h)
+    interior <- (y >= 2 * h)
+    shape <- y / h * interior + (1 / 4 * (y / h)^2 + 1) * (!interior)
+    h * dgamma(x, shape, scale = h)
   },
   support = c(0, Inf)
 )
@@ -195,12 +215,18 @@ kernel_environment$beta <- list(
     cut_points <- c(2 * h, 1 - 2 * h)
     sectioning <- findInterval(y, cut_points)
 
-    y0 <- y[sectioning == 0]
-    y1 <- y[sectioning == 1]
-    y2 <- y[sectioning == 2]
+    lower <- sectioning == 0
+    interior <- sectioning == 1
+    upper <- sectioning == 2
+    par1 <- numeric(N)
+    par2 <- numeric(N)
 
-    par1 <- c(rho(y0, h), y1 / h, y2 / h)
-    par2 <- c((1 - y0) / h, (1 - y1) / h, rho(1 - y2, h))
+    par1[lower] <- rho(y[lower], h)
+    par2[lower] <- (1 - y[lower]) / h
+    par1[interior] <- y[interior] / h
+    par2[interior] <- (1 - y[interior]) / h
+    par1[upper] <- y[upper] / h
+    par2[upper] <- rho(1 - y[upper], h)
 
     h * dbeta(x, par1, par2)
   },
@@ -211,6 +237,36 @@ kernel_environment$beta_biased <- list(
   kernel  = function(y, x, h) h * dbeta(x, y / h + 1, (1 - y) / h + 1),
   support = c(0, 1)
 )
+
+compiled_kernel_ids <- c(
+  gaussian = 1L,
+  normal = 1L,
+  epanechnikov = 2L,
+  rectangular = 3L,
+  uniform = 3L,
+  triangular = 4L,
+  biweight = 5L,
+  cosine = 6L,
+  optcosine = 7L,
+  triweight = 8L,
+  tricube = 9L,
+  laplace = 10L,
+  gcopula = 11L,
+  gamma = 12L,
+  gamma_biased = 13L,
+  beta = 14L,
+  beta_biased = 15L
+)
+
+for (kernel_name in names(compiled_kernel_ids)) {
+  kernel_environment[[kernel_name]]$compiled_id <-
+    unname(compiled_kernel_ids[[kernel_name]])
+}
+
+rm(compiled_kernel_ids, kernel_name)
+
+# Snapshot built-in names before any custom objects can be registered.
+builtin_kernel_names <- ls(kernel_environment, all.names = TRUE)
 
 ## ---------------------------------------------------------------------------
 ## Accessors.
@@ -244,7 +300,13 @@ get_kernel <- function(kernel_str) {
 add_kernel <- function(kernel_str, kernel) {
   assert_(is.character(kernel_str))
   assert_(all(kernel_str == make.names(kernel_str)),
-    msg = "The name of the kernel is not valid. Use a short, valid name. (E.g. kdensity(x, kernel = gaussian), where gaussian is a predefined kernel function.)"
+    msg = "The name of the kernel is not valid. Use a short, valid name. (E.g. kdensity(x, kernel = my_gaussian), where my_gaussian is a predefined kernel function.)"
+  )
+
+  assert_(!any(kernel_str %in% builtin_kernel_names),
+    msg = paste0("The kernel name ('", kernel_str,
+      "') is reserved for a built-in kernel. Rename your object (e.g. 'my_",
+      kernel_str, "').")
   )
 
   list_msg <- paste0("The kernel ('", kernel_str, "') must be a list.")

@@ -14,6 +14,10 @@
 #'   function. The estimator function takes one argument, a numeric vector,
 #'   which is passed from `kdensity`.
 #'
+#' Custom objects must use names different from the built-ins (for example,
+#' `my_gaussian`). Registering another custom object under the same name
+#' replaces the earlier custom object.
+#'
 #' @section Supported parametric starts: `kdensity` supports more than
 #'    20 built-in starts from the [univariateML][univariateML::univariateML-package] package, see
 #'    `univariateML::univariateML_models` for a list. Densities with variable
@@ -129,7 +133,8 @@ starts$power <- NULL
 starts$unif <- list(
   density   = function(x) rep(1, length(x)),
   estimator = function(data) NULL,
-  support   = c(-Inf, Inf)
+  support   = c(-Inf, Inf),
+  normalization_id = 1L
 )
 
 starts$constant <- starts$unif
@@ -137,6 +142,7 @@ starts$uniform <- starts$unif
 
 ## Aliases for densities.
 
+starts$norm$normalization_id <- 2L
 starts$gaussian <- starts$norm
 starts$normal <- starts$norm
 starts$exponential <- starts$exp
@@ -144,12 +150,36 @@ starts$lognormal <- starts$lnorm
 starts$inverse_gaussian <- starts$invgauss
 starts$wald <- starts$invgauss
 
+compiled_start_ids <- c(
+  norm = 1L,
+  gaussian = 1L,
+  normal = 1L,
+  exp = 2L,
+  exponential = 2L,
+  lnorm = 3L,
+  lognormal = 3L,
+  gamma = 4L,
+  weibull = 5L,
+  beta = 6L
+)
+
+for (start_name in names(compiled_start_ids)) {
+  starts[[start_name]]$compiled_id <- unname(compiled_start_ids[[start_name]])
+}
+
+rm(compiled_start_ids, start_name)
+
 ## Make starts_environments with evaled support.
 for (i in seq_along(starts)) {
   starts[[i]]$support <- eval(starts[[i]]$support)
+  starts[[i]]$density_has_log <-
+    "log" %in% names(formals(starts[[i]]$density))
 }
 
 starts_environment <- as.environment(starts)
+
+# Snapshot built-in names before any custom objects can be registered.
+builtin_start_names <- ls(starts_environment, all.names = TRUE)
 
 ## ---------------------------------------------------------------------------
 ## Accessors.
@@ -182,7 +212,13 @@ get_start <- function(start_str) {
 add_start <- function(start_str, start) {
   assert_(is.character(start_str))
   assert_(all(start_str == make.names(start_str)),
-    msg = "The name of the parametric start is not valid. Use a short, valid name. (E.g. kdensity(x, start = gaussian), where gaussian is a predefined start function.)"
+    msg = "The name of the parametric start is not valid. Use a short, valid name. (E.g. kdensity(x, start = my_gaussian), where my_gaussian is a predefined start function.)"
+  )
+
+  assert_(!any(start_str %in% builtin_start_names),
+    msg = paste0("The parametric start name ('", start_str,
+      "') is reserved for a built-in parametric start. Rename your object (e.g. 'my_",
+      start_str, "').")
   )
 
   list_msg <- paste0("The parametric start ('", start_str, "') must be a list.")

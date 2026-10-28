@@ -16,6 +16,10 @@ estimation function, and the support of the density. The parameters of
 the density function must partially match the parameters of the estimator
 function. The estimator function takes one argument, a numeric vector,
 which is passed from \code{kdensity}.
+
+Custom objects must use names different from the built-ins (for example,
+\code{my_gaussian}). Registering another custom object under the same name
+replaces the earlier custom object.
 }
 
 \section{Supported parametric starts}{

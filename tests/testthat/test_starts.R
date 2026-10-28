@@ -1,5 +1,3 @@
-context("parametric starts")
-
 t_without_estim <- list(
   density = dt,
   support = c(-Inf, Inf)
@@ -28,3 +26,10 @@ expect_error(add_start("t", t_without_support))
 expect_error(add_start("t", t_without_density))
 expect_error(get_start(5))
 expect_error(get_start("no_start"))
+
+expect_equal(
+  get_univariate_ml_support(list(
+    support = list(bounds = c(0, 1), type = "continuous")
+  )),
+  list(bounds = c(0, 1), type = "continuous")
+)

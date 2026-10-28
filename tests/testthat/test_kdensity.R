@@ -1,9 +1,9 @@
-context("kdensity")
-
 # Normalization errors.
 x <- c(170, 172, 142, 199, 180, 184)
-expect_error(kdensity(x, start = "normal"))
-expect_error(kdensity(x, kernel = "epanechnikov"))
+expect_silent(normal_start_fit <- kdensity(x, start = "normal"))
+expect_true(all(normal_start_fit(x) >= 0))
+expect_silent(epanechnikov_fit <- kdensity(x, kernel = "epanechnikov"))
+expect_true(all(epanechnikov_fit(x) >= 0))
 set.seed(1)
 x <- rweibull(100, 2, 7)
 expect_error(kdensity(x, kernel = "triangular", start = "weibull"))

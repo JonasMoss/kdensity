@@ -1,28 +1,32 @@
-## Resubmission / update
+## Submission
 
-* New closed-form bandwidth selector `"HS"` (Hallberg Szabadváry's beta
-  reference rule, arXiv:2601.19553); now the default for the
-  bias-corrected `beta` kernel with a uniform or constant start.
-* Several packages removed from Imports and Suggests.
-* Internal cleanup: consolidated R source layout, no user-visible API
-  changes.
+This is a major release with breaking changes, listed in NEWS.md: the gamma
+kernel now follows Chen (2000), every built-in kernel defaults to a
+closed-form bandwidth rule, and fitted objects are read-only. The reverse
+dependencies are not affected.
+
+It is the first CRAN version of kdensity with compiled code (C++17, via
+Rcpp). We checked the compiled code with AddressSanitizer, UBSan and
+valgrind.
+
+It also fixes the r-devel NOTE on the current CRAN version about
+'bandwidths.Rd' documenting arguments without \usage.
 
 ## Test environments
-* macos-latest (release)
-* windows-latest (release)
-* ubuntu-latest (devel)
-* ubuntu-latest (release)
-* ubuntu-latest (oldrel-1)
+
+* local: Ubuntu 26.04, R 4.6.1
+* local, sanitizers: gcc 15 AddressSanitizer and UBSan (Ubuntu 26.04,
+  R 4.6.1); valgrind (Ubuntu 24.04, R 4.6.1)
+* win-builder: R-devel, R-release
+* GitHub Actions: macOS and Windows (R-release); Ubuntu (R-devel, R-release,
+  R-oldrel-1)
 
 ## R CMD check results
-0 ERRORs, 0 WARNINGs, 2 NOTEs:
 
-* `Found the following (possibly) invalid URLs:` — the Biometrika article
-  link in `README.md` returns HTTP 403 to automated requests but is
-  reachable in a browser. The DOI is correct.
-* `unable to verify current time` — local clock-verification service
-  unavailable; not package-related.
+0 errors | 0 warnings | 0 notes
 
 ## Reverse dependencies
-We checked the 2 reverse dependencies (RealSurvSim, tscopula) by
-running R CMD check against this version. No problems found.
+
+We ran R CMD check on all three reverse dependencies against this version:
+RealSurvSim and tscopula (Imports) and TreeDist (Suggests). No problems were
+found.

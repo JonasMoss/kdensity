@@ -1,4 +1,3 @@
-context("kdensity helper (default arguments)")
 expect_equal(kdensity(precip, support = c(-Inf, Inf))$kernel_str, "gaussian")
 expect_equal(kdensity(precip, support = c(0, Inf))$kernel_str, "gamma")
 expect_message(kdensity(precip, support = c(7, 999)))

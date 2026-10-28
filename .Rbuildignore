@@ -11,6 +11,7 @@
 ^\.github$
 ^AGENTS\.md$
 ^Justfile$
+^TODO\.md$
 ^cran-comments\.md$
 ^CRAN-RELEASE$
 ^CRAN-SUBMISSION$
@@ -19,3 +20,6 @@
 ^cobertura\.xml$
 ^revdep$
 ^revdep-manual$
+^\.claude$
+^src/.*\.gcda$
+^src/.*\.gcno$

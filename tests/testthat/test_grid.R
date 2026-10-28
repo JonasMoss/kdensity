@@ -1,0 +1,343 @@
+test_that("FFT grids approximate the supported translation kernels", {
+  set.seed(20260720)
+  kernels <- c(
+    "gaussian", "epanechnikov", "rectangular", "triangular",
+    "biweight", "cosine", "optcosine"
+  )
+
+  for (kernel_name in kernels) {
+    fit <- kdensity(
+      rnorm(750),
+      kernel = kernel_name,
+      start = "uniform",
+      bw = 0.25
+    )
+    grid <- kdensity_grid(
+      fit,
+      from = -3,
+      to = 3,
+      n = 257,
+      method = "fft",
+      fft_n = 4096
+    )
+    error <- grid$y - fit(grid$x)
+
+    expect_s3_class(grid, "density")
+    expect_identical(grid$method, "fft")
+    expect_lt(
+      sqrt(mean(error^2)),
+      if (kernel_name == "rectangular") 2e-3 else 1e-4
+    )
+  }
+})
+
+test_that("FFT grids retain parametric-start corrections", {
+  set.seed(20260720)
+  fit <- kdensity(
+    rnorm(1000, mean = 0.4, sd = 1.3),
+    kernel = "gaussian",
+    start = "normal",
+    bw = 0.2
+  )
+  grid <- kdensity_grid(
+    fit,
+    from = -3,
+    to = 4,
+    n = 301,
+    method = "fft",
+    fft_n = 4096
+  )
+
+  expect_equal(grid$y, fit(grid$x), tolerance = 2e-5)
+})
+
+test_that("Gaussian-copula grids use the probit convolution", {
+  set.seed(20260720)
+  x <- rbeta(1000, 2, 5)
+
+  for (start_name in c("uniform", "beta")) {
+    fit <- kdensity(
+      x,
+      kernel = "gcopula",
+      start = start_name,
+      bw = 0.12
+    )
+    grid <- kdensity_grid(
+      fit,
+      from = 0.005,
+      to = 0.995,
+      n = 301,
+      method = "fft",
+      fft_n = 4096
+    )
+
+    expect_equal(
+      grid$y,
+      fit(grid$x),
+      tolerance = 5e-5,
+      info = start_name
+    )
+    expect_equal(
+      diff(stats::qnorm(range(grid$x))),
+      stats::qnorm(0.995) - stats::qnorm(0.005),
+      tolerance = 1e-12
+    )
+  }
+})
+
+test_that("grid method selection has an exact fallback", {
+  set.seed(20260720)
+  fit <- kdensity(rgamma(100, 2), kernel = "gamma", bw = 0.1)
+
+  automatic <- kdensity_grid(fit, n = 101, method = "auto")
+  exact <- kdensity_grid(fit, n = 101, method = "exact")
+
+  expect_identical(automatic$method, "exact")
+  expect_equal(automatic$x, exact$x)
+  expect_equal(automatic$y, exact$y)
+  expect_error(
+    kdensity_grid(fit, n = 101, method = "fft"),
+    "no FFT convolution representation"
+  )
+})
+
+test_that("automatic grids use only the verified faster backend", {
+  set.seed(20260720)
+  gaussian <- kdensity(rnorm(100), kernel = "gaussian", bw = 0.2)
+  compact <- kdensity(rnorm(100), kernel = "epanechnikov", bw = 0.2)
+  copula <- kdensity(rbeta(100, 2, 5), kernel = "gcopula", bw = 0.12)
+
+  expect_identical(kdensity_grid(gaussian, method = "auto")$method, "fft")
+  expect_identical(kdensity_grid(compact, method = "auto")$method, "exact")
+  expect_identical(kdensity_grid(copula, method = "auto")$method, "fft")
+  expect_identical(kdensity_grid(compact, method = "fft")$method, "fft")
+})
+
+test_that("Gaussian-copula FFT grids handle support boundaries", {
+  set.seed(20260720)
+  fit <- kdensity(rbeta(100, 2, 5), kernel = "gcopula", bw = 0.12)
+
+  grid <- kdensity_grid(fit, from = 0, to = 1, method = "fft")
+  expect_identical(grid$x[c(1L, length(grid$x))], c(0, 1))
+
+  ## The copula kernel is NaN at the 0/1 endpoints, so pin the finite interior
+  ## against exact evaluation rather than comparing NaN == NaN.
+  interior <- grid$x > 0 & grid$x < 1
+  expect_gt(sum(interior), 2L)
+  expect_true(all(is.finite(grid$y[interior])))
+  solid <- grid$x > 0.05 & grid$x < 0.95
+  expect_equal(grid$y[solid], fit(grid$x[solid]), tolerance = 1e-3)
+
+  expect_error(
+    kdensity_grid(fit, from = -0.1, to = 1, method = "fft"),
+    "inside \\[0, 1\\]"
+  )
+})
+
+test_that("Gaussian-copula FFT grids evaluate unstable probit tails exactly", {
+  set.seed(20282860)
+  fit <- kdensity(
+    rbeta(100, 0.7, 0.7),
+    kernel = "gcopula",
+    start = "beta",
+    bw = 0.04
+  )
+  grid <- kdensity_grid(fit, from = 0, to = 1, n = 1000, method = "fft")
+  exact <- fit(grid$x)
+  finite <- is.finite(exact)
+  peak <- max(exact[finite])
+
+  expect_true(all(is.finite(grid$y[finite])))
+  expect_lt(
+    sqrt(mean((grid$y[finite] - exact[finite])^2)) / peak,
+    2e-3
+  )
+  expect_lt(max(abs(grid$y[finite] - exact[finite])) / peak, 1e-2)
+})
+
+test_that("grid arguments are validated", {
+  fit <- kdensity(precip)
+
+  expect_error(kdensity_grid(precip), "must be a kdensity")
+  expect_error(kdensity_grid(fit, n = 1), "at least two")
+  expect_error(kdensity_grid(fit, n = 2.9), "whole number")
+  expect_error(kdensity_grid(fit, from = 2, to = 1), "from.*to")
+  expect_error(kdensity_grid(fit, fft_n = 100), "at least 512")
+  expect_error(kdensity_grid(fit, truncate = 0), "positive")
+
+  exact <- kdensity_grid(
+    fit,
+    method = "exact",
+    fft_n = 100,
+    truncate = 0
+  )
+  expect_identical(exact$method, "exact")
+  expect_true(is.na(exact$fft_n))
+  expect_equal(exact$y, fit(exact$x))
+})
+
+test_that("exact Gaussian-copula grids are linearly spaced", {
+  set.seed(20260720)
+  fit <- kdensity(rbeta(100, 2, 5), kernel = "gcopula", bw = 0.12)
+  exact <- kdensity_grid(
+    fit,
+    from = 0.01,
+    to = 0.99,
+    n = 21,
+    method = "exact",
+    fft_n = 1,
+    truncate = 0
+  )
+
+  expect_equal(exact$x, seq(0.01, 0.99, length.out = 21))
+  expect_equal(exact$y, fit(exact$x))
+})
+
+test_that("FFT support diagnostics cover invalid fitted state", {
+  bad_bandwidth <- kdensity(precip, bw = 0.2)
+  environment(bad_bandwidth)$h <- 0
+  expect_match(
+    fft_grid_support_problem(bad_bandwidth, 0, 1),
+    "bandwidth"
+  )
+
+  bad_start <- kdensity(precip, bw = 0.2)
+  environment(bad_start)$parametric_start_data <-
+    rep(0, bad_start$n)
+  expect_match(
+    fft_grid_support_problem(bad_start, 0, 1),
+    "data weights"
+  )
+
+  bad_normalization <- kdensity(precip, bw = 0.2)
+  environment(bad_normalization)$normalization <- 0
+  expect_match(
+    fft_grid_support_problem(bad_normalization, 0, 1),
+    "normalization"
+  )
+
+  set.seed(20260720)
+  copula_boundary <- kdensity(
+    rbeta(20, 2, 5),
+    kernel = "gcopula",
+    bw = 0.12
+  )
+  environment(copula_boundary)$x[[1]] <- 0
+  expect_match(
+    fft_grid_support_problem(copula_boundary, 0, 1),
+    "strictly inside"
+  )
+
+  copula_bandwidth <- kdensity(
+    rbeta(20, 2, 5),
+    kernel = "gcopula",
+    bw = 0.12
+  )
+  environment(copula_bandwidth)$h <- sqrt(2)
+  expect_match(
+    fft_grid_support_problem(copula_bandwidth, 0, 1),
+    "bandwidth requires"
+  )
+})
+
+test_that("short copula convolution grids use exact evaluation", {
+  set.seed(20260720)
+  fit <- kdensity(rbeta(20, 2, 5), kernel = "gcopula", bw = 0.12)
+  grid <- c(0, 1)
+
+  expect_identical(
+    evaluate_kdensity_fft_grid(fit, grid, fft_n = 512, truncate = 8),
+    fit(grid)
+  )
+})
+
+test_that("the binned FFT convolution is exact for data on the grid nodes", {
+  # Linear binning is exact when every point sits on a node, so the FFT sums
+  # must equal direct kernel sums at the nodes.
+  set.seed(20261028)
+  fft_n <- 401L
+  lower <- -2
+  spacing <- 4 / (fft_n - 1)
+  points <- lower + spacing * sample(0:(fft_n - 1), 150, replace = TRUE)
+  weights <- runif(150)
+  for (kernel_name in c("gaussian", "epanechnikov", "tricube", "laplace")) {
+    kernel <- get_kernel(kernel_name)
+    h <- 0.25
+    half_width <- fft_half_width(kernel$compiled_id, h, truncate = 8)
+    sums <- binned_kernel_sum(
+      points, weights,
+      kernel_at = function(lag) kernel$kernel(0, lag, h) / h,
+      half_width = half_width,
+      from = lower + half_width,
+      to = 2 - half_width,
+      fft_n = fft_n
+    )
+    direct <- vapply(sums$x, function(node) {
+      sum(weights * kernel$kernel(node, points, h) / h)
+    }, numeric(1))
+    expect_equal(sums$y, direct, tolerance = 1e-12, info = kernel_name)
+  }
+
+  # Points farther than the half-width from [from, to] do not contribute.
+  empty <- binned_kernel_sum(
+    c(-100, 100), c(1, 1),
+    kernel_at = function(lag) stats::dnorm(lag),
+    half_width = 1, from = 0, to = 1, fft_n = 64L
+  )
+  expect_equal(empty$y, rep(0, 64))
+})
+
+test_that("every built-in symmetric kernel has an FFT grid", {
+  set.seed(20261028)
+  x <- c(rnorm(300), rnorm(200, 4, 0.7))
+  kernels <- c(
+    "gaussian", "epanechnikov", "rectangular", "triangular", "biweight",
+    "cosine", "optcosine", "triweight", "tricube", "laplace"
+  )
+  for (kernel_name in kernels) {
+    fit <- kdensity(x, kernel = kernel_name, bw = 0.3)
+    fast <- kdensity_grid(fit, n = 256, method = "fft")
+    exact <- fit(fast$x)
+    expect_identical(fast$method, "fft")
+    # The rectangular kernel is discontinuous, so linear binning leaves a
+    # visible error at the jumps; the others are continuous.
+    limit <- if (kernel_name == "rectangular") 0.03 else 2e-3
+    expect_lt(max(abs(fast$y - exact)) / max(exact), limit)
+  }
+
+  # Parametric starts reweight the same convolution.
+  fit <- kdensity(x, kernel = "laplace", start = "normal", bw = 0.3,
+    normalized = FALSE)
+  fast <- kdensity_grid(fit, n = 256, method = "fft")
+  expect_lt(max(abs(fast$y - fit(fast$x))) / max(fit(fast$x)), 2e-3)
+})
+
+test_that("compiled linear binning matches an R reference", {
+  reference <- function(points, weights, lower, spacing, n) {
+    position <- (points - lower) / spacing
+    inside <- !is.na(position) & position >= 0 & position <= n - 1
+    position <- position[inside]
+    weights <- weights[inside]
+    left <- pmin(floor(position), n - 2)
+    fraction <- position - left
+    out <- numeric(n)
+    for (k in seq_along(position)) {
+      out[left[k] + 1] <- out[left[k] + 1] + weights[k] * (1 - fraction[k])
+      out[left[k] + 2] <- out[left[k] + 2] + weights[k] * fraction[k]
+    }
+    out
+  }
+  set.seed(4)
+  # Points below, inside, exactly on both end nodes, above, and NaN.
+  points <- c(-1, runif(50, 0, 3), 0, 3, 3.5, NaN)
+  weights <- runif(length(points))
+  expect_equal(
+    linear_bin_cpp(points, weights, 0, 0.75, 5L),
+    reference(points, weights, 0, 0.75, 5L),
+    tolerance = 1e-14
+  )
+  expect_identical(linear_bin_cpp(numeric(), numeric(), 0, 1, 3L), numeric(3))
+  expect_error(linear_bin_cpp(1, c(1, 2), 0, 1, 4L), "same length")
+  expect_error(linear_bin_cpp(1, 1, 0, 0, 4L), "positive spacing")
+  expect_error(linear_bin_cpp(1, 1, 0, 1, 1L), "at least two nodes")
+})

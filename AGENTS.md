@@ -21,4 +21,7 @@ This repository is an R package. Keep changes small, package-oriented, and easy 
 
 - Prefer focused edits over wide refactors.
 - Add or extend tests for behavior changes.
+- Maintain 100% coverage as reported by `just coverage`. Add focused tests for
+  reachable behavior; reserve coverage exclusions for genuinely unreachable or
+  platform/version-specific code, and explain each exclusion in the source.
 - Before a version bump, make sure `DESCRIPTION`, docs, and CI reflect the current package behavior.

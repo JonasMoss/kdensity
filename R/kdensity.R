@@ -19,10 +19,14 @@
 #'
 #' @param bw A bandwidth function. Can be either a string, a custom-made
 #' function, or a double. The supported bandwidth functions are documented
-#' in [bandwidths()].
+#' in [bandwidths()]. Every built-in kernel defaults to a closed-form rule;
+#' use `bw = "ucv"` for start-aware cross-validation. For symmetric kernels,
+#' `bw` is on the Gaussian standard-deviation scale.
 #'
-#' @param adjust An adjustment constant, so that `h = adjust*bw*sd`, where `sd`
-#' varies with the chosen kernel.
+#' @param adjust An adjustment constant. For symmetric kernels,
+#' `h = adjust * bw * sd`, where `sd` is the kernel's stored scale factor
+#' (the reciprocal of its standard deviation). For asymmetric kernels,
+#' `h = adjust * bw`.
 #'
 #' @param kernel The kernel function. Can be chosen from the list of built-in
 #' kernels or be custom-made. See [kernels()] for details.
@@ -59,14 +63,30 @@
 #'   \item{`call`}{The `call` to `kdensity`.}
 #'   \item{`estimates`}{Named numeric vector containing the parameter
 #'               estimates from the parametric start.}
-#'   \item{`logLik`}{The log-likelihood of the parametric starts. Is `NA`
-#'               for the uniform start.}
+#'   \item{`logLik`}{The log-likelihood of the *fitted parametric start*
+#'               (not of the kernel density estimate): the sum of
+#'               `log start(x_i)` at the maximum-likelihood estimates,
+#'               evaluated directly on the log scale when supported by the
+#'               start density. Is `NA` for the `uniform` and `constant`
+#'               starts.}
 #'
 #' }
 #'
 #'
 #' @details If `normalized` is `FALSE` and `start != "uniform"`, the resulting
 #' density will not integrate to 1 in general.
+#'
+#' Fitted objects are read-only: `$<-` and `[[<-` assignment is not supported.
+#' Use `kde <- update(kde, bw = 0.5)` to refit from the stored call with changed
+#' arguments and return a new object. The data must be visible where
+#' `update()` is called.
+#'
+#' The `logLik()`, `AIC()`, and `BIC()` methods for `kdensity` objects describe
+#' the *fitted parametric start* alone, not the kernel density estimate: they
+#' use the start's maximum-likelihood log-likelihood, so they can be used to
+#' compare candidate parametric starts. They are undefined for the `uniform` and
+#' `constant` starts (`logLik()` returns `NA` and errors), which have no
+#' parametric model.
 #'
 #' @seealso The `stats` package function [stats::density()].
 #' @references
@@ -157,93 +177,101 @@ kdensity <- function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
     )
   }
 
+  validate_gcopula_data(x, kernel)
+
   estimates <- start$estimator(x)
   parametric_start <- start$density
 
   # Name of the variable where the density is evaluated. Typically x.
   x_name <- names(formals(start$density))[1]
+  parametric_arguments <- c(
+    stats::setNames(list(NULL), x_name),
+    as.list(estimates)
+  )
 
   parametric_start_vector <- function(x) {
-    arguments <- list()
-    arguments[[1]] <- x
-    names(arguments)[1] <- x_name
-    arguments <- append(arguments, as.list(estimates))
-    do.call(parametric_start, arguments)
+    parametric_arguments[[1]] <- x
+    do.call(parametric_start, parametric_arguments)
+  }
+
+  parametric_start_data <- parametric_start_vector(x)
+  if (!(is.numeric(bw) && length(bw) == 1L && isTRUE(bw == Inf))) {
+    invalid_start <- !is.finite(parametric_start_data) | parametric_start_data <= 0
+    if (any(invalid_start)) {
+      stop(
+        "Parametric start '", start_str,
+        "' must have finite, positive density at every observation; ",
+        sum(invalid_start),
+        ngettext(sum(invalid_start), " observation has", " observations have"),
+        " an invalid density (example: x = ",
+        x[which(invalid_start)[1L]],
+        "). Try a heavier-tailed start or check for outliers.",
+        call. = FALSE
+      )
+    }
+  }
+
+  parametric_log_start_vector <- if (isTRUE(start$density_has_log)) {
+    function(x) {
+      arguments <- parametric_arguments
+      arguments[[1]] <- x
+      arguments$log <- TRUE
+      do.call(parametric_start, arguments)
+    }
+  } else {
+    function(x) log(parametric_start_vector(x))
   }
 
   ## Takes care of the bandwidth. Can be either a double, a string, or a
   ## function taking the arguments data, kernel, start support.
 
-  if (is.null(bw)) {
-    bw <- get_standard_bw(kernel_str, start_str, support)
-  }
-
-  if (!is.numeric(bw)) {
-    if (is.character(bw)) {
-      bw_str <- bw
-      bw <- get_bw(bw)(x, kernel_str, start_str, support)
-    } else {
-      bw_str <- deparse(substitute(bw))
-      bw <- bw(x, kernel_str, start_str, support)
-    }
-  } else {
-    bw_str <- "user supplied"
-    if (bw == Inf) {
-      msg <- "bw = Inf does not work with a uniform start."
-      assert_(start_str != "uniform", start_str != "constant", msg = msg)
-    }
-  }
+  bw_label <- deparse(substitute(bw))
+  bw_info <- resolve_bandwidth(
+    bw = bw,
+    bw_label = bw_label,
+    x = x,
+    kernel_str = kernel_str,
+    start_str = start_str,
+    support = support
+  )
+  bw <- bw_info$bw
+  bw_str <- bw_info$bw_str
 
   ## The parameter h is computed. The basic bandwidth is h = bw*adjust for the
   ## normal kernel, and is adjusted for all the other kernels so that the sd
   ## of the kernel equals h.
-  sd <- ifelse(!is.null(kss_list$kernel$sd), kss_list$kernel$sd, 1)
+  sd <- if (!is.null(kss_list$kernel$sd)) kss_list$kernel$sd else 1
   h <- bw * adjust * sd
-
-  ## The denominator can be computed.
-  parametric_start_data <- parametric_start_vector(x)
 
   ## Now we handle normalization.
 
   normalization <- 1
+  unnormalized_density <- NULL
 
-  if (normalized & bw != Inf) {
-    integrand <- function(y) {
-      sapply(y, function(y) {
-        mean(1 / h * kernel$kernel(y, x, h) /
-          parametric_start_data) *
-          parametric_start_vector(y)
-      })
+  if (bw != Inf) {
+    kernel_evaluator <- make_kernel_evaluator(
+      x = x,
+      h = h,
+      kernel = kernel,
+      parametric_start_data = parametric_start_data
+    )
+
+    unnormalized_density <- function(y) {
+      kernel_evaluator(y) * parametric_start_vector(y)
     }
 
-    integral <- tryCatch(
-      stats::integrate(integrand,
-        lower = support[1],
-        upper = support[2]
-      ),
-      error = function(e) {
-        stop(paste0(
-          "Normalization error: The function will not integrate.",
-          "Two common causes are: 1.) The kernel is non-smooth, ",
-          "try a smooth kernel if possible. 2.) The supplied ",
-          "support is incorrect."
-        ))
-      }
-    )
-
-    msg <- "The normalization constant has too large relative error.
-   1.) try to normalize the data, or
-   2.) change kernel, or
-   3.) increase the 'tolerance' parameter for kdensity"
-
-    assert_(!is.nan(integral$abs.error / integral$value),
-      msg = msg
-    )
-    assert_(integral$abs.error / integral$value < tolerance,
-      msg = msg
-    )
-
-    normalization <- integral$value
+    if (normalized) {
+      normalization <- resolve_normalization(
+        unnormalized_density = unnormalized_density,
+        start = start,
+        kernel = kernel,
+        support = support,
+        h = h,
+        x = x,
+        estimates = estimates,
+        tolerance = tolerance
+      )
+    }
   }
 
 
@@ -255,23 +283,10 @@ kdensity <- function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
     }
 
     if (h != Inf) {
-      if (length(y) == 1) {
-        mean(1 / h * kernel$kernel(y, x, h) * parametric_start_vector(y) /
-          parametric_start_data) / normalization
-      } else {
-        sapply(y, function(y) {
-          parametric_start_vector_y <- parametric_start_vector(y)
-          1 / h * mean(kernel$kernel(y, x, h) * parametric_start_vector_y /
-            parametric_start_data) / normalization
-        })
-      }
+      unnormalized_density(y) / normalization
     } else {
       ## If bw = Inf, the parametric start is returned.
-      arguments <- list()
-      arguments[[1]] <- y
-      names(arguments)[1] <- x_name
-      arguments <- append(arguments, as.list(estimates))
-      do.call(parametric_start, arguments)
+      parametric_start_vector(y)
     }
   }
 
@@ -279,9 +294,11 @@ kdensity <- function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
   call <- match.call()
   range <- c(min(x), max(x))
   n <- length(x)
-  logLik <- ifelse(start_str == "uniform" | start_str == "constant", NA,
-    sum(parametric_start_vector(x))
-  )
+  logLik <- if (start_str == "uniform" || start_str == "constant") {
+    NA
+  } else {
+    sum(parametric_log_start_vector(x))
+  }
 
   ## S3 attributes:
   class(return_function) <- "kdensity"

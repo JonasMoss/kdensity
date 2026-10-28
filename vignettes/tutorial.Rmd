@@ -31,7 +31,10 @@ Hence it can be used to calculate functionals, such as the expectation.
 integrate(function(x) x * kde(x), lower = -Inf, upper = Inf)$value
 ```
 
-Plotting works as with `stats::density`. If `kdensity` was called with a parametric start, use `plot_start = TRUE` inside a plotting function in order to plot the estimated parametric start density instead of the kernel density.
+Plotting works as with `stats::density`. The default `grid = "auto"` uses
+approximate FFT evaluation for Gaussian and Gaussian-copula kernels and exact
+evaluation otherwise. Use `grid = "exact"` for exact plotting; calling the
+fitted density function itself always uses exact evaluation. If `kdensity` was called with a parametric start, use `plot_start = TRUE` inside a plotting function in order to plot the estimated parametric start density instead of the kernel density.
 
 ```{r mpg_example_plot, echo = TRUE,fig.height = 5, fig.width = 5, fig.align = "center"}
 plot(kde, main = "Miles per Gallon")
@@ -69,16 +72,26 @@ kde$start_str
 kde[["x"]]
 ```
 
-To make changes to the kernel density estimator, you can use the generic `update` function, replace values with `$`, or make a new one.
+Fitted objects are read-only. To change the estimator, use `update`, which
+refits from the stored call with the changed arguments, or call `kdensity`
+again. Assignment with `$<-` or `[[<-` is not supported. `update()` returns a
+new object; assign it to retain the changed fit. The data must be visible
+where `update()` is called.
 
 ```{r mpg_example_changes, echo = TRUE}
-kde$bw <- "RHE"
-update(kde, start = "normal")
+kde_updated <- update(kde, start = "normal", bw = "RHE")
+kde_updated
 ```
 
 `kdensity` supports all parametric starts implemented by the package 
 `univariateML`. See [its Github page](https://github.com/JonasMoss/univariateML)
 for a complete list, or take a look at `univariateML::univariateML_models`.
+
+Every built-in kernel defaults to a closed-form bandwidth rule: `"nrd0"` for
+symmetric kernels with a uniform start, `"RHE"` for symmetric kernels with a
+parametric start, `"GR"` for gamma kernels, `"HS"` for beta kernels, and
+`"SJ"` on the probit scale for `gcopula`. The rules ignore the parametric
+start; `bw = "ucv"` selects a bandwidth by start-aware cross-validation.
 
 # Custom densities and kernels
 ## Parametric starts
@@ -86,7 +99,7 @@ for a complete list, or take a look at `univariateML::univariateML_models`.
 You must supply two functions and one vector to `kdensity` in order to use a custom parametric start. The first is a `density` function, the second is a function that estimates the named parameters of the density, and the third is the support of the density. 
 
 ```{r}
-normal <- list(
+my_normal <- list(
   density = dnorm,
   estimator = function(data) {
     c(
@@ -108,7 +121,7 @@ The built-in data set `LakeHuron` contains annual measurements of the water leve
 
 ```{r, fig2, fig.height = 5, fig.width = 5, fig.align = "center"}
 LH <- diff(LakeHuron)
-kde_normal <- kdensity(LH, start = "normal")
+kde_normal <- kdensity(LH, start = my_normal)
 plot(kde_normal,
   lwd = 2, col = "black",
   main = "Lake Huron differences"
@@ -122,7 +135,7 @@ The density is clearly non-normal. Still, it looks fairly regular, and it should
 If you want to make custom kernel, you will need to supply the kernel function, with arguments `y, x, h`. Here `x` is the random data you put into `kdensity`, `h` is the final bandwidth, and `y` is the point you want to evaluate at. The kernel is called as `1/h*kernel(y, x, h)`, and should be able to take vector inputs `x` and `y`. In addition to the kernel function, you must supply a `support` argument, which states the domain of definition of the kernel. For instance, the `gcopula` kernel is defined on `c(0, 1)`. In addition, you can optionally supply the standard deviation of the kernel. This is only used for symmetric kernels, and is useful since it makes them comparable. For example, the implementation of the `gaussian` kernel is
 
 ```{r}
-gaussian <- list(
+my_gaussian <- list(
   kernel  = function(y, x, h) dnorm((y - x) / h),
   sd      = 1,
   support = c(-Inf, Inf)

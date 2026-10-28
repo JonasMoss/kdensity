@@ -9,6 +9,7 @@ plot_helper(
   range = NULL,
   plot_start = FALSE,
   zero_line = TRUE,
+  grid = "auto",
   ptype = c("plot", "lines", "points"),
   ...
 )
@@ -21,6 +22,8 @@ plot_helper(
 \item{plot_start}{Logical; if \code{TRUE}, plots the parametric start only.}
 
 \item{zero_line}{Logical; if \code{TRUE}, adds a line at \code{y = 0}.}
+
+\item{grid}{Evaluation backend passed to \code{\link[=kdensity_grid]{kdensity_grid()}}.}
 
 \item{ptype}{The kind of plot to make}
 

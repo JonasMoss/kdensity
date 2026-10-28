@@ -6,11 +6,25 @@
 \alias{points.kdensity}
 \title{Plot, Lines and Points Methods for Kernel Density Estimation}
 \usage{
-\method{plot}{kdensity}(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ...)
+\method{plot}{kdensity}(x, range = NULL, plot_start = FALSE, zero_line = TRUE, grid = "auto", ...)
 
-\method{lines}{kdensity}(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ...)
+\method{lines}{kdensity}(
+  x,
+  range = NULL,
+  plot_start = FALSE,
+  zero_line = TRUE,
+  grid = "auto",
+  ...
+)
 
-\method{points}{kdensity}(x, range = NULL, plot_start = FALSE, zero_line = TRUE, ...)
+\method{points}{kdensity}(
+  x,
+  range = NULL,
+  plot_start = FALSE,
+  zero_line = TRUE,
+  grid = "auto",
+  ...
+)
 }
 \arguments{
 \item{x}{a \code{kdensity} object.}
@@ -20,6 +34,12 @@
 \item{plot_start}{logical; if \code{TRUE}, plots the parametric start instead of the kernel density estimate.}
 
 \item{zero_line}{logical; if \code{TRUE}, add a base line at \code{y = 0}.}
+
+\item{grid}{Evaluation backend. \code{"auto"} uses the fastest verified backend:
+FFT for Gaussian and Gaussian-copula kernels, and exact evaluation
+otherwise. \code{"exact"} always retains direct evaluation and \code{"fft"}
+explicitly requests the approximate backend supported by
+\code{\link[=kdensity_grid]{kdensity_grid()}}.}
 
 \item{...}{further plotting parameters.}
 }
