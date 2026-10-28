@@ -173,8 +173,16 @@ kernel_environment$laplace <- list(
 kernel_environment$gcopula <- list(
   kernel = function(y, x, h) {
     rho <- 1 - h^2
-    inside <- rho^2 * (qnorm(y)^2 + qnorm(x)^2) - 2 * rho * qnorm(y) * qnorm(x)
-    h / sqrt(1 - rho^2) * exp(-inside / (2 * (1 - rho^2)))
+    qy <- qnorm(y)
+    qx <- qnorm(x)
+    inside <- rho^2 * (qy^2 + qx^2) - 2 * rho * qy * qx
+    value <- h / sqrt(1 - rho^2) * exp(-inside / (2 * (1 - rho^2)))
+    ## At y = 0 or 1 the probit is infinite and the formula gives Inf - Inf.
+    ## Use the limit: 0, or the constant h of the independence copula when
+    ## rho = 0 (h = 1).
+    boundary <- rep_len(is.infinite(qy), length(value))
+    value[boundary] <- if (rho == 0) h else 0
+    value
   },
   support = c(0, 1)
 )

@@ -100,6 +100,10 @@ Version 1.3.0 was never released; its changes are part of this version.
   0 or 1 now give a specific error suggesting the beta kernel or moving the
   observations off the boundary.
 
+* Gaussian-copula estimates evaluated at exactly 0 or 1 return their limit
+  (0, or the constant independence-copula value when `h = 1`) instead of
+  `NaN`, so plots and grids starting at the boundary keep their end points.
+
 * Fits now give a clear error when the fitted start has zero, negative, or
   non-finite density at an observation, instead of silently producing `NaN`
   estimates. The error suggests a heavier-tailed start or checking for outliers.

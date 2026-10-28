@@ -86,3 +86,26 @@ test_that("gcopula FFT grids retain reference values", {
     }
   }
 })
+
+test_that("gcopula estimates take their limit at 0 and 1", {
+  # The probit is infinite at the boundary, where the formula gives Inf - Inf.
+  # The kernel vanishes there, except for rho = 0 (h = 1), the constant
+  # independence copula.
+  for (start in c("uniform", "beta")) {
+    fit <- kdensity(gcopula_data, kernel = "gcopula", start = start, bw = .2)
+    expect_identical(fit(c(0, 1)), c(0, 0), info = start)
+    grid <- kdensity_grid(fit, from = 0, to = 1, n = 33)
+    expect_false(anyNA(grid$y), info = start)
+    expect_identical(grid$y[c(1L, 33L)], c(0, 0), info = start)
+  }
+
+  independence <- kdensity(gcopula_data, kernel = "gcopula", bw = 1)
+  expect_equal(independence(c(0, .3, 1)), c(1, 1, 1), tolerance = 1e-12)
+
+  kernel <- get_kernel("gcopula")$kernel
+  expect_identical(kernel(0, gcopula_data[1:3], .2), c(0, 0, 0))
+  expect_identical(kernel(c(0, 1), .37, .2), c(0, 0))
+  expect_identical(kernel(c(0, 1), .37, 1), c(1, 1))
+  expect_equal(kernel(.3, .37, .2) / .2, copula_density(.3, .37, .2),
+               tolerance = 1e-12)
+})

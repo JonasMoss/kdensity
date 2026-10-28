@@ -759,6 +759,20 @@ NumericVector kernel_weighted_sum_cpp(const NumericVector& y,
 
     if (kernel_id == 11) {
       qy = R::qnorm5(yi, 0.0, 1.0, true, false);
+      if (std::isinf(qy)) {
+        // At y = 0 or 1 the probit is infinite and the formula gives
+        // Inf - Inf. Use the limit instead: the exponent tends to -Inf, so
+        // the kernel vanishes, except for rho = 0 (h = 1), where the kernel
+        // is the constant h of the independence copula.
+        double sum = 0.0;
+        if (rho == 0.0) {
+          for (R_xlen_t j = 0; j < nx; ++j) {
+            sum += weights[j] * h;
+          }
+        }
+        out[i] = sum;
+        continue;
+      }
     } else if (kernel_id == 12 || kernel_id == 13) {
       shape1 = gamma_kernel_shape(yi, h, kernel_id);
     } else if (kernel_id == 14) {
