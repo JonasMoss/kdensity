@@ -9,9 +9,14 @@ status](https://github.com/JonasMoss/kdensity/actions/workflows/R-CMD-check.yaml
 coverage](https://codecov.io/gh/JonasMoss/kdensity/graph/badge.svg)](https://app.codecov.io/gh/JonasMoss/kdensity)
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/kdensity)](https://cran.r-project.org/package=kdensity)
 [![DOI](https://zenodo.org/badge/120678148.svg)](https://zenodo.org/badge/latestdoi/120678148)
+[![Project Status:
+Inactive](https://www.repostatus.org/badges/latest/inactive.svg)](https://www.repostatus.org/#inactive)
 
 An `R` package for univariate kernel density estimation with parametric
 starts and asymmetric kernels.
+
+kdensity is in maintenance mode: it gets bug fixes and the changes
+needed to stay on CRAN, but no new features.
 
 ## Overview
 
@@ -24,10 +29,6 @@ list), and the asymmetric kernels include `gcopula` and Chen’s `gamma`
 and `beta` kernels; you can also supply your own starts, kernels, and
 bandwidth functions. The return value is itself a density function,
 ready for numerical integration, differentiation, or point evaluation.
-
-Use a parametric start for an estimator that often beats ordinary kernel
-density estimation, and an asymmetric kernel to avoid *boundary bias*
-when your data live on the unit interval or the positive half-line.
 
 ## Installation
 
@@ -83,8 +84,8 @@ kernels:
 - Chen’s two *beta kernels* from [Beta kernel estimators for density
   functions
   (1999)](https://www.sciencedirect.com/science/article/pii/S0167947399000109).
-  These are used for data supported on the on the unit interval, and are
-  called `beta` and `beta_biased`.
+  These are used for data supported on the unit interval, and are called
+  `beta` and `beta_biased`.
 
 - Chen’s two *gamma kernels* from [Probability Density Function
   Estimation Using Gamma Kernels
@@ -98,23 +99,7 @@ two main functions are `kdensity()` and `kdensity_grid()`, in addition
 to methods for generics such as `plot()`, `points()`, `lines()`,
 `summary()`, and `print()`.
 
-``` r
-set.seed(42)
-beta_fit <- kdensity(rbeta(250, 2, 5), kernel = "beta")
-beta_fit$bw_str
-#> [1] "HS"
-beta_fit$bw
-#> [1] 0.02052664
-```
-
 ## Usage
-
-Every built-in kernel defaults to a closed-form bandwidth rule: `"nrd0"`
-for symmetric kernels with a uniform start, `"RHE"` for symmetric
-kernels with a parametric start, `"GR"` for both gamma kernels, `"HS"`
-for both beta kernels, and `"SJ"` on the probit scale for `gcopula`.
-These rules ignore the parametric start; use `bw = "ucv"` for
-start-aware cross-validation.
 
 The function `kdensity` takes some `data`, a kernel `kernel` and a
 parametric start `start`. You can optionally specify the `support`
@@ -151,17 +136,7 @@ integrate(kde, lower = 0, upper = 1) # The cumulative distribution up to 1.
 
 For large plotting grids, `kdensity_grid()` provides an explicitly
 approximate binning-and-FFT backend for every built-in symmetric kernel
-and the Gaussian-copula kernel. Calling `kde()` remains exact. Plotting
-defaults to `grid = "auto"`, which uses FFT for the Gaussian and
-Gaussian-copula kernels and the exact evaluators for the others, which
-are as fast: sorted range sums for the compact kernels and a two-sweep
-recurrence for Laplace. Use `grid = "exact"` to force exact plotting or
-`grid = "fft"` to request the approximate backend explicitly.
-
-Fitted objects are read-only: assignment with `$<-` or `[[<-` is not
-supported. To change a fit, use `kde <- update(kde, bw = 0.5)`, which
-refits from the stored call and returns a new object. The data must be
-visible where `update()` is called.
+and the Gaussian-copula kernel. Calling `kde()` remains exact.
 
 You can access the parameter estimates by using `coef`. You can also
 access the log likelihood (`logLik`), AIC and BIC of the parametric
