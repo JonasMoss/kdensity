@@ -69,11 +69,12 @@ kde$start_str
 kde[["x"]]
 ```
 
-To make changes to the kernel density estimator, you can use the generic `update` function, replace values with `$`, or make a new one.
+Fitted objects are read-only. To change the estimator, use `update`, which
+refits from the stored call with the changed arguments, or call `kdensity`
+again.
 
 ```{r mpg_example_changes, echo = TRUE}
-kde$bw <- "RHE"
-update(kde, start = "normal")
+update(kde, start = "normal", bw = "RHE")
 ```
 
 `kdensity` supports all parametric starts implemented by the package 

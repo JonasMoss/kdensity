@@ -5,8 +5,13 @@
 ### -- summary, print
 ### ===========================================================================
 
+## Fitted objects are read-only: there are no `$<-`, `[[<-` or `update()`
+## methods. `exact` is accepted so that getCall() / getElement() work, which
+## lets stats::update.default() refit by re-evaluating the stored call.
+## Names are matched partially, as `$` does for lists.
+
 #' @export
-`[[.kdensity` <- function(x, i) {
+`[[.kdensity` <- function(x, i, exact = TRUE) {
   allowed_arg <- c(
     "x", "bw_str", "bw", "adjust", "h", "kernel_str", "kernel",
     "start", "start_str", "support", "data.name", "n", "range",
@@ -18,72 +23,8 @@
 }
 
 #' @export
-`[[<-.kdensity` <- function(x, i, value) {
-  allowed_arg <- c(
-    "x", "bw", "adjust", "kernel", "start", "support", "na.rm",
-    "normalized"
-  )
-
-  i <- match.arg(i, allowed_arg)
-  args <- list(object = x)
-  args[[i]] <- value
-  do.call(update.kdensity, args)
-}
-
-
-#' @export
-`$<-.kdensity` <- function(x, name, value) {
-  x[[name]] <- value
-  x
-}
-
-
-#' @export
 `$.kdensity` <- function(x, name) {
   x[[name]]
-}
-
-#' @export
-update.kdensity <- function(object, ...) {
-  current <- list(
-    x = object$x,
-    bw = object$bw_str,
-    adjust = object$adjust,
-    kernel = object$kernel_str,
-    start = object$start_str,
-    support = object$support,
-    na.rm = object$na.rm,
-    normalized = object$normalized
-  )
-
-  passed <- list(...)
-  args <- utils::modifyList(
-    current,
-    passed[intersect(names(passed), names(current))],
-    keep.null = TRUE
-  )
-  new_object <- do.call(kdensity, args)
-
-  ## Preserve the original data name unless new data was supplied.
-  arg_names <- lapply(match.call(expand.dots = TRUE)[-1], deparse)
-  if ("x" %in% names(arg_names)) {
-    data.name <- arg_names$x
-  } else {
-    data.name <- object$data.name
-  }
-
-  call <- call("kdensity",
-    x = data.name, adjust = args$adjust,
-    kernel = args$kernel, start = args$start, support = args$support
-  )
-
-  environment(new_object)$call <- call
-  environment(new_object)$data.name <- data.name
-
-  ## `update()` follows R's copy-on-modify semantics: it returns a new object
-  ## and never mutates the caller's binding. The `$<-` / `[[<-` methods pass the
-  ## returned object back through R's replacement protocol.
-  new_object
 }
 
 #' @export

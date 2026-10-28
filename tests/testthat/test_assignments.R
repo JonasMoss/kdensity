@@ -1,61 +1,46 @@
-# Assignment, update, and replacement behaviour for kdensity objects.
-#
-# `update()` follows R's copy-on-modify semantics: it returns a new object and
-# never mutates the caller's binding. The `$<-` and `[[<-` methods pass that
-# returned object back through R's replacement protocol.
+# Fitted kdensity objects are read-only. There are no `$<-`, `[[<-` or
+# update() methods; update() is stats::update.default(), which re-evaluates
+# the stored call with the changed arguments, as for lm().
 
 obj <- kdensity(cars$dist, kernel = "gamma")
 
 test_that("a fresh kdensity object has the expected defaults", {
   expect_equal(obj$start_str, "uniform")
+  expect_identical(getCall(obj), obj$call)
 })
 
-test_that("update() returns a new object without mutating its argument", {
+test_that("update() refits from the stored call without mutating its argument", {
   updated <- update(obj, start = "gamma")
   expect_equal(updated$start_str, "gamma")
-  ## Regression test: the original binding must be untouched. The previous
-  ## implementation reassigned it in place via assign(..., parent.frame()).
   expect_equal(obj$start_str, "uniform")
-})
-
-test_that("update() rebuilds the estimate from the supplied arguments", {
+  expect_equal(
+    updated(c(10, 40)),
+    kdensity(cars$dist, kernel = "gamma", start = "gamma")(c(10, 40))
+  )
   expect_equal(
     update(obj, x = 1:100)(1:10),
     kdensity(1:100, kernel = "gamma")(1:10)
   )
 })
 
-test_that("[[<- rebuilds the object and round-trips settable fields", {
+test_that("update() keeps numeric and custom bandwidths", {
+  set.seed(1)
+  y <- rnorm(100)
+  numeric_fit <- kdensity(y, bw = 0.5)
+  updated <- update(numeric_fit, kernel = "epanechnikov")
+  expect_equal(updated$kernel_str, "epanechnikov")
+  expect_equal(updated$bw, 0.5)
+
+  fixed_width <- function(x, kernel = NULL, start = NULL, support = NULL) 0.3
+  custom_fit <- kdensity(y, bw = fixed_width)
+  updated <- update(custom_fit, adjust = 2)
+  expect_equal(updated$bw_str, "fixed_width")
+  expect_equal(updated$h, 2 * custom_fit$h)
+})
+
+test_that("fitted objects cannot be modified in place", {
   fit <- obj
-  fit[["start"]] <- "gaussian"
-  expect_equal(fit$start_str, "gaussian")
-
-  fit[["kernel"]] <- "gaussian"
-  expect_equal(fit$kernel_str, "gaussian")
-
-  fit[["adjust"]] <- 2
-  expect_equal(fit$adjust, 2)
-
-  fit[["bw"]] <- "nrd0"
-  expect_equal(fit$bw_str, "nrd0")
-
-  fit[["normalized"]] <- FALSE
-  expect_false(fit$normalized)
-
-  ## Replacing fields on `fit` must not reach back and mutate `obj`.
+  expect_error(fit$start <- "gaussian")
+  expect_error(fit[["adjust"]] <- 2)
   expect_equal(obj$start_str, "uniform")
-})
-
-test_that("$<- rebuilds the object like [[<-", {
-  fit <- obj
-  fit$start <- "gumbel"
-  expect_equal(fit$start_str, "gumbel")
-})
-
-test_that("replacement functions compose on nested structures", {
-  ## The old parent.frame() assignment made this depend on the object being
-  ## bound to a bare symbol; it now works through the replacement protocol.
-  fits <- list(obj)
-  fits[[1]]$start <- "gaussian"
-  expect_equal(fits[[1]]$start_str, "gaussian")
 })

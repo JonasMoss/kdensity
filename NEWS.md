@@ -10,10 +10,14 @@ Version 1.3.0 was never released; its changes are part of this version.
   `y >= 2h` the kernel coincided with the uncorrected `gamma_biased` kernel and
   its boundary modification increased the error. Every fit that uses the gamma
   kernel changes, including the bandwidths selected for it.
-* `update()` on a `kdensity` object now returns a new object and follows R's
-  copy-on-modify semantics instead of modifying the caller's variable in place.
-  Replace `update(kde, ...)` with `kde <- update(kde, ...)`. The `$<-` and
-  `[[<-` replacement forms are unchanged.
+* Fitted `kdensity` objects are read-only. The `update()`, `$<-` and `[[<-`
+  methods are removed, so `kde$bw <- 0.5` and `kde[["kernel"]] <- "gamma"`
+  now give an error. `update()` falls back to `stats::update.default()`, which
+  refits by re-evaluating the stored call with the changed arguments (as for
+  `lm()`) and returns a new object: write `kde <- update(kde, bw = 0.5)`. This
+  also makes `update()` work for fits with a numeric or custom-function
+  bandwidth, which used to fail. As for other model objects, the data must be
+  visible from where `update()` is called.
 
 ### New features
 
