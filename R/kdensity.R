@@ -185,6 +185,21 @@ kdensity <- function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
     do.call(parametric_start, parametric_arguments)
   }
 
+  parametric_start_data <- parametric_start_vector(x)
+  if (!(is.numeric(bw) && length(bw) == 1L && isTRUE(bw == Inf))) {
+    invalid_start <- !is.finite(parametric_start_data) | parametric_start_data <= 0
+    if (any(invalid_start)) {
+      stop(
+        "Parametric start '", start_str,
+        "' must have finite, positive density at every observation; ",
+        sum(invalid_start), " observations have invalid densities (example: x = ",
+        x[which(invalid_start)[1L]],
+        "). Try a heavier-tailed start or check for outliers.",
+        call. = FALSE
+      )
+    }
+  }
+
   parametric_log_start_vector <- if (isTRUE(start$density_has_log)) {
     function(x) {
       arguments <- parametric_arguments
@@ -216,9 +231,6 @@ kdensity <- function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
   ## of the kernel equals h.
   sd <- if (!is.null(kss_list$kernel$sd)) kss_list$kernel$sd else 1
   h <- bw * adjust * sd
-
-  ## The denominator can be computed.
-  parametric_start_data <- parametric_start_vector(x)
 
   ## Now we handle normalization.
 

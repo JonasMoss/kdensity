@@ -98,6 +98,11 @@ Version 1.3.0 was never released; its changes are part of this version.
   0 or 1 now give a specific error suggesting the beta kernel or moving the
   observations off the boundary.
 
+* Fits now give a clear error when the fitted start has zero, negative, or
+  non-finite density at an observation, instead of silently producing `NaN`
+  estimates. The error suggests a heavier-tailed start or checking for outliers.
+  Numeric `bw = Inf` still returns the parametric start without this check.
+
 * `bw = "ucv"` for asymmetric kernels and for parametric starts compared the
   integral of the squared *normalized* estimate with *unnormalized*
   leave-one-out estimates. Both terms are now normalized. Since the gamma

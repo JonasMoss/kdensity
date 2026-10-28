@@ -151,7 +151,7 @@ test_that("logLik uses a built-in density's log scale without underflow", {
     x,
     start = "normal",
     kernel = "gaussian",
-    bw = 1,
+    bw = Inf,
     normalized = FALSE
   )
   estimates <- coef(fit)
