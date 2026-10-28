@@ -703,6 +703,32 @@ NumericVector kernel_weighted_sum_sorted_cpp(
   return out;
 }
 
+namespace {
+
+// Keep interrupt polling between blocks so each kernel has a tight inner loop.
+template <typename F>
+double weighted_sum(const double* w, const R_xlen_t n,
+                    const bool poll, F value) {
+  constexpr R_xlen_t block_size = 1048576;
+  double sum = 0.0;
+  for (R_xlen_t begin = 0; begin < n;) {
+    if (poll && begin != 0) {
+      // Polling is operational rather than data-dependent behavior.
+      // # nocov start
+      Rcpp::checkUserInterrupt();
+      // # nocov end
+    }
+    const R_xlen_t end = begin + std::min(block_size, n - begin);
+    for (R_xlen_t j = begin; j < end; ++j) {
+      sum += w[j] * value(j);
+    }
+    begin = end;
+  }
+  return sum;
+}
+
+}  // namespace
+
 // Exact weighted sums for the built-in kernels. The weights include the
 // 1 / (n * h) factor used by kdensity.
 //
@@ -734,6 +760,11 @@ NumericVector kernel_weighted_sum_cpp(const NumericVector& y,
     Rcpp::stop("The beta-kernel cache has the wrong length.");
   }
 
+  const double* xp = x.begin();
+  const double* wp = weights.begin();
+  const double* c1 = cache1.begin();
+  const double* c2 = cache2.begin();
+  const double inv_h = 1.0 / h;
   const double h2 = h * h;
   const double log_h = std::log(h);
   const double rho = 1.0 - h2;
@@ -799,79 +830,125 @@ NumericVector kernel_weighted_sum_cpp(const NumericVector& y,
         std::lgamma(shape1 + shape2)
       : 0.0;
 
+    const double am1 = shape1 - 1.0;
+    const double bm1 = shape2 - 1.0;
+    const double rho2 = rho * rho;
+    const double qy2 = qy * qy;
+    const double twice_rho_qy = 2.0 * rho * qy;
+    const double copula_scale = h / std::sqrt(1.0 - rho2);
     double sum = 0.0;
-    for (R_xlen_t j = 0; j < nx; ++j) {
-      if (i == 0 && j != 0 && (j & 1048575) == 0) {
-        // Polling is operational rather than data-dependent behavior.
-        // # nocov start
-        Rcpp::checkUserInterrupt();
-        // # nocov end
-      }
-
-      const double xj = x[j];
-      double value = 0.0;
-
-      if (kernel_id == 1) {
-        const double u = (xj - yi) / h;
-        value = kInvSqrtTwoPi * std::exp(-0.5 * u * u);
-      } else if (kernel_id == 2) {
-        const double u = (xj - yi) / h;
-        value = std::abs(u) <= 1.0 ? 0.75 * (1.0 - u * u) : 0.0;
-      } else if (kernel_id == 3) {
-        const double u = (xj - yi) / h;
-        value = std::abs(u) <= 1.0 ? 0.5 : 0.0;
-      } else if (kernel_id == 4) {
-        const double abs_u = std::abs((xj - yi) / h);
-        value = abs_u <= 1.0 ? 1.0 - abs_u : 0.0;
-      } else if (kernel_id == 5) {
-        const double u = (xj - yi) / h;
-        const double one_minus_u2 = 1.0 - u * u;
-        value = std::abs(u) <= 1.0
-          ? 15.0 / 16.0 * one_minus_u2 * one_minus_u2
-          : 0.0;
-      } else if (kernel_id == 6) {
-        const double u = (xj - yi) / h;
-        value = std::abs(u) <= 1.0
-          ? (1.0 + std::cos(kPi * u)) / 2.0
-          : 0.0;
-      } else if (kernel_id == 7) {
-        const double u = (xj - yi) / h;
-        value = std::abs(u) <= 1.0
-          ? kPi / 4.0 * std::cos(kPi / 2.0 * u)
-          : 0.0;
-      } else if (kernel_id == 8) {
-        const double u = (xj - yi) / h;
-        const double one_minus_u2 = 1.0 - u * u;
-        value = std::abs(u) <= 1.0
-          ? 35.0 / 32.0 * one_minus_u2 * one_minus_u2 * one_minus_u2
-          : 0.0;
-      } else if (kernel_id == 9) {
-        const double abs_u = std::abs((xj - yi) / h);
-        const double one_minus_u3 = 1.0 - abs_u * abs_u * abs_u;
-        value = abs_u <= 1.0
-          ? 70.0 / 81.0 * one_minus_u3 * one_minus_u3 * one_minus_u3
-          : 0.0;
-      } else if (kernel_id == 10) {
-        value = 0.5 * std::exp(-std::abs((xj - yi) / h));
-      } else if (kernel_id == 11) {
-        const double qx = cache1[j];
-        const double inside =
-          rho * rho * (qy * qy + qx * qx) - 2.0 * rho * qy * qx;
-        value = h / std::sqrt(1.0 - rho * rho) *
-          std::exp(-inside / copula_denominator);
-      } else if (kernel_id == 12 || kernel_id == 13) {
-        value = xj > 0.0
-          ? std::exp((shape1 - 1.0) * cache1[j] - xj / h +
-                     gamma_constant)
-          : h * R::dgamma(xj, shape1, h, false);
-      } else if (kernel_id == 14 || kernel_id == 15) {
-        value = xj > 0.0 && xj < 1.0
-          ? std::exp((shape1 - 1.0) * cache1[j] +
-                     (shape2 - 1.0) * cache2[j] + beta_constant)
-          : h * R::dbeta(xj, shape1, shape2, false);
-      }
-
-      sum += weights[j] * value;
+    switch (kernel_id) {
+      case 1:
+        sum = weighted_sum(wp, nx, i == 0, [&](R_xlen_t j) {
+          const double xj = xp[j];
+          const double u = (xj - yi) * inv_h;
+          return kInvSqrtTwoPi * std::exp(-0.5 * u * u);
+        });
+        break;
+      case 2:
+        sum = weighted_sum(wp, nx, i == 0, [&](R_xlen_t j) {
+          const double xj = xp[j];
+          const double u = (xj - yi) / h;
+          return std::abs(u) <= 1.0 ? 0.75 * (1.0 - u * u) : 0.0;
+        });
+        break;
+      case 3:
+        sum = weighted_sum(wp, nx, i == 0, [&](R_xlen_t j) {
+          const double xj = xp[j];
+          const double u = (xj - yi) / h;
+          return std::abs(u) <= 1.0 ? 0.5 : 0.0;
+        });
+        break;
+      case 4:
+        sum = weighted_sum(wp, nx, i == 0, [&](R_xlen_t j) {
+          const double xj = xp[j];
+          const double abs_u = std::abs((xj - yi) / h);
+          return abs_u <= 1.0 ? 1.0 - abs_u : 0.0;
+        });
+        break;
+      case 5:
+        sum = weighted_sum(wp, nx, i == 0, [&](R_xlen_t j) {
+          const double xj = xp[j];
+          const double u = (xj - yi) / h;
+          const double one_minus_u2 = 1.0 - u * u;
+          return std::abs(u) <= 1.0
+            ? 15.0 / 16.0 * one_minus_u2 * one_minus_u2
+            : 0.0;
+        });
+        break;
+      case 6:
+        sum = weighted_sum(wp, nx, i == 0, [&](R_xlen_t j) {
+          const double xj = xp[j];
+          const double u = (xj - yi) / h;
+          return std::abs(u) <= 1.0
+            ? (1.0 + std::cos(kPi * u)) / 2.0
+            : 0.0;
+        });
+        break;
+      case 7:
+        sum = weighted_sum(wp, nx, i == 0, [&](R_xlen_t j) {
+          const double xj = xp[j];
+          const double u = (xj - yi) / h;
+          return std::abs(u) <= 1.0
+            ? kPi / 4.0 * std::cos(kPi / 2.0 * u)
+            : 0.0;
+        });
+        break;
+      case 8:
+        sum = weighted_sum(wp, nx, i == 0, [&](R_xlen_t j) {
+          const double xj = xp[j];
+          const double u = (xj - yi) / h;
+          const double one_minus_u2 = 1.0 - u * u;
+          return std::abs(u) <= 1.0
+            ? 35.0 / 32.0 * one_minus_u2 * one_minus_u2 * one_minus_u2
+            : 0.0;
+        });
+        break;
+      case 9:
+        sum = weighted_sum(wp, nx, i == 0, [&](R_xlen_t j) {
+          const double xj = xp[j];
+          const double abs_u = std::abs((xj - yi) / h);
+          const double one_minus_u3 = 1.0 - abs_u * abs_u * abs_u;
+          return abs_u <= 1.0
+            ? 70.0 / 81.0 * one_minus_u3 * one_minus_u3 * one_minus_u3
+            : 0.0;
+        });
+        break;
+      case 10:
+        sum = weighted_sum(wp, nx, i == 0, [&](R_xlen_t j) {
+          const double xj = xp[j];
+          return 0.5 * std::exp(-std::abs((xj - yi) / h));
+        });
+        break;
+      case 11:
+        sum = weighted_sum(wp, nx, i == 0, [&](R_xlen_t j) {
+          const double qx = c1[j];
+          const double inside =
+            rho2 * (qy2 + qx * qx) - twice_rho_qy * qx;
+          return copula_scale *
+            std::exp(-inside / copula_denominator);
+        });
+        break;
+      case 12:
+      case 13:
+        sum = weighted_sum(wp, nx, i == 0, [&](R_xlen_t j) {
+          const double xj = xp[j];
+          return xj > 0.0
+            ? std::exp(am1 * c1[j] - xj * inv_h +
+                       gamma_constant)
+            : h * R::dgamma(xj, shape1, h, false);
+        });
+        break;
+      case 14:
+      case 15:
+        sum = weighted_sum(wp, nx, i == 0, [&](R_xlen_t j) {
+          const double xj = xp[j];
+          return xj > 0.0 && xj < 1.0
+            ? std::exp(am1 * c1[j] +
+                       bm1 * c2[j] + beta_constant)
+            : h * R::dbeta(xj, shape1, shape2, false);
+        });
+        break;
     }
     out[i] = sum;
   }
