@@ -72,19 +72,38 @@ test_that("gcopula rejects boundary observations before fitting", {
                "strictly between 0 and 1")
 })
 
-test_that("gcopula FFT grids retain reference values", {
-  # Central points from the unmodified package's 33-point probit grids.
-  reference <- c(1.00358810943314, 1.02794903884636,
-                 1.01901128951024, 1.08449363545763)
-  i <- 0L
-  for (start in c("uniform", "beta")) {
-    for (h in c(.18, .35)) {
-      i <- i + 1L
-      fit <- kdensity(gcopula_data, kernel = "gcopula", start = start, bw = h)
-      grid <- kdensity_grid(fit, n = 33, method = "fft")
-      expect_equal(grid$y[17], reference[i], tolerance = 1e-12)
+test_that("gcopula FFT grids agree with exact evaluation", {
+  # Includes h > 1 (rho < 0) and data deep in the probit tails, whose terms
+  # the FFT path sums exactly.
+  extreme_data <- c(gcopula_data, 1e-12, 1e-10, 1 - 1e-12)
+  for (data in list(gcopula_data, extreme_data)) {
+    for (start in c("uniform", "beta")) {
+      for (h in c(.18, .35, 1.2)) {
+        fit <- kdensity(data, kernel = "gcopula", start = start, bw = h)
+        for (range in list(c(0, 1), c(.05, .95))) {
+          grid <- kdensity_grid(fit, from = range[1], to = range[2], n = 65,
+                                method = "fft")
+          exact <- fit(grid$x)
+          info <- paste(length(data), start, h, range[1])
+          expect_identical(grid$method, "fft", info = info)
+          # A fitted beta start with shape below one is infinite at the
+          # boundary, where both paths give 0 * Inf.
+          finite <- is.finite(exact)
+          expect_identical(is.finite(grid$y), finite, info = info)
+          expect_lt(max(abs(grid$y - exact)[finite]) / max(exact[finite]),
+                    5e-4)
+        }
+      }
     }
   }
+})
+
+test_that("gcopula FFT grids are exact for the independence copula", {
+  # h = 1 gives rho = 0, a constant kernel with no convolution form.
+  fit <- kdensity(gcopula_data, kernel = "gcopula", bw = 1)
+  grid <- kdensity_grid(fit, from = 0, to = 1, n = 9, method = "fft")
+  expect_identical(grid$method, "fft")
+  expect_identical(grid$y, fit(grid$x))
 })
 
 test_that("gcopula estimates take their limit at 0 and 1", {

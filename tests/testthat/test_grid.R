@@ -311,3 +311,33 @@ test_that("every built-in symmetric kernel has an FFT grid", {
   fast <- kdensity_grid(fit, n = 256, method = "fft")
   expect_lt(max(abs(fast$y - fit(fast$x))) / max(fit(fast$x)), 2e-3)
 })
+
+test_that("compiled linear binning matches an R reference", {
+  reference <- function(points, weights, lower, spacing, n) {
+    position <- (points - lower) / spacing
+    inside <- !is.na(position) & position >= 0 & position <= n - 1
+    position <- position[inside]
+    weights <- weights[inside]
+    left <- pmin(floor(position), n - 2)
+    fraction <- position - left
+    out <- numeric(n)
+    for (k in seq_along(position)) {
+      out[left[k] + 1] <- out[left[k] + 1] + weights[k] * (1 - fraction[k])
+      out[left[k] + 2] <- out[left[k] + 2] + weights[k] * fraction[k]
+    }
+    out
+  }
+  set.seed(4)
+  # Points below, inside, exactly on both end nodes, above, and NaN.
+  points <- c(-1, runif(50, 0, 3), 0, 3, 3.5, NaN)
+  weights <- runif(length(points))
+  expect_equal(
+    linear_bin_cpp(points, weights, 0, 0.75, 5L),
+    reference(points, weights, 0, 0.75, 5L),
+    tolerance = 1e-14
+  )
+  expect_identical(linear_bin_cpp(numeric(), numeric(), 0, 1, 3L), numeric(3))
+  expect_error(linear_bin_cpp(1, c(1, 2), 0, 1, 4L), "same length")
+  expect_error(linear_bin_cpp(1, 1, 0, 0, 4L), "positive spacing")
+  expect_error(linear_bin_cpp(1, 1, 0, 1, 1L), "at least two nodes")
+})

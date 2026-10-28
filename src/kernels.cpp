@@ -1336,3 +1336,44 @@ double ucv_loo_term_cpp(const NumericVector& x, const double h,
 
   return 2.0 * mean_term / static_cast<double>(n);
 }
+
+// Linear binning for the FFT grids, the BinDist step of stats::density():
+// each point at fractional node position p = (point - lower) / spacing splits
+// its weight between nodes floor(p) and floor(p) + 1 in proportion to
+// proximity. Points outside [0, n_nodes - 1] (and NaN positions) are dropped;
+// a point exactly on the last node goes to the last interval.
+//
+// [[Rcpp::export]]
+NumericVector linear_bin_cpp(const NumericVector& points,
+                             const NumericVector& weights,
+                             const double lower,
+                             const double spacing,
+                             const int n_nodes) {
+  if (weights.size() != points.size()) {
+    Rcpp::stop("'weights' and 'points' must have the same length.");
+  }
+  if (n_nodes < 2 || !(spacing > 0.0)) {
+    Rcpp::stop("Linear binning needs at least two nodes and positive spacing.");
+  }
+
+  NumericVector binned(n_nodes);
+  double* out = binned.begin();
+  const double* point = points.begin();
+  const double* weight = weights.begin();
+  const double last = static_cast<double>(n_nodes - 1);
+  const R_xlen_t n = points.size();
+
+  for (R_xlen_t i = 0; i < n; ++i) {
+    const double position = (point[i] - lower) / spacing;
+    if (!(position >= 0.0 && position <= last)) {
+      continue;
+    }
+    const double left = std::min(std::floor(position), last - 1.0);
+    const double fraction = position - left;
+    const R_xlen_t index = static_cast<R_xlen_t>(left);
+    out[index] += weight[i] * (1.0 - fraction);
+    out[index + 1] += weight[i] * fraction;
+  }
+
+  return binned;
+}

@@ -83,6 +83,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// linear_bin_cpp
+NumericVector linear_bin_cpp(const NumericVector& points, const NumericVector& weights, const double lower, const double spacing, const int n_nodes);
+RcppExport SEXP _kdensity_linear_bin_cpp(SEXP pointsSEXP, SEXP weightsSEXP, SEXP lowerSEXP, SEXP spacingSEXP, SEXP n_nodesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type points(pointsSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< const double >::type lower(lowerSEXP);
+    Rcpp::traits::input_parameter< const double >::type spacing(spacingSEXP);
+    Rcpp::traits::input_parameter< const int >::type n_nodes(n_nodesSEXP);
+    rcpp_result_gen = Rcpp::wrap(linear_bin_cpp(points, weights, lower, spacing, n_nodes));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_kdensity_compact_kernel_cache_cpp", (DL_FUNC) &_kdensity_compact_kernel_cache_cpp, 3},
@@ -90,6 +105,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_kdensity_kernel_weighted_sum_cpp", (DL_FUNC) &_kdensity_kernel_weighted_sum_cpp, 7},
     {"_kdensity_designated_loo_parameters_cpp", (DL_FUNC) &_kdensity_designated_loo_parameters_cpp, 2},
     {"_kdensity_ucv_loo_term_cpp", (DL_FUNC) &_kdensity_ucv_loo_term_cpp, 5},
+    {"_kdensity_linear_bin_cpp", (DL_FUNC) &_kdensity_linear_bin_cpp, 5},
     {NULL, NULL, 0}
 };
 

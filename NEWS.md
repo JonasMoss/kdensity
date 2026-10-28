@@ -52,9 +52,11 @@ Version 1.3.0 was never released; its changes are part of this version.
   tricube, laplace). Callable `kdensity` objects stay exact. Plotting now
   defaults to `grid = "auto"`, using FFT for Gaussian and Gaussian-copula
   kernels and the equally fast exact evaluators for compact kernels, Laplace
-  and the asymmetric kernels. Gaussian-copula grids evaluate numerically
-  unstable extreme probit tails exactly. Exact grids ignore FFT-only
-  arguments, stay linearly spaced, and require whole-number grid sizes.
+  and the asymmetric kernels. Gaussian-copula grids use the symmetry of the
+  copula density to convolve on the probit scale without amplifying roundoff
+  in the tails; the few observations deep in the probit tails are summed
+  exactly. Exact grids ignore FFT-only arguments, stay linearly spaced, and
+  require whole-number grid sizes.
 * Added the `"GR"` gamma-reference bandwidth selector: Chen's AMISE-optimal
   bandwidth for the bias-corrected gamma kernel with a fitted gamma density
   in place of the unknown one. The fitted shape is floored at 3 (keeping the
@@ -65,6 +67,10 @@ Version 1.3.0 was never released; its changes are part of this version.
 
 * Gamma and beta UCV leave-one-out calculations reuse shape and normalization
   constants across observations, reducing repeated computation.
+
+* FFT grids bin the data in compiled code, as `stats::density()` does.
+  A Gaussian grid at n = 100,000 takes about 6 ms instead of 23 ms, and a
+  Gaussian-copula grid about 9 ms instead of 450 ms.
 
 * Built-in kernels now use an exact compiled evaluation path. Gaussian and
   Gaussian-copula evaluation is substantially faster, and beta and gamma kernels

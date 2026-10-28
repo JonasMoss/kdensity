@@ -21,3 +21,7 @@ ucv_loo_term_cpp <- function(x, h, kernel_id, start_id, parameters) {
     .Call(`_kdensity_ucv_loo_term_cpp`, x, h, kernel_id, start_id, parameters)
 }
 
+linear_bin_cpp <- function(points, weights, lower, spacing, n_nodes) {
+    .Call(`_kdensity_linear_bin_cpp`, points, weights, lower, spacing, n_nodes)
+}
+

@@ -208,7 +208,8 @@ make_kdensity_grid <- function(object, from, to, n, truncate,
 
 # Weighted kernel sums  sum_i weights[i] * kernel_at(t - points[i])  at fft_n
 # equally spaced nodes t covering [from - half_width, to + half_width], by
-# linear binning and a circular FFT convolution padded against wrap-around:
+# linear binning (compiled, as in stats::density()) and a circular FFT
+# convolution padded against wrap-around:
 # the algorithm of stats::density(), with the caller's kernel. Points outside
 # the node range lie more than half_width from [from, to] and are dropped.
 # Roundoff can make sums slightly negative; they are clamped at zero.
@@ -219,20 +220,7 @@ binned_kernel_sum <- function(points, weights, kernel_at, half_width,
   spacing <- (upper - lower) / (fft_n - 1)
   nodes <- lower + spacing * seq.int(0, fft_n - 1)
 
-  position <- (points - lower) / spacing
-  inside <- position >= 0 & position <= fft_n - 1
-  position <- position[inside]
-  weights <- weights[inside]
-  left <- pmin(floor(position), fft_n - 2)
-  fraction <- position - left
-  binned <- numeric(fft_n)
-  if (length(position) > 0L) {
-    sums <- rowsum(
-      c(weights * (1 - fraction), weights * fraction),
-      c(left, left + 1)
-    )
-    binned[as.integer(rownames(sums)) + 1L] <- sums[, 1L]
-  }
+  binned <- linear_bin_cpp(points, weights, lower, spacing, fft_n)
 
   padded_n <- stats::nextn(2L * fft_n)
   lags <- spacing * seq.int(0, fft_n - 1)
@@ -258,43 +246,55 @@ evaluate_kdensity_fft_grid <- function(object, grid, fft_n, truncate) {
   kernel_id <- object$kernel$compiled_id
 
   if (kernel_id == 11L) {
-    rho <- 1 - object$h^2
-    sigma <- sqrt(1 - rho^2)
+    h <- object$h
+    rho <- 1 - h^2
     interior <- grid > 0 & grid < 1
-    transformed <- rep(NA_real_, length(grid))
-    transformed[interior] <- stats::qnorm(grid[interior])
-    # The copula correction contains exp(z^2 / 2), which amplifies ordinary
-    # FFT/interpolation roundoff in the extreme probit tails. At this limit the
-    # amplification of machine epsilon reaches approximately sqrt(epsilon).
-    # Exact evaluation of those few tail points prevents artificial boundary
-    # spikes while retaining the fast convolution over the central grid.
-    stable_limit <- sqrt(log(1 / .Machine$double.eps))
-    fft_interior <- interior & abs(transformed) <= stable_limit
-    if (sum(fft_interior) < 2L) {
+    if (rho == 0 || sum(interior) < 2L) {
+      # rho = 0 is the constant independence-copula kernel.
       return(object(grid))
     }
-    transformed_grid <- transformed[fft_interior]
+    # The copula density is symmetric in its arguments, so on the probit
+    # scale z = qnorm(y) each term is a normal density in z:
+    #   c(y, x_i) = dnorm(z, z_i / rho, scale) / (|rho| * dnorm(z_i)),
+    # with z_i = qnorm(x_i) and scale = sqrt(1 - rho^2) / |rho|. The estimate
+    # is a Gaussian convolution with no z-dependent factor, so the FFT's
+    # roundoff is not amplified in the tails of the grid.
+    transformed_grid <- stats::qnorm(grid[interior])
+    transformed_x <- stats::qnorm(object$x)
+    # Data deep in the probit tails carry weights 1 / dnorm(z_i) large enough
+    # to swamp the roundoff of every other grid value; at this limit the
+    # weights reach about 1 / sqrt(epsilon). Their few terms are summed
+    # exactly instead.
+    extreme <- abs(transformed_x) > sqrt(log(1 / .Machine$double.eps))
+    scale <- sqrt(1 - rho^2) / abs(rho)
+    regular <- !extreme
     convolution <- binned_kernel_sum(
-      points = rho * stats::qnorm(object$x),
-      weights = 1 / (object$n * object$h * start_data),
-      kernel_at = function(lag) stats::dnorm(lag, sd = sigma),
-      half_width = truncate * sigma,
+      points = transformed_x[regular] / rho,
+      weights = 1 / (object$n * start_data[regular] * abs(rho) *
+        stats::dnorm(transformed_x[regular])),
+      kernel_at = function(lag) stats::dnorm(lag, sd = scale),
+      half_width = truncate * scale,
       from = min(transformed_grid),
       to = max(transformed_grid),
       fft_n = fft_n
     )
-    correction <- stats::approx(
+    sums <- stats::approx(
       convolution$x,
       convolution$y,
       xout = transformed_grid,
       rule = 2
-    )$y
-    correction <- correction * sqrt(2 * pi) * object$h *
-      exp(transformed_grid^2 / 2)
+    )$y + kernel_weighted_sum_cpp(
+      y = grid[interior],
+      x = object$x[extreme],
+      weights = 1 / (object$n * h * start_data[extreme]),
+      h = h,
+      kernel_id = 11L,
+      cache1 = transformed_x[extreme],
+      cache2 = numeric()
+    )
     values <- numeric(length(grid))
-    values[fft_interior] <- correction * start_density(grid[fft_interior]) /
-      normalization
-    values[!fft_interior] <- object(grid[!fft_interior])
+    values[interior] <- sums * start_density(grid[interior]) / normalization
+    values[!interior] <- object(grid[!interior])
     return(values)
   } else {
     # Symmetric kernels depend on y - x only; evaluate the fitted kernel
