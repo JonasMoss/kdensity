@@ -1,4 +1,4 @@
-## kdensity 2.0.0
+## kdensity 2.0.0 (2026-10-28)
 
 kdensity is now in maintenance mode: future releases fix bugs and keep the
 package working on CRAN, but add no new features.
