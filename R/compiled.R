@@ -156,8 +156,7 @@ known_normalization <- function(start, kernel, support, h, x, estimates) {
       identical(support, c(0, 1)) &&
       h > 0 && h < sqrt(2) &&
       all(x > 0 & x < 1)) {
-    rho <- 1 - h^2
-    return(sqrt(1 - rho^2) / h)
+    return(1)
   }
 
   if (start_id == 2L && kernel_id == 1L &&

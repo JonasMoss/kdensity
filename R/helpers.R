@@ -1,3 +1,15 @@
+validate_gcopula_data <- function(x, kernel) {
+  if (identical(kernel$compiled_id, 11L) && any(x == 0 | x == 1)) {
+    stop(
+      "The gcopula kernel requires observations strictly between 0 and 1; ",
+      "data at 0 or 1 have infinite probit transforms. ",
+      "Use the beta kernel or move the data off the boundary.",
+      call. = FALSE
+    )
+  }
+  invisible(NULL)
+}
+
 assert_ <- function(..., msg = "Assertion failed.") {
   conditions <- list(...)
   ok <- all(vapply(conditions, function(condition) isTRUE(all(condition)), logical(1)))

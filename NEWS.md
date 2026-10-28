@@ -93,6 +93,11 @@ Version 1.3.0 was never released; its changes are part of this version.
   1% of either search edge, where the criterion may prefer a value outside
   the interval.
 
+* Fixed the Gaussian-copula kernel constant so unnormalized estimates with a
+  uniform start integrate to one. Normalized estimates are unchanged. Data at
+  0 or 1 now give a specific error suggesting the beta kernel or moving the
+  observations off the boundary.
+
 * `bw = "ucv"` for asymmetric kernels and for parametric starts compared the
   integral of the squared *normalized* estimate with *unnormalized*
   leave-one-out estimates. Both terms are now normalized. Since the gamma

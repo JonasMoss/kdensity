@@ -263,7 +263,7 @@ evaluate_kdensity_fft_grid <- function(object, grid, fft_n, truncate) {
       xout = transformed_grid,
       rule = 2
     )$y
-    correction <- correction * sqrt(2 * pi) * sigma *
+    correction <- correction * sqrt(2 * pi) * object$h *
       exp(transformed_grid^2 / 2)
     values <- numeric(length(grid))
     values[fft_interior] <- correction * start_density(grid[fft_interior]) /

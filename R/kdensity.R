@@ -168,6 +168,8 @@ kdensity <- function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
     )
   }
 
+  validate_gcopula_data(x, kernel)
+
   estimates <- start$estimator(x)
   parametric_start <- start$density
 

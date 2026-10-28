@@ -394,7 +394,8 @@ double pair_log_kernel(const double y, const double x, const double h,
     const double rho = 1.0 - h * h;
     const double inside =
       rho * rho * (qy * qy + qx * qx) - 2.0 * rho * qy * qx;
-    return -inside / (2.0 * (1.0 - rho * rho));
+    return std::log(h) - 0.5 * std::log(1.0 - rho * rho) -
+      inside / (2.0 * (1.0 - rho * rho));
   }
   if (kernel_id == 12 || kernel_id == 13) {
     return x > 0.0
@@ -842,7 +843,8 @@ NumericVector kernel_weighted_sum_cpp(const NumericVector& y,
         const double qx = cache1[j];
         const double inside =
           rho * rho * (qy * qy + qx * qx) - 2.0 * rho * qy * qx;
-        value = std::exp(-inside / copula_denominator);
+        value = h / std::sqrt(1.0 - rho * rho) *
+          std::exp(-inside / copula_denominator);
       } else if (kernel_id == 12 || kernel_id == 13) {
         value = xj > 0.0
           ? std::exp((shape1 - 1.0) * cache1[j] - xj / h +

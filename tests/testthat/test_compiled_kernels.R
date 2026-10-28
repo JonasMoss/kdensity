@@ -108,7 +108,7 @@ test_that("known built-in normalizations avoid numerical integration", {
       uniform, get_kernel("gcopula"), c(0, 1), 0.2,
       x = c(0.25, 0.75), estimates = numeric()
     ),
-    sqrt(1 - (1 - 0.2^2)^2) / 0.2
+    1
   )
   expect_null(
     known_normalization(
