@@ -39,10 +39,27 @@ test_that("gcopula normalized beta starts agree with the density formula", {
   }
 })
 
-test_that("gcopula UCV retains the reference bandwidth", {
+test_that("the gcopula constant does not affect the UCV criterion", {
+  # UCV divides the leave-one-out term by the normalizer, so a constant factor
+  # in the kernel cancels. Compare the compiled kernel with an R kernel that
+  # lacks the constant (the pre-2.0.0 form).
+  on.exit(rm(list = "gcopula_unscaled", envir = kernel_environment))
+  add_kernel("gcopula_unscaled", list(
+    kernel = function(y, x, h) {
+      rho <- 1 - h^2
+      inside <- rho^2 * (qnorm(y)^2 + qnorm(x)^2) - 2 * rho * qnorm(y) * qnorm(x)
+      exp(-inside / (2 * (1 - rho^2)))
+    },
+    support = c(0, 1)
+  ))
   for (start in c("uniform", "beta")) {
-    fit <- kdensity(gcopula_data, kernel = "gcopula", start = start, bw = "ucv")
-    expect_equal(fit$h, 0.2499433619183222, tolerance = 1e-12)
+    scaled <- make_ucv_objective(gcopula_data, "gcopula", start, c(0, 1))
+    unscaled <- make_ucv_objective(gcopula_data, "gcopula_unscaled", start, c(0, 1))
+    for (h in c(.12, .25, .4)) {
+      expect_equal(scaled(h), unscaled(h), tolerance = 1e-6,
+        info = paste(start, h)
+      )
+    }
   }
 })
 
