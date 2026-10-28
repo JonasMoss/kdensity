@@ -87,7 +87,7 @@ for a complete list, or take a look at `univariateML::univariateML_models`.
 You must supply two functions and one vector to `kdensity` in order to use a custom parametric start. The first is a `density` function, the second is a function that estimates the named parameters of the density, and the third is the support of the density. 
 
 ```{r}
-normal <- list(
+my_normal <- list(
   density = dnorm,
   estimator = function(data) {
     c(
@@ -109,7 +109,7 @@ The built-in data set `LakeHuron` contains annual measurements of the water leve
 
 ```{r, fig2, fig.height = 5, fig.width = 5, fig.align = "center"}
 LH <- diff(LakeHuron)
-kde_normal <- kdensity(LH, start = "normal")
+kde_normal <- kdensity(LH, start = my_normal)
 plot(kde_normal,
   lwd = 2, col = "black",
   main = "Lake Huron differences"
@@ -123,7 +123,7 @@ The density is clearly non-normal. Still, it looks fairly regular, and it should
 If you want to make custom kernel, you will need to supply the kernel function, with arguments `y, x, h`. Here `x` is the random data you put into `kdensity`, `h` is the final bandwidth, and `y` is the point you want to evaluate at. The kernel is called as `1/h*kernel(y, x, h)`, and should be able to take vector inputs `x` and `y`. In addition to the kernel function, you must supply a `support` argument, which states the domain of definition of the kernel. For instance, the `gcopula` kernel is defined on `c(0, 1)`. In addition, you can optionally supply the standard deviation of the kernel. This is only used for symmetric kernels, and is useful since it makes them comparable. For example, the implementation of the `gaussian` kernel is
 
 ```{r}
-gaussian <- list(
+my_gaussian <- list(
   kernel  = function(y, x, h) dnorm((y - x) / h),
   sd      = 1,
   support = c(-Inf, Inf)

@@ -4,6 +4,9 @@ Version 1.3.0 was never released; its changes are part of this version.
 
 ### Breaking changes
 
+* Custom kernels and parametric starts must use names different from built-ins
+  (for example, `my_gaussian`). Re-registering a custom name remains allowed.
+
 * `kernel = "gamma"` now implements Chen's (2000) modified gamma kernel, a
   gamma density with scale `h` and shape `y / h` for `y >= 2h` and
   `(y / (2h))^2 + 1` below. Earlier versions used a shape one larger, so for
@@ -77,6 +80,9 @@ Version 1.3.0 was never released; its changes are part of this version.
   invalid compiled fits fall back to the existing R path.
 
 ### Bug fixes
+
+* Custom kernels and starts can no longer silently replace built-ins for the
+  rest of the session, which also disabled their compiled evaluation paths.
 
 * `bw = "ucv"` for asymmetric kernels and for parametric starts compared the
   integral of the squared *normalized* estimate with *unnormalized*

@@ -31,14 +31,18 @@ kernel_environment <- new.env(hash = FALSE)
 #'    `sd` is used for symmetric kernels, and states the standard error
 #'    of the kernel. This is used to make kernels comparable to the Gaussian
 #'    kernel when calculating bandwidths.
+#' Custom objects must use names different from the built-ins (for example,
+#' `my_gaussian`). Registering another custom object under the same name
+#' replaces the earlier custom object.
+#'
 #' @examples
-#' gaussian <- list(
+#' my_gaussian <- list(
 #'   kernel = function(y, x, h) stats::dnorm((y - x) / h),
 #'   sd = 1,
 #'   support = c(-Inf, Inf)
 #' )
 #'
-#' gcopula <- list(
+#' my_gcopula <- list(
 #'   kernel = function(y, x, h) {
 #'     rho <- 1 - h^2
 #'     inside <- rho^2 * (qnorm(y)^2 + qnorm(x)^2) - 2 * rho * qnorm(y) * qnorm(x)
@@ -252,6 +256,9 @@ for (kernel_name in names(compiled_kernel_ids)) {
 
 rm(compiled_kernel_ids, kernel_name)
 
+# Snapshot built-in names before any custom objects can be registered.
+builtin_kernel_names <- ls(kernel_environment, all.names = TRUE)
+
 ## ---------------------------------------------------------------------------
 ## Accessors.
 ## ---------------------------------------------------------------------------
@@ -284,7 +291,13 @@ get_kernel <- function(kernel_str) {
 add_kernel <- function(kernel_str, kernel) {
   assert_(is.character(kernel_str))
   assert_(all(kernel_str == make.names(kernel_str)),
-    msg = "The name of the kernel is not valid. Use a short, valid name. (E.g. kdensity(x, kernel = gaussian), where gaussian is a predefined kernel function.)"
+    msg = "The name of the kernel is not valid. Use a short, valid name. (E.g. kdensity(x, kernel = my_gaussian), where my_gaussian is a predefined kernel function.)"
+  )
+
+  assert_(!any(kernel_str %in% builtin_kernel_names),
+    msg = paste0("The kernel name ('", kernel_str,
+      "') is reserved for a built-in kernel. Rename your object (e.g. 'my_",
+      kernel_str, "').")
   )
 
   list_msg <- paste0("The kernel ('", kernel_str, "') must be a list.")

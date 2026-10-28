@@ -14,6 +14,10 @@
 #'   function. The estimator function takes one argument, a numeric vector,
 #'   which is passed from `kdensity`.
 #'
+#' Custom objects must use names different from the built-ins (for example,
+#' `my_gaussian`). Registering another custom object under the same name
+#' replaces the earlier custom object.
+#'
 #' @section Supported parametric starts: `kdensity` supports more than
 #'    20 built-in starts from the [univariateML][univariateML::univariateML-package] package, see
 #'    `univariateML::univariateML_models` for a list. Densities with variable
@@ -174,6 +178,9 @@ for (i in seq_along(starts)) {
 
 starts_environment <- as.environment(starts)
 
+# Snapshot built-in names before any custom objects can be registered.
+builtin_start_names <- ls(starts_environment, all.names = TRUE)
+
 ## ---------------------------------------------------------------------------
 ## Accessors.
 ## ---------------------------------------------------------------------------
@@ -205,7 +212,13 @@ get_start <- function(start_str) {
 add_start <- function(start_str, start) {
   assert_(is.character(start_str))
   assert_(all(start_str == make.names(start_str)),
-    msg = "The name of the parametric start is not valid. Use a short, valid name. (E.g. kdensity(x, start = gaussian), where gaussian is a predefined start function.)"
+    msg = "The name of the parametric start is not valid. Use a short, valid name. (E.g. kdensity(x, start = my_gaussian), where my_gaussian is a predefined start function.)"
+  )
+
+  assert_(!any(start_str %in% builtin_start_names),
+    msg = paste0("The parametric start name ('", start_str,
+      "') is reserved for a built-in parametric start. Rename your object (e.g. 'my_",
+      start_str, "').")
   )
 
   list_msg <- paste0("The parametric start ('", start_str, "') must be a list.")

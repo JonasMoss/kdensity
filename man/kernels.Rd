@@ -60,16 +60,19 @@ unit interval / positive half-line from kernels on R.
 \code{sd} is used for symmetric kernels, and states the standard error
 of the kernel. This is used to make kernels comparable to the Gaussian
 kernel when calculating bandwidths.
+Custom objects must use names different from the built-ins (for example,
+\code{my_gaussian}). Registering another custom object under the same name
+replaces the earlier custom object.
 }
 
 \examples{
-gaussian <- list(
+my_gaussian <- list(
   kernel = function(y, x, h) stats::dnorm((y - x) / h),
   sd = 1,
   support = c(-Inf, Inf)
 )
 
-gcopula <- list(
+my_gcopula <- list(
   kernel = function(y, x, h) {
     rho <- 1 - h^2
     inside <- rho^2 * (qnorm(y)^2 + qnorm(x)^2) - 2 * rho * qnorm(y) * qnorm(x)
