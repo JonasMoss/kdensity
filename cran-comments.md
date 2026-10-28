@@ -18,7 +18,6 @@ It also fixes the r-devel NOTE on the current CRAN version about
 * local, sanitizers: gcc 15 AddressSanitizer and UBSan (Ubuntu 26.04,
   R 4.6.1); valgrind (Ubuntu 24.04, R 4.6.1)
 * win-builder: R-devel, R-release
-* macOS builder: R-release (arm64)
 * GitHub Actions: macOS and Windows (R-release); Ubuntu (R-devel, R-release,
   R-oldrel-1)
 

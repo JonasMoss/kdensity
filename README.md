@@ -56,48 +56,16 @@ plot(kdensity(mtcars$mpg, start = "normal"))
 
 ## Description
 
-Kernel density estimation with a *parametric start* was introduced by
-Hjort and Glad in [Nonparametric Density Estimation with a Parametric
-Start (1995)](https://projecteuclid.org/euclid.aos/1176324627). The idea
-is to start out with a parametric density before you do your kernel
-density estimation, so that your actual kernel density estimation will
-be a correction to the original parametric estimate. The resulting
-estimator will outperform the ordinary kernel density estimator in terms
-of asymptotic integrated mean squared error whenever the true density is
-close to your suggestion, and the estimator can be superior to the
-ordinary kernel density estimator even when the suggestion is pretty far
-off.
+A *parametric start* (Hjort and Glad, 1995) fits a parametric density
+first and uses kernel density estimation to correct it. When the true
+density is close to the start, this beats the ordinary kernel density
+estimator, and it often does well even when the start is some way off.
 
-In addition to parametric starts, the package implements some
-*asymmetric kernels*. These kernels are useful when modelling data with
-sharp boundaries, such as data supported on the positive half-line or
-the unit interval. Currently we support the following asymmetric
-kernels:
-
-- Jones and Henderson’s *Gaussian copula KDE*, from [Kernel-Type Density
-  Estimation on the Unit Interval
-  (2007)](https://academic.oup.com/biomet/article-abstract/94/4/977/246269).
-  This is used for data on the unit interval. The bandwidth selection
-  mechanism described in that paper is implemented as well. This kernel
-  is called `gcopula`.
-
-- Chen’s two *beta kernels* from [Beta kernel estimators for density
-  functions
-  (1999)](https://www.sciencedirect.com/science/article/pii/S0167947399000109).
-  These are used for data supported on the unit interval, and are called
-  `beta` and `beta_biased`.
-
-- Chen’s two *gamma kernels* from [Probability Density Function
-  Estimation Using Gamma Kernels
-  (2000)](https://link.springer.com/article/10.1023/A:1004165218295).
-  These are used for data supported on the positive half-line, and are
-  called `gamma` and `gamma_biased`.
-
-These features can be combined to make asymmetric kernel density
-estimators with parametric starts, see the example below. The package’s
-two main functions are `kdensity()` and `kdensity_grid()`, in addition
-to methods for generics such as `plot()`, `points()`, `lines()`,
-`summary()`, and `print()`.
+*Asymmetric kernels* avoid boundary bias for data on the unit interval
+or the positive half-line. kdensity has Jones and Henderson’s Gaussian
+copula kernel (`gcopula`), Chen’s beta kernels (`beta`, `beta_biased`),
+and Chen’s gamma kernels (`gamma`, `gamma_biased`). Starts and kernels
+can be combined, as in the example below.
 
 ## Usage
 
