@@ -192,7 +192,9 @@ kdensity <- function(x, bw = NULL, adjust = 1, kernel = NULL, start = NULL,
       stop(
         "Parametric start '", start_str,
         "' must have finite, positive density at every observation; ",
-        sum(invalid_start), " observations have invalid densities (example: x = ",
+        sum(invalid_start),
+        ngettext(sum(invalid_start), " observation has", " observations have"),
+        " an invalid density (example: x = ",
         x[which(invalid_start)[1L]],
         "). Try a heavier-tailed start or check for outliers.",
         call. = FALSE

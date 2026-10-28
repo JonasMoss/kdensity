@@ -1,7 +1,7 @@
 test_that("underflowing normal starts fail before bandwidth selection", {
   x <- c(rep(c(-1, 1), 5000), 1000)
   message <- paste0(
-    "Parametric start 'normal'.*1 observations.*x = 1000.*",
+    "Parametric start 'normal'.*1 observation has.*x = 1000.*",
     "heavier-tailed start or check for outliers"
   )
   expect_error(kdensity(x, start = "normal"), message)
@@ -19,7 +19,7 @@ test_that("custom starts reject all non-positive and non-finite densities", {
     )
     expect_error(
       kdensity(c(0, 1, 1), start = custom_start, bw = 1),
-      "Parametric start 'custom_start'.*2 observations.*x = 1"
+      "Parametric start 'custom_start'.*2 observations have.*x = 1"
     )
   }
 })
