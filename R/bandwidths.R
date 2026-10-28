@@ -223,33 +223,49 @@ bw_environment$ucv <- function(x, kernel = NULL, start = NULL, support = NULL) {
   ## If we are here, we must do our own cross-validation.
   obj_func <- make_ucv_objective(x, kernel, start, support)
 
-  # The range of allowable bandwidths vary from kernel to kernel.
-
-  eps <- 10^-10
-
-  if (kernel == "gcopula" | kernel == "beta" | kernel == "beta_biased") {
-    using_str <- "JH"
-    using <- bw_environment$JH(x)
-    lower <- 1 / 4 * using
-    upper <- 1 / 4 - eps
-  } else if (start == "constant" | start == "uniform") {
-    using_str <- "nrd0"
-    using <- stats::bw.nrd0(x)
-    lower <- 1 / 5 * using
-    upper <- 5 * using
-  } else {
-    using_str <- "RHE"
-    using <- bw_environment$RHE(x)
-    lower <- 1 / 5 * using
-    upper <- 5 * using
+  # Use a pilot on the kernel's bandwidth scale. Call the rules directly:
+  # their public wrappers can fall back to UCV and would recurse here.
+  legacy_pilot <- function() {
+    if (kernel %in% c("gcopula", "beta", "beta_biased")) {
+      list(value = bw_environment$JH(x), name = "JH")
+    } else if (start %in% c("constant", "uniform")) {
+      list(value = stats::bw.nrd0(x), name = "nrd0")
+    } else {
+      list(value = bw_environment$RHE(x), name = "RHE")
+    }
   }
+  pilot <- tryCatch({
+    if (kernel %in% c("gamma", "gamma_biased")) {
+      list(value = compute_gr_bandwidth(x), name = "GR")
+    } else if (kernel %in% c("beta", "beta_biased")) {
+      list(value = suppressWarnings(compute_hs_bandwidth(x)), name = "HS")
+    } else if (kernel == "gcopula") {
+      list(value = compute_probit_sj_bandwidth(x), name = "SJ")
+    } else {
+      legacy_pilot()
+    }
+  }, error = function(e) legacy_pilot())
+  using <- pilot$value
+  using_str <- pilot$name
+  lower <- using / 5
+  upper <- 5 * using
+  if (kernel %in% c("beta", "beta_biased")) upper <- min(upper, 1 / 4 - 1e-10)
+  if (kernel == "gcopula") upper <- min(upper, 1 / 2)
 
+  optimized <- TRUE
   bw <- tryCatch(stats::optimize(obj_func, lower = lower, upper = upper, tol = 0.0001)$minimum,
     error = function(e) {
+      optimized <<- FALSE
       warning(paste0("Integration failed when finding bandwidth using 'ucv'. Using '", using_str, "' instead."), call. = FALSE)
       using
     }
   )
+  if (optimized && (bw <= lower * 1.01 || bw >= upper * 0.99)) {
+    warning(sprintf(
+      "'ucv' selected a bandwidth at the edge of its search interval [%g, %g]; the criterion may prefer a bandwidth outside it.",
+      lower, upper
+    ), call. = FALSE)
+  }
   return(bw)
 }
 

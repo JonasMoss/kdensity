@@ -61,6 +61,9 @@ Version 1.3.0 was never released; its changes are part of this version.
 
 ### Performance
 
+* Gamma and beta UCV leave-one-out calculations reuse shape and normalization
+  constants across observations, reducing repeated computation.
+
 * Built-in kernels now use an exact compiled evaluation path. Gaussian and
   Gaussian-copula evaluation is substantially faster, and beta and gamma kernels
   reuse cached data transformations. User-supplied kernels keep the R path.
@@ -83,6 +86,12 @@ Version 1.3.0 was never released; its changes are part of this version.
 
 * Custom kernels and starts can no longer silently replace built-ins for the
   rest of the session, which also disabled their compiled evaluation paths.
+
+* Explicit `bw = "ucv"` searches around a closed-form pilot on the gamma,
+  beta, or Gaussian-copula kernel's bandwidth scale, avoiding intervals that
+  force oversmoothing. It now warns when the selected bandwidth is within
+  1% of either search edge, where the criterion may prefer a value outside
+  the interval.
 
 * `bw = "ucv"` for asymmetric kernels and for parametric starts compared the
   integral of the squared *normalized* estimate with *unnormalized*

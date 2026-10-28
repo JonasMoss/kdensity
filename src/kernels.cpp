@@ -298,10 +298,51 @@ double start_log_density(const double x, const double log_x,
   }
 }
 
+// Shape and normalization terms depend only on the evaluation point.
+struct PairKernelConstants {
+  double shape1 = 0.0;
+  double shape2 = 0.0;
+  double log_h = 0.0;
+  double log_gamma1 = 0.0;
+  double log_gamma2 = 0.0;
+  double log_gamma_sum = 0.0;
+};
+
+PairKernelConstants pair_kernel_constants(double y, double h, int kernel_id) {
+  PairKernelConstants c;
+  if (kernel_id < 12) return c;
+  c.log_h = std::log(h);
+  if (kernel_id <= 13) {
+    c.shape1 = gamma_kernel_shape(y, h, kernel_id);
+    c.log_gamma1 = std::lgamma(c.shape1);
+  } else {
+    c.shape1 = y / h + 1.0;
+    c.shape2 = (1.0 - y) / h + 1.0;
+    if (kernel_id == 14) {
+      const double h2 = h * h;
+      const double rho_base = 4.0 * h2 * h2 + 6.0 * h2 + 2.25;
+      if (y < 2.0 * h) {
+        c.shape1 = beta_boundary_parameter(y, h, rho_base);
+        c.shape2 = (1.0 - y) / h;
+      } else if (y < 1.0 - 2.0 * h) {
+        c.shape1 = y / h;
+        c.shape2 = (1.0 - y) / h;
+      } else {
+        c.shape1 = y / h;
+        c.shape2 = beta_boundary_parameter(1.0 - y, h, rho_base);
+      }
+    }
+    c.log_gamma1 = std::lgamma(c.shape1);
+    c.log_gamma2 = std::lgamma(c.shape2);
+    c.log_gamma_sum = std::lgamma(c.shape1 + c.shape2);
+  }
+  return c;
+}
+
 double pair_log_kernel(const double y, const double x, const double h,
                        const int kernel_id, const double qy,
                        const double qx, const double log_x,
-                       const double log1m_x) {
+                       const double log1m_x, const PairKernelConstants& c) {
   const double u = (x - y) / h;
 
   if (kernel_id == 1) {
@@ -356,37 +397,17 @@ double pair_log_kernel(const double y, const double x, const double h,
     return -inside / (2.0 * (1.0 - rho * rho));
   }
   if (kernel_id == 12 || kernel_id == 13) {
-    const double shape = gamma_kernel_shape(y, h, kernel_id);
     return x > 0.0
-      ? (shape - 1.0) * (log_x - std::log(h)) - x / h -
-        std::lgamma(shape)
-      : std::log(h) + R::dgamma(x, shape, h, true);
+      ? (c.shape1 - 1.0) * (log_x - c.log_h) - x / h - c.log_gamma1
+      : c.log_h + R::dgamma(x, c.shape1, h, true);
   }
   if (kernel_id == 14 || kernel_id == 15) {
-    double shape1 = y / h + 1.0;
-    double shape2 = (1.0 - y) / h + 1.0;
-
-    if (kernel_id == 14) {
-      const double h2 = h * h;
-      const double rho_base = 4.0 * h2 * h2 + 6.0 * h2 + 2.25;
-      if (y < 2.0 * h) {
-        shape1 = beta_boundary_parameter(y, h, rho_base);
-        shape2 = (1.0 - y) / h;
-      } else if (y < 1.0 - 2.0 * h) {
-        shape1 = y / h;
-        shape2 = (1.0 - y) / h;
-      } else {
-        shape1 = y / h;
-        shape2 = beta_boundary_parameter(1.0 - y, h, rho_base);
-      }
-    }
-
     if (x > 0.0 && x < 1.0) {
-      return std::log(h) + (shape1 - 1.0) * log_x +
-        (shape2 - 1.0) * log1m_x - std::lgamma(shape1) -
-        std::lgamma(shape2) + std::lgamma(shape1 + shape2);
+      return c.log_h + (c.shape1 - 1.0) * log_x +
+        (c.shape2 - 1.0) * log1m_x - c.log_gamma1 -
+        c.log_gamma2 + c.log_gamma_sum;
     }
-    return std::log(h) + R::dbeta(x, shape1, shape2, true);
+    return c.log_h + R::dbeta(x, c.shape1, c.shape2, true);
   }
 
   // Callers validate kernel ids before reaching this helper.
@@ -1244,6 +1265,7 @@ double ucv_loo_term_cpp(const NumericVector& x, const double h,
       x[i], log_data[i], log1m_data[i], start_id, parameters, i,
       start_constant
     );
+    const PairKernelConstants constants = pair_kernel_constants(x[i], h, kernel_id);
     double maximum = R_NegInf;
     double scaled_sum = 0.0;
 
@@ -1263,7 +1285,7 @@ double ucv_loo_term_cpp(const NumericVector& x, const double h,
       const double log_x = kernel_id >= 12 ? log_data[j] : 0.0;
       const double log1m_x = kernel_id >= 14 ? log1m_data[j] : 0.0;
       const double log_kernel = pair_log_kernel(
-        x[i], x[j], h, kernel_id, qy, qx, log_x, log1m_x
+        x[i], x[j], h, kernel_id, qy, qx, log_x, log1m_x, constants
       );
       const double log_start_j = start_log_density(
         x[j], log_data[j], log1m_data[j], start_id, parameters, i,

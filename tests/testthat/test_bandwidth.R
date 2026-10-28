@@ -31,7 +31,7 @@ gamma_ucv_sample <- rgamma(60, 2, 2)
 ## criterion (2.0.0). For this sample the ISE-optimal bandwidth is about 0.11.
 expect_equal(
   get_bw("ucv")(gamma_ucv_sample, "gamma", "uniform", c(0, Inf)),
-  0.1077853552,
+  0.10778523669076044,
   tolerance = 1e-8
 )
 
@@ -224,4 +224,73 @@ test_that("the UCV objective normalizes both terms", {
   expect_equal(objective(0.2), ucv_reference(x, 0.2, "gamma", "gamma"),
     tolerance = 1e-5
   )
+})
+
+test_that("UCV uses kernel-scale pilots and caps its search interval", {
+  local_mocked_bindings(
+    compute_gr_bandwidth = function(x) 0.02,
+    compute_hs_bandwidth = function(x) {
+      warning("fallback heuristic")
+      0.08
+    },
+    compute_probit_sj_bandwidth = function(x) 0.2
+  )
+  check_interval <- function(kernel, start, lower, upper) {
+    local_mocked_bindings(make_ucv_objective = function(...) {
+      function(h) (h - (lower + upper) / 2)^2
+    })
+    expect_silent(value <- bw_environment$ucv(seq(0.1, 0.9, length.out = 20),
+      kernel, start, c(0, 1)))
+    expect_equal(value, (lower + upper) / 2, tolerance = 1e-8)
+  }
+  for (kernel in c("gamma", "gamma_biased")) {
+    check_interval(kernel, "gamma", 0.004, 0.1)
+  }
+  for (kernel in c("beta", "beta_biased")) {
+    check_interval(kernel, "uniform", 0.016, 0.25 - 1e-10)
+  }
+  check_interval("gcopula", "beta", 0.04, 0.5)
+})
+
+test_that("UCV retains legacy pilots when a rule fails", {
+  x <- seq(0.1, 0.9, length.out = 20)
+  local_mocked_bindings(
+    compute_gr_bandwidth = function(...) stop("pilot failed"),
+    compute_hs_bandwidth = function(...) stop("pilot failed"),
+    compute_probit_sj_bandwidth = function(...) stop("pilot failed"),
+    make_ucv_objective = function(...) function(h) stop("objective failed")
+  )
+  for (kernel in c("beta", "beta_biased", "gcopula")) {
+    expect_warning(value <- bw_environment$ucv(x, kernel, "uniform", c(0, 1)),
+      "Using 'JH'")
+    expect_equal(value, bw_environment$JH(x))
+  }
+  expect_warning(value <- bw_environment$ucv(x, "gamma", "uniform", c(0, Inf)),
+    "Using 'nrd0'")
+  expect_equal(value, stats::bw.nrd0(x))
+  expect_warning(value <- bw_environment$ucv(x, "gamma_biased", "gamma", c(0, Inf)),
+    "Using 'RHE'")
+  expect_equal(value, bw_environment$RHE(x))
+  # The same pilots still apply to custom kernels and symmetric parametric fits.
+  expect_warning(value <- bw_environment$ucv(x, "asymmetric_custom", "uniform", c(0, Inf)),
+    "Using 'nrd0'")
+  expect_equal(value, stats::bw.nrd0(x))
+  expect_warning(value <- bw_environment$ucv(x, "gaussian", "normal", c(-Inf, Inf)),
+    "Using 'RHE'")
+  expect_equal(value, bw_environment$RHE(x))
+})
+
+test_that("UCV warns at either search edge and returns its pilot on failure", {
+  x <- seq(0.1, 0.9, length.out = 20)
+  local_mocked_bindings(compute_gr_bandwidth = function(...) 0.1)
+  for (direction in c(-1, 1)) {
+    local_mocked_bindings(make_ucv_objective = function(...) function(h) direction * h)
+    expect_warning(value <- bw_environment$ucv(x, "gamma", "gamma", c(0, Inf)),
+      "at the edge of its search interval \\[0.02, 0.5\\]")
+    expect_lt(abs(value - if (direction == 1) 0.02 else 0.5), 1e-4)
+  }
+  local_mocked_bindings(make_ucv_objective = function(...) function(h) stop("failed"))
+  expect_warning(value <- bw_environment$ucv(x, "gamma", "gamma", c(0, Inf)),
+    "Using 'GR'")
+  expect_equal(value, 0.1)
 })
