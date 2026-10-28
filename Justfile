@@ -24,12 +24,18 @@ revdep-reset:
 revdep-manual:
     #!/usr/bin/env bash
     set -euo pipefail
+    # Private library with Posit Package Manager binaries for this Linux release;
+    # the revdeps' Suggests are installed too, since R CMD check needs them.
+    revdeps='c("RealSurvSim", "tscopula", "TreeDist")'
+    . /etc/os-release
+    p3m="https://packagemanager.posit.co/cran/__linux__/${VERSION_CODENAME}/latest"
     rm -rf revdep-manual
+    mkdir -p revdep-manual/lib
+    export R_LIBS_USER="$PWD/revdep-manual/lib"
+    Rscript -e "install.packages($revdeps, dependencies = TRUE, repos = '$p3m', Ncpus = 4)"
     R CMD INSTALL .
-    R_COMPILE_AND_INSTALL_PACKAGES=never Rscript -e 'install.packages(c("RealSurvSim","tscopula"), repos="https://cloud.r-project.org")'
-    mkdir -p revdep-manual
     cd revdep-manual
-    Rscript -e 'download.packages(c("RealSurvSim","tscopula"), destdir=".", type="source", repos="https://cloud.r-project.org")'
+    Rscript -e "download.packages($revdeps, destdir = '.', type = 'source', repos = 'https://cloud.r-project.org')"
     for tarball in *.tar.gz; do
       echo "=== Checking $tarball ==="
       R CMD check --no-manual "$tarball" || true
