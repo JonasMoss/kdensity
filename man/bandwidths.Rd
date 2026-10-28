@@ -3,24 +3,14 @@
 \name{bandwidths}
 \alias{bandwidths}
 \title{Bandwidth Selectors}
-\arguments{
-\item{x}{The input data.}
-
-\item{kernel_str}{A string specifying the kernel, e.g. "gaussian."}
-
-\item{start_str}{A string specifying the parametric start, e.g. "normal".}
-
-\item{support}{The domain of definition for the kernel. (-Inf, Inf) for
-symmetric kernels.}
-}
 \description{
 The available options for bandwidth selectors, passed as the \code{bw}
 argument to \code{kdensity}.
 }
 \details{
 The bandwidth functions are not exported. They are members of the
-environment \code{bw_environments}, and can be accessed by
-\code{kdensity:::bw_environments}.
+environment \code{bw_environment}, and can be accessed by
+\code{kdensity:::bw_environment}.
 }
 \section{Defaults}{
 

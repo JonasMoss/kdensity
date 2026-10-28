@@ -6,14 +6,8 @@ bw_environment <- new.env(hash = FALSE)
 #' argument to `kdensity`.
 #'
 #' The bandwidth functions are not exported. They are members of the
-#' environment `bw_environments`, and can be accessed by
-#' `kdensity:::bw_environments`.
-#'
-#' @param x The input data.
-#' @param kernel_str A string specifying the kernel, e.g. "gaussian."
-#' @param start_str A string specifying the parametric start, e.g. "normal".
-#' @param support The domain of definition for the kernel. (-Inf, Inf) for
-#' symmetric kernels.
+#' environment `bw_environment`, and can be accessed by
+#' `kdensity:::bw_environment`.
 #'
 #' @section Defaults:
 #'    Every default is a closed-form rule, so no default requires
