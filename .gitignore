@@ -56,3 +56,6 @@ vignettes/*.R
 revdep/
 revdep-manual/
 tools/results/
+tools/default-bandwidth-sim/results/
+tools/default-bandwidth-sim/logs/
+tools/default-bandwidth-sim/combine.out
