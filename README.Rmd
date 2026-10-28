@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# kdensity
+# kdensity <img src="man/figures/logo.png" align="right" height="139" alt="kdensity hex logo" />
 [![R build status](https://github.com/JonasMoss/kdensity/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JonasMoss/kdensity/actions)
 [![Codecov test coverage](https://codecov.io/gh/JonasMoss/kdensity/graph/badge.svg)](https://app.codecov.io/gh/JonasMoss/kdensity)
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/kdensity)](https://cran.r-project.org/package=kdensity)

@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# kdensity
+# kdensity <img src="man/figures/logo.png" align="right" height="139" alt="kdensity hex logo" />
 
 [![R build
 status](https://github.com/JonasMoss/kdensity/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JonasMoss/kdensity/actions)
