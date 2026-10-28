@@ -19,10 +19,14 @@
 #'
 #' @param bw A bandwidth function. Can be either a string, a custom-made
 #' function, or a double. The supported bandwidth functions are documented
-#' in [bandwidths()].
+#' in [bandwidths()]. Every built-in kernel defaults to a closed-form rule;
+#' use `bw = "ucv"` for start-aware cross-validation. For symmetric kernels,
+#' `bw` is on the Gaussian standard-deviation scale.
 #'
-#' @param adjust An adjustment constant, so that `h = adjust*bw*sd`, where `sd`
-#' varies with the chosen kernel.
+#' @param adjust An adjustment constant. For symmetric kernels,
+#' `h = adjust * bw * sd`, where `sd` is the kernel's stored scale factor
+#' (the reciprocal of its standard deviation). For asymmetric kernels,
+#' `h = adjust * bw`.
 #'
 #' @param kernel The kernel function. Can be chosen from the list of built-in
 #' kernels or be custom-made. See [kernels()] for details.
@@ -71,6 +75,11 @@
 #'
 #' @details If `normalized` is `FALSE` and `start != "uniform"`, the resulting
 #' density will not integrate to 1 in general.
+#'
+#' Fitted objects are read-only: `$<-` and `[[<-` assignment is not supported.
+#' Use `kde <- update(kde, bw = 0.5)` to refit from the stored call with changed
+#' arguments and return a new object. The data must be visible where
+#' `update()` is called.
 #'
 #' The `logLik()`, `AIC()`, and `BIC()` methods for `kdensity` objects describe
 #' the *fitted parametric start* alone, not the kernel density estimate: they

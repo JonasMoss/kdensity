@@ -31,7 +31,10 @@ Hence it can be used to calculate functionals, such as the expectation.
 integrate(function(x) x * kde(x), lower = -Inf, upper = Inf)$value
 ```
 
-Plotting works as with `stats::density`. If `kdensity` was called with a parametric start, use `plot_start = TRUE` inside a plotting function in order to plot the estimated parametric start density instead of the kernel density.
+Plotting works as with `stats::density`. The default `grid = "auto"` uses
+approximate FFT evaluation for Gaussian and Gaussian-copula kernels and exact
+evaluation otherwise. Use `grid = "exact"` for exact plotting; calling the
+fitted density function itself always uses exact evaluation. If `kdensity` was called with a parametric start, use `plot_start = TRUE` inside a plotting function in order to plot the estimated parametric start density instead of the kernel density.
 
 ```{r mpg_example_plot, echo = TRUE,fig.height = 5, fig.width = 5, fig.align = "center"}
 plot(kde, main = "Miles per Gallon")
@@ -71,15 +74,24 @@ kde[["x"]]
 
 Fitted objects are read-only. To change the estimator, use `update`, which
 refits from the stored call with the changed arguments, or call `kdensity`
-again.
+again. Assignment with `$<-` or `[[<-` is not supported. `update()` returns a
+new object; assign it to retain the changed fit. The data must be visible
+where `update()` is called.
 
 ```{r mpg_example_changes, echo = TRUE}
-update(kde, start = "normal", bw = "RHE")
+kde_updated <- update(kde, start = "normal", bw = "RHE")
+kde_updated
 ```
 
 `kdensity` supports all parametric starts implemented by the package 
 `univariateML`. See [its Github page](https://github.com/JonasMoss/univariateML)
 for a complete list, or take a look at `univariateML::univariateML_models`.
+
+Every built-in kernel defaults to a closed-form bandwidth rule: `"nrd0"` for
+symmetric kernels with a uniform start, `"RHE"` for symmetric kernels with a
+parametric start, `"GR"` for gamma kernels, `"HS"` for beta kernels, and
+`"SJ"` on the probit scale for `gcopula`. The rules ignore the parametric
+start; `bw = "ucv"` selects a bandwidth by start-aware cross-validation.
 
 # Custom densities and kernels
 ## Parametric starts

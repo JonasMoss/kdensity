@@ -7,9 +7,10 @@ kernel_environment <- new.env(hash = FALSE)
 #' in the list can be used in `kdensity` by using `kernel = "kernel"`
 #' for the intended kernel.
 #'
-#' Be careful combining kernels with compact support with parametric starts,
-#' as the normalizing integral typically fails to converge. Use `gaussian`
-#' instead.
+#' Ordinary symmetric kernel estimates use exact normalization constants.
+#' With a non-uniform parametric start, compact-support kernels still require
+#' numerical normalization, which can fail to converge; use `gaussian` if this
+#' occurs.
 #'
 #' @section Symmetric kernels:
 #' @section Asymmetric kernels:
@@ -28,13 +29,13 @@ kernel_environment <- new.env(hash = FALSE)
 #'    definition for the kernel. This is used to distinguish kernels on the
 #'    unit interval / positive half-line from kernels on R.
 #'
-#'    `sd` is used for symmetric kernels, and states the standard error
-#'    of the kernel. This is used to make kernels comparable to the Gaussian
-#'    kernel when calculating bandwidths.
-#' Custom objects must use names different from the built-ins (for example,
-#' `my_gaussian`). Registering another custom object under the same name
-#' replaces the earlier custom object.
+#'    `sd` is used for symmetric kernels and is the reciprocal of the kernel's
+#'    standard deviation. This scale factor converts a bandwidth on the Gaussian
+#'    standard-deviation scale to `h = adjust * bw * sd`.
 #'
+#'    Custom objects must use names different from the built-ins (for example,
+#'    `my_gaussian`). Registering another custom object under the same name
+#'    replaces the earlier custom object.
 #' @examples
 #' my_gaussian <- list(
 #'   kernel = function(y, x, h) stats::dnorm((y - x) / h),
@@ -46,7 +47,7 @@ kernel_environment <- new.env(hash = FALSE)
 #'   kernel = function(y, x, h) {
 #'     rho <- 1 - h^2
 #'     inside <- rho^2 * (qnorm(y)^2 + qnorm(x)^2) - 2 * rho * qnorm(y) * qnorm(x)
-#'     exp(-inside / (2 * (1 - rho^2)))
+#'     h / sqrt(1 - rho^2) * exp(-inside / (2 * (1 - rho^2)))
 #'   },
 #'   support = c(0, 1)
 #' )

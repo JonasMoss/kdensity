@@ -10,9 +10,10 @@ in the list can be used in \code{kdensity} by using \code{kernel = "kernel"}
 for the intended kernel.
 }
 \details{
-Be careful combining kernels with compact support with parametric starts,
-as the normalizing integral typically fails to converge. Use \code{gaussian}
-instead.
+Ordinary symmetric kernel estimates use exact normalization constants.
+With a non-uniform parametric start, compact-support kernels still require
+numerical normalization, which can fail to converge; use \code{gaussian} if this
+occurs.
 }
 \section{Symmetric kernels}{
 
@@ -57,9 +58,10 @@ The second mandatory element is \code{support}, stating the domain of
 definition for the kernel. This is used to distinguish kernels on the
 unit interval / positive half-line from kernels on R.
 
-\code{sd} is used for symmetric kernels, and states the standard error
-of the kernel. This is used to make kernels comparable to the Gaussian
-kernel when calculating bandwidths.
+\code{sd} is used for symmetric kernels and is the reciprocal of the kernel's
+standard deviation. This scale factor converts a bandwidth on the Gaussian
+standard-deviation scale to \code{h = adjust * bw * sd}.
+
 Custom objects must use names different from the built-ins (for example,
 \code{my_gaussian}). Registering another custom object under the same name
 replaces the earlier custom object.
@@ -76,7 +78,7 @@ my_gcopula <- list(
   kernel = function(y, x, h) {
     rho <- 1 - h^2
     inside <- rho^2 * (qnorm(y)^2 + qnorm(x)^2) - 2 * rho * qnorm(y) * qnorm(x)
-    exp(-inside / (2 * (1 - rho^2)))
+    h / sqrt(1 - rho^2) * exp(-inside / (2 * (1 - rho^2)))
   },
   support = c(0, 1)
 )

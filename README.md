@@ -109,6 +109,13 @@ beta_fit$bw
 
 ## Usage
 
+Every built-in kernel defaults to a closed-form bandwidth rule: `"nrd0"`
+for symmetric kernels with a uniform start, `"RHE"` for symmetric
+kernels with a parametric start, `"GR"` for both gamma kernels, `"HS"`
+for both beta kernels, and `"SJ"` on the probit scale for `gcopula`.
+These rules ignore the parametric start; use `bw = "ucv"` for
+start-aware cross-validation.
+
 The function `kdensity` takes some `data`, a kernel `kernel` and a
 parametric start `start`. You can optionally specify the `support`
 parameter, which is used to find the normalizing constant.
@@ -143,13 +150,21 @@ integrate(kde, lower = 0, upper = 1) # The cumulative distribution up to 1.
 ```
 
 For large plotting grids, `kdensity_grid()` provides an explicitly
-approximate binning-and-FFT backend for the built-in symmetric kernels
-and the Gaussian-copula kernel. Calling `kde()` remains exact. Plotting
-defaults to `grid = "auto"`, which uses FFT for the Gaussian and
-Gaussian-copula kernels and retains the faster exact evaluator for
-compact and asymmetric kernels. Use `grid = "exact"` to force exact
-plotting or `grid = "fft"` to explicitly request the approximate backend
-for any supported kernel.
+approximate binning-and-FFT backend for the `stats::density()` kernels
+(`gaussian`, `epanechnikov`, `rectangular`, `triangular`, `biweight`,
+`cosine`, and `optcosine`) and `gcopula`. The `triweight`, `tricube`,
+and `laplace` kernels use exact evaluation (sorted-data evaluation for
+the compact kernels and a two-sweep recurrence for Laplace). Calling
+`kde()` remains exact. Plotting defaults to `grid = "auto"`, which uses
+FFT for the Gaussian and Gaussian-copula kernels and retains the faster
+exact evaluator for compact and asymmetric kernels. Use `grid = "exact"`
+to force exact plotting or `grid = "fft"` to explicitly request the
+approximate backend for any supported kernel.
+
+Fitted objects are read-only: assignment with `$<-` or `[[<-` is not
+supported. To change a fit, use `kde <- update(kde, bw = 0.5)`, which
+refits from the stored call and returns a new object. The data must be
+visible where `update()` is called.
 
 You can access the parameter estimates by using `coef`. You can also
 access the log likelihood (`logLik`), AIC and BIC of the parametric

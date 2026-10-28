@@ -21,10 +21,14 @@ kdensity(
 
 \item{bw}{A bandwidth function. Can be either a string, a custom-made
 function, or a double. The supported bandwidth functions are documented
-in \code{\link[=bandwidths]{bandwidths()}}.}
+in \code{\link[=bandwidths]{bandwidths()}}. Every built-in kernel defaults to a closed-form rule;
+use \code{bw = "ucv"} for start-aware cross-validation. For symmetric kernels,
+\code{bw} is on the Gaussian standard-deviation scale.}
 
-\item{adjust}{An adjustment constant, so that \code{h = adjust*bw*sd}, where \code{sd}
-varies with the chosen kernel.}
+\item{adjust}{An adjustment constant. For symmetric kernels,
+\code{h = adjust * bw * sd}, where \code{sd} is the kernel's stored scale factor
+(the reciprocal of its standard deviation). For asymmetric kernels,
+\code{h = adjust * bw}.}
 
 \item{kernel}{The kernel function. Can be chosen from the list of built-in
 kernels or be custom-made. See \code{\link[=kernels]{kernels()}} for details.}
@@ -88,6 +92,11 @@ to ordinary kernel density estimation. The typical default value for
 
 If \code{normalized} is \code{FALSE} and \code{start != "uniform"}, the resulting
 density will not integrate to 1 in general.
+
+Fitted objects are read-only: \verb{$<-} and \verb{[[<-} assignment is not supported.
+Use \code{kde <- update(kde, bw = 0.5)} to refit from the stored call with changed
+arguments and return a new object. The data must be visible where
+\code{update()} is called.
 
 The \code{logLik()}, \code{AIC()}, and \code{BIC()} methods for \code{kdensity} objects describe
 the \emph{fitted parametric start} alone, not the kernel density estimate: they
