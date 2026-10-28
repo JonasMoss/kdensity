@@ -126,9 +126,11 @@ get_range <- function(obj) {
 #' @param range range of x values.
 #' @param plot_start logical; if `TRUE`, plots the parametric start instead of the kernel density estimate.
 #' @param zero_line logical; if `TRUE`, add a base line at `y = 0`.
-#' @param grid Evaluation backend. `"exact"` retains direct evaluation;
-#'   `"fft"` uses the approximate grid backend supported by [kdensity_grid()];
-#'   and `"auto"` uses FFT when available with an exact fallback.
+#' @param grid Evaluation backend. `"auto"` uses the fastest verified backend:
+#'   FFT for Gaussian and Gaussian-copula kernels, and exact evaluation
+#'   otherwise. `"exact"` always retains direct evaluation and `"fft"`
+#'   explicitly requests the approximate backend supported by
+#'   [kdensity_grid()].
 #' @param ... further plotting parameters.
 #' @return None.
 #' @seealso [kdensity()]
@@ -143,7 +145,7 @@ get_range <- function(obj) {
 #' lines(kde, lty = 3)
 #' rug(precip)
 plot.kdensity <- function(x, range = NULL, plot_start = FALSE,
-                          zero_line = TRUE, grid = "exact", ...) {
+                          zero_line = TRUE, grid = "auto", ...) {
   plot_helper(
     x, range, plot_start, zero_line, grid = grid, ptype = "plot", ...
   )
@@ -152,7 +154,7 @@ plot.kdensity <- function(x, range = NULL, plot_start = FALSE,
 #' @rdname plot.kdensity
 #' @export
 lines.kdensity <- function(x, range = NULL, plot_start = FALSE,
-                           zero_line = TRUE, grid = "exact", ...) {
+                           zero_line = TRUE, grid = "auto", ...) {
   plot_helper(
     x, range, plot_start, zero_line, grid = grid,
     ptype = "lines", type = "l", ...
@@ -162,7 +164,7 @@ lines.kdensity <- function(x, range = NULL, plot_start = FALSE,
 #' @rdname plot.kdensity
 #' @export
 points.kdensity <- function(x, range = NULL, plot_start = FALSE,
-                            zero_line = TRUE, grid = "exact", ...) {
+                            zero_line = TRUE, grid = "auto", ...) {
   plot_helper(
     x, range, plot_start, zero_line, grid = grid,
     ptype = "points", type = "p", ...
@@ -185,7 +187,7 @@ points.kdensity <- function(x, range = NULL, plot_start = FALSE,
 #' @return None.
 
 plot_helper <- function(x, range = NULL, plot_start = FALSE,
-                        zero_line = TRUE, grid = "exact",
+                        zero_line = TRUE, grid = "auto",
                         ptype = c("plot", "lines", "points"), ...) {
   ptype <- match.arg(ptype)
   grid <- match.arg(grid, c("exact", "auto", "fft"))
@@ -236,17 +238,23 @@ plot_helper <- function(x, range = NULL, plot_start = FALSE,
     if (grid == "exact") {
       args$y <- x(range)
     } else {
+      grid_n <- length(range)
+      if (supplied_range &&
+          identical(x$kernel$compiled_id, 11L)) {
+        grid_n <- max(2048, 2 * as.double(grid_n))
+      }
       grid_fit <- kdensity_grid(
         x,
         from = min(range),
         to = max(range),
-        n = length(range),
+        n = grid_n,
         method = grid
       )
       if (supplied_range) {
+        unique_grid <- !duplicated(grid_fit$x)
         args$y <- stats::approx(
-          grid_fit$x,
-          grid_fit$y,
+          grid_fit$x[unique_grid],
+          grid_fit$y[unique_grid],
           xout = range,
           rule = 2
         )$y

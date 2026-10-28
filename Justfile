@@ -12,6 +12,9 @@ check:
 coverage:
     trap 'rm -f tests/testthat/Rplots.pdf' EXIT; Rscript tools/render-coverage-report.R
 
+verify-grids:
+    Rscript tools/verification/fast-grids/verify.R
+
 revdep:
     R_COMPILE_AND_INSTALL_PACKAGES=never Rscript -e "revdepcheck::revdep_check(num_workers = 2)"
 

@@ -9,7 +9,7 @@ plot_helper(
   range = NULL,
   plot_start = FALSE,
   zero_line = TRUE,
-  grid = "exact",
+  grid = "auto",
   ptype = c("plot", "lines", "points"),
   ...
 )

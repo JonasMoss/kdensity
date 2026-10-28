@@ -100,9 +100,11 @@ integrate(kde, lower = 0, upper = 1) # The cumulative distribution up to 1.
 
 For large plotting grids, `kdensity_grid()` provides an explicitly
 approximate binning-and-FFT backend for the built-in symmetric kernels and the
-Gaussian-copula kernel. Calling `kde()` remains exact. Plotting also opts in
-with `grid = "fft"` for supported fits. Use `grid = "auto"` when an exact
-fallback is preferred for unsupported kernels.
+Gaussian-copula kernel. Calling `kde()` remains exact. Plotting defaults to
+`grid = "auto"`, which uses FFT for the Gaussian and Gaussian-copula kernels
+and retains the faster exact evaluator for compact and asymmetric kernels.
+Use `grid = "exact"` to force exact plotting or `grid = "fft"` to explicitly
+request the approximate backend for any supported kernel.
 
 You can access the parameter estimates by using `coef`. You can also access the log likelihood (`logLik`), AIC and BIC of the parametric start distribution.
 

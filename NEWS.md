@@ -11,9 +11,12 @@
 
 * Added `kdensity_grid()`, an explicitly approximate linear-binning/FFT backend
   for the built-in translation-invariant kernels and the Gaussian-copula kernel
-  (on the probit scale). Callable `kdensity` objects stay exact; plotting opts
-  in with `grid = "fft"` or `"auto"`. Exact grids ignore FFT-only arguments,
-  stay linearly spaced, and require whole-number grid sizes.
+  (on the probit scale). Callable `kdensity` objects stay exact. Plotting now
+  defaults to `grid = "auto"`, using verified FFT acceleration for Gaussian and
+  Gaussian-copula kernels while retaining faster exact evaluation for compact
+  and asymmetric kernels. Gaussian-copula grids evaluate numerically unstable
+  extreme probit tails exactly. Exact grids ignore FFT-only arguments, stay
+  linearly spaced, and require whole-number grid sizes.
 * Added the `"GR"` gamma-reference bandwidth selector, obtained by substituting
   a fitted gamma density into Chen's AMISE-optimal bandwidth. It is not yet a
   default: the effect of final normalization and non-uniform starts still needs

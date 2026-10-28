@@ -23,8 +23,10 @@ kdensity_grid(
 \item{n}{Number of returned grid points.}
 
 \item{method}{One of \code{"auto"}, \code{"exact"}, or \code{"fft"}. \code{"auto"} uses the
-FFT backend when it is available and otherwise evaluates \code{object}
-exactly. \code{"fft"} reports an error when the fitted kernel is unsupported.}
+FFT backend for Gaussian and Gaussian-copula kernels and otherwise uses
+the exact evaluator. Compact kernels retain their faster exact sorted
+evaluator. \code{"fft"} explicitly requests FFT evaluation and reports an
+error when the fitted kernel is unsupported.}
 
 \item{fft_n}{Size of the internal convolution grid. The default is at least
 four times \code{n} and at least 2048 points.}

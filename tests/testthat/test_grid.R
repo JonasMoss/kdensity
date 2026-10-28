@@ -101,6 +101,18 @@ test_that("grid method selection has an exact fallback", {
   )
 })
 
+test_that("automatic grids use only the verified faster backend", {
+  set.seed(20260720)
+  gaussian <- kdensity(rnorm(100), kernel = "gaussian", bw = 0.2)
+  compact <- kdensity(rnorm(100), kernel = "epanechnikov", bw = 0.2)
+  copula <- kdensity(rbeta(100, 2, 5), kernel = "gcopula", bw = 0.12)
+
+  expect_identical(kdensity_grid(gaussian, method = "auto")$method, "fft")
+  expect_identical(kdensity_grid(compact, method = "auto")$method, "exact")
+  expect_identical(kdensity_grid(copula, method = "auto")$method, "fft")
+  expect_identical(kdensity_grid(compact, method = "fft")$method, "fft")
+})
+
 test_that("Gaussian-copula FFT grids handle support boundaries", {
   set.seed(20260720)
   fit <- kdensity(rbeta(100, 2, 5), kernel = "gcopula", bw = 0.12)
@@ -120,6 +132,27 @@ test_that("Gaussian-copula FFT grids handle support boundaries", {
     kdensity_grid(fit, from = -0.1, to = 1, method = "fft"),
     "inside \\[0, 1\\]"
   )
+})
+
+test_that("Gaussian-copula FFT grids evaluate unstable probit tails exactly", {
+  set.seed(20282860)
+  fit <- kdensity(
+    rbeta(100, 0.7, 0.7),
+    kernel = "gcopula",
+    start = "beta",
+    bw = 0.04
+  )
+  grid <- kdensity_grid(fit, from = 0, to = 1, n = 1000, method = "fft")
+  exact <- fit(grid$x)
+  finite <- is.finite(exact)
+  peak <- max(exact[finite])
+
+  expect_true(all(is.finite(grid$y[finite])))
+  expect_lt(
+    sqrt(mean((grid$y[finite] - exact[finite])^2)) / peak,
+    2e-3
+  )
+  expect_lt(max(abs(grid$y[finite] - exact[finite])) / peak, 1e-2)
 })
 
 test_that("grid arguments are validated", {

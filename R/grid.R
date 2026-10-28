@@ -15,8 +15,10 @@
 #'   [get_range()] supplies a plotting interval.
 #' @param n Number of returned grid points.
 #' @param method One of `"auto"`, `"exact"`, or `"fft"`. `"auto"` uses the
-#'   FFT backend when it is available and otherwise evaluates `object`
-#'   exactly. `"fft"` reports an error when the fitted kernel is unsupported.
+#'   FFT backend for Gaussian and Gaussian-copula kernels and otherwise uses
+#'   the exact evaluator. Compact kernels retain their faster exact sorted
+#'   evaluator. `"fft"` explicitly requests FFT evaluation and reports an
+#'   error when the fitted kernel is unsupported.
 #' @param fft_n Size of the internal convolution grid. The default is at least
 #'   four times `n` and at least 2048 points.
 #' @param truncate Number of Gaussian standard deviations used to pad an FFT
@@ -56,7 +58,14 @@ kdensity_grid <- function(object, from = NULL, to = NULL, n = 512L,
   if (method != "exact") {
     support_problem <- fft_grid_support_problem(object, from, to)
     if (method == "auto") {
-      actual_method <- if (is.null(support_problem)) "fft" else "exact"
+      kernel_id <- object$kernel$compiled_id
+      actual_method <- if (
+        is.null(support_problem) && kernel_id %in% c(1L, 11L)
+      ) {
+        "fft"
+      } else {
+        "exact"
+      }
     } else if (!is.null(support_problem)) {
       stop("FFT grid evaluation is unavailable: ", support_problem)
     } else {
@@ -223,10 +232,19 @@ evaluate_kdensity_fft_grid <- function(object, grid, fft_n, truncate) {
     rho <- 1 - object$h^2
     sigma <- sqrt(1 - rho^2)
     interior <- grid > 0 & grid < 1
-    if (sum(interior) < 2L) {
+    transformed <- rep(NA_real_, length(grid))
+    transformed[interior] <- stats::qnorm(grid[interior])
+    # The copula correction contains exp(z^2 / 2), which amplifies ordinary
+    # FFT/interpolation roundoff in the extreme probit tails. At this limit the
+    # amplification of machine epsilon reaches approximately sqrt(epsilon).
+    # Exact evaluation of those few tail points prevents artificial boundary
+    # spikes while retaining the fast convolution over the central grid.
+    stable_limit <- sqrt(log(1 / .Machine$double.eps))
+    fft_interior <- interior & abs(transformed) <= stable_limit
+    if (sum(fft_interior) < 2L) {
       return(object(grid))
     }
-    transformed_grid <- stats::qnorm(grid[interior])
+    transformed_grid <- transformed[fft_interior]
     convolution <- density_fft(
       rho * stats::qnorm(object$x),
       weights = 1 / (object$n * object$h * start_data),
@@ -248,9 +266,9 @@ evaluate_kdensity_fft_grid <- function(object, grid, fft_n, truncate) {
     correction <- correction * sqrt(2 * pi) * sigma *
       exp(transformed_grid^2 / 2)
     values <- numeric(length(grid))
-    values[interior] <- correction * start_density(grid[interior]) /
+    values[fft_interior] <- correction * start_density(grid[fft_interior]) /
       normalization
-    values[!interior] <- object(grid[!interior])
+    values[!fft_interior] <- object(grid[!fft_interior])
     return(values)
   } else {
     kernel_name <- fft_grid_kernel_name(kernel_id)
