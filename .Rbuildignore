@@ -21,3 +21,5 @@
 ^revdep$
 ^revdep-manual$
 ^\.claude$
+^src/.*\.gcda$
+^src/.*\.gcno$
